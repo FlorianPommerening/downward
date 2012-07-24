@@ -36,24 +36,25 @@ protected:
     bool is_unit_cost_problem() const {
         return is_unit_cost;
     }
+
+    bool is_last_evaluated_dead_end() const;
+    int get_last_evaluated_value() const;
+    void evaluate(int g, bool preferred);
 public:
     Heuristic(const Options &options);
     virtual ~Heuristic();
 
     void evaluate(const State &state);
-    bool is_dead_end() const;
-    int get_heuristic();
     // changed to virtual, so HeuristicProxy can delegate this:
-    virtual void get_preferred_operators(std::vector<const Operator *> &result);
+    virtual void get_preferred_operators(int evaluation_context, std::vector<const Operator *> &result);
     virtual bool dead_ends_are_reliable() const {return true; }
     virtual bool reach_state(const State &parent_state, const Operator &op,
                              const State &state);
+    int get_heuristic(int evaluation_context);
 
     // for abstract parent ScalarEvaluator
-    int get_value() const;
-    void evaluate(int g, bool preferred);
     bool dead_end_is_reliable() const;
-    void set_evaluator_value(int val);
+    void set_evaluator_value(int evaluation_context, int val);
     void get_involved_heuristics(std::set<Heuristic *> &hset) {hset.insert(this); }
     virtual void reset() {}
     OperatorCost get_cost_type() const {return cost_type; }

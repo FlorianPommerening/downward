@@ -52,17 +52,17 @@ void LamaFFSynergy::compute_heuristics(const State &state) {
     ff_preferred_operators.clear();
 
     lama_heuristic->evaluate(state);
-    if (!lama_heuristic->is_dead_end()) {
-        lama_heuristic_value = lama_heuristic->get_heuristic();
-        lama_heuristic->get_preferred_operators(lama_preferred_operators);
+    if (!lama_heuristic->is_dead_end(state.get_id())) {
+        lama_heuristic_value = lama_heuristic->get_heuristic(state.get_id());
+        lama_heuristic->get_preferred_operators(state.get_id(), lama_preferred_operators);
     } else {
         lama_heuristic_value = -1;
     }
 
     exploration->evaluate(state);
-    if (!exploration->is_dead_end()) {
-        ff_heuristic_value = exploration->get_heuristic();
-        exploration->get_preferred_operators(ff_preferred_operators);
+    if (!exploration->is_dead_end(state.get_id())) {
+        ff_heuristic_value = exploration->get_heuristic(state.get_id());
+        exploration->get_preferred_operators(state.get_id(), ff_preferred_operators);
     } else {
         ff_heuristic_value = -1;
     }

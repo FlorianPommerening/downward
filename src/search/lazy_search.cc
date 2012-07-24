@@ -65,8 +65,8 @@ void LazySearch::get_successor_operators(vector<const Operator *> &ops) {
 
     for (int i = 0; i < preferred_operator_heuristics.size(); i++) {
         Heuristic *heur = preferred_operator_heuristics[i];
-        if (!heur->is_dead_end())
-            heur->get_preferred_operators(preferred_operators);
+        if (!heur->is_dead_end(current_state.get_id()))
+            heur->get_preferred_operators(current_state.get_id(), preferred_operators);
     }
 
     if (succ_mode == pref_first) {
@@ -105,7 +105,7 @@ void LazySearch::generate_successors() {
         if (is_preferred)
             operators[i]->unmark();
         if (new_real_g < bound) {
-            open_list->evaluate(new_g, is_preferred);
+            open_list->evaluate(current_state.get_id(), new_g, is_preferred);
             open_list->insert(
                 make_pair(current_state_buffer, operators[i]));
         }
@@ -163,11 +163,11 @@ int LazySearch::step() {
         }
         search_progress.inc_evaluated_states();
         search_progress.inc_evaluations(heuristics.size());
-        open_list->evaluate(current_g, false);
-        if (!open_list->is_dead_end()) {
+        open_list->evaluate(current_state.get_id(), current_g, false);
+        if (!open_list->is_dead_end(current_state.get_id())) {
             // We use the value of the first heuristic, because SearchSpace only
             // supported storing one heuristic value
-            int h = heuristics[0]->get_value();
+            int h = heuristics[0]->get_value(current_state.get_id());
             if (reopen) {
                 node.reopen(parent_node, current_operator);
                 search_progress.inc_reopened();
@@ -180,7 +180,7 @@ int LazySearch::step() {
             node.close();
             if (check_goal_and_set_plan(current_state))
                 return SOLVED;
-            if (search_progress.check_h_progress(current_g)) {
+            if (search_progress.check_h_progress(current_state.get_id(), current_g)) {
                 reward_progress();
             }
             generate_successors();

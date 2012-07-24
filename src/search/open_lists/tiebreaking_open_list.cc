@@ -99,25 +99,25 @@ void TieBreakingOpenList<Entry>::evaluate(int g, bool preferred) {
     dead_end_reliable = false;
 
     for (unsigned int i = 0; i < evaluators.size(); i++) {
-        evaluators[i]->evaluate(g, preferred);
+        evaluators[i]->evaluate(Evaluator::current_evaluation_context, g, preferred);
 
         // check for dead end
-        if (evaluators[i]->is_dead_end()) {
+        if (evaluators[i]->is_dead_end(Evaluator::current_evaluation_context)) {
             last_evaluated_value[i] = std::numeric_limits<int>::max();
             dead_end = true;
             if (evaluators[i]->dead_end_is_reliable()) {
                 dead_end_reliable = true;
             }
         } else { // add value if no dead end
-            last_evaluated_value[i] = evaluators[i]->get_value();
+            last_evaluated_value[i] = evaluators[i]->get_value(Evaluator::current_evaluation_context);
         }
     }
-    first_is_dead_end = evaluators[0]->is_dead_end();
+    first_is_dead_end = evaluators[0]->is_dead_end(Evaluator::current_evaluation_context);
     last_preferred = preferred;
 }
 
 template<class Entry>
-bool TieBreakingOpenList<Entry>::is_dead_end() const {
+bool TieBreakingOpenList<Entry>::is_last_evaluated_dead_end() const {
     return dead_end;
 }
 

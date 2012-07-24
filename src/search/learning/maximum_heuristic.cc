@@ -62,7 +62,7 @@ int MaxHeuristic::compute_heuristic(const State &state) {
     for (int i = 0; i < heuristics.size(); i++) {
         //cout << "h[" << i << "] = ";
         heuristics[i]->evaluate(state);
-        if (heuristics[i]->is_dead_end()) {
+        if (heuristics[i]->is_dead_end(state.get_id())) {
             if (heuristics[i]->dead_ends_are_reliable()) {
                 return DEAD_END;
             } else {
@@ -70,7 +70,7 @@ int MaxHeuristic::compute_heuristic(const State &state) {
                 dead_end = true;
             }
         } else {
-            hvalue[i] = heuristics[i]->get_heuristic();
+            hvalue[i] = heuristics[i]->get_heuristic(state.get_id());
             if (hvalue[i] > max) {
                 max = hvalue[i];
             }
@@ -81,7 +81,7 @@ int MaxHeuristic::compute_heuristic(const State &state) {
     if (dead_end) {
         bool all_dead_end = true;
         for (int i = 0; i < heuristics.size(); i++) {
-            if (!heuristics[i]->is_dead_end()) {
+            if (!heuristics[i]->is_dead_end(state.get_id())) {
                 all_dead_end = false;
                 break;
             }

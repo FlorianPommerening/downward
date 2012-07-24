@@ -67,9 +67,9 @@ int ZeroOnePDBsHeuristic::compute_heuristic(const State &state) {
     int h_val = 0;
     for (size_t i = 0; i < pattern_databases.size(); ++i) {
         pattern_databases[i]->evaluate(state);
-        if (pattern_databases[i]->is_dead_end())
+        if (pattern_databases[i]->is_dead_end(state.get_id()))
             return -1;
-        h_val += pattern_databases[i]->get_heuristic();
+        h_val += pattern_databases[i]->get_heuristic(state.get_id());
     }
     return h_val;
 }

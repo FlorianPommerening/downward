@@ -115,9 +115,9 @@ int CanonicalPDBsHeuristic::compute_heuristic(const State &state) {
         int clique_h = 0;
         for (size_t j = 0; j < clique.size(); ++j) {
             clique[j]->evaluate(state);
-            if (clique[j]->is_dead_end())
+            if (clique[j]->is_dead_end(state.get_id()))
                 return -1;
-            clique_h += clique[j]->get_heuristic();
+            clique_h += clique[j]->get_heuristic(state.get_id());
         }
         max_h = max(max_h, clique_h);
     }

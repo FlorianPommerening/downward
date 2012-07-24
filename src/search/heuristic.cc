@@ -35,6 +35,7 @@ void Heuristic::set_preferred(const Operator *op) {
 void Heuristic::evaluate(const State &state) {
     if (heuristic == NOT_INITIALIZED)
         initialize();
+    start_evaluation_context(state.get_id());
     preferred_operators.clear();
     heuristic = compute_heuristic(state);
     for (int i = 0; i < preferred_operators.size(); i++)
@@ -58,11 +59,12 @@ void Heuristic::evaluate(const State &state) {
     evaluator_value = heuristic;
 }
 
-bool Heuristic::is_dead_end() const {
+bool Heuristic::is_last_evaluated_dead_end() const {
     return evaluator_value == DEAD_END;
 }
 
-int Heuristic::get_heuristic() {
+int Heuristic::get_heuristic(int evaluation_context) {
+    validate_evaluation_context(evaluation_context);
     // The -1 value for dead ends is an implementation detail which is
     // not supposed to leak. Thus, calling this for dead ends is an
     // error. Call "is_dead_end()" first.
@@ -86,7 +88,8 @@ int Heuristic::get_heuristic() {
     return heuristic;
 }
 
-void Heuristic::get_preferred_operators(std::vector<const Operator *> &result) {
+void Heuristic::get_preferred_operators(int evaluation_context, std::vector<const Operator *> &result) {
+    validate_evaluation_context(evaluation_context);
     assert(heuristic >= 0);
     result.insert(result.end(),
                   preferred_operators.begin(),
@@ -95,10 +98,11 @@ void Heuristic::get_preferred_operators(std::vector<const Operator *> &result) {
 
 bool Heuristic::reach_state(const State & /*parent_state*/,
                             const Operator & /*op*/, const State & /*state*/) {
+    // TODO start validation context here instead of in evaluate()?
     return false;
 }
 
-int Heuristic::get_value() const {
+int Heuristic::get_last_evaluated_value() const {
     return evaluator_value;
 }
 
@@ -112,7 +116,8 @@ bool Heuristic::dead_end_is_reliable() const {
     return dead_ends_are_reliable();
 }
 
-void Heuristic::set_evaluator_value(int val) {
+void Heuristic::set_evaluator_value(int evaluation_context, int val) {
+    start_evaluation_context(evaluation_context);
     evaluator_value = val;
 }
 

@@ -2,6 +2,7 @@
 
 #include "option_parser.h"
 #include "plugin.h"
+#include "state.h"
 
 #include <limits>
 #include <string>
@@ -24,7 +25,7 @@ int IPCMaxHeuristic::compute_heuristic(const State &state) {
     for (unsigned int i = 0; i < evaluators.size(); i++) {
         evaluators[i]->evaluate(state);
 
-        if (evaluators[i]->is_dead_end()) {
+        if (evaluators[i]->is_dead_end(state.get_id())) {
             value = numeric_limits<int>::max();
             dead_end = true;
             if (evaluators[i]->dead_end_is_reliable()) {
@@ -33,7 +34,7 @@ int IPCMaxHeuristic::compute_heuristic(const State &state) {
                 break;
             }
         } else {
-            value = max(value, evaluators[i]->get_value());
+            value = max(value, evaluators[i]->get_value(state.get_id()));
         }
     }
     return value;

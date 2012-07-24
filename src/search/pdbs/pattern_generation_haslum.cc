@@ -66,9 +66,9 @@ void PatternGenerationHaslum::generate_candidate_patterns(const vector<int> &pat
 
 void PatternGenerationHaslum::sample_states(vector<State> &samples, double average_operator_cost) {
     current_heuristic->evaluate(*g_initial_state);
-    assert(!current_heuristic->is_dead_end());
+    assert(!current_heuristic->is_dead_end(g_initial_state->get_id()));
 
-    int h = current_heuristic->get_heuristic();
+    int h = current_heuristic->get_heuristic(g_initial_state->get_id());
     int n;
     if (h == 0) {
         n = 10;
@@ -108,7 +108,7 @@ void PatternGenerationHaslum::sample_states(vector<State> &samples, double avera
                 current_state = State(current_state, *applicable_ops[random]);
                 // if current state is dead-end, then restart with initial state
                 current_heuristic->evaluate(current_state);
-                if (current_heuristic->is_dead_end())
+                if (current_heuristic->is_dead_end(current_state.get_id()))
                     current_state = *g_initial_state;
             }
         }
@@ -120,20 +120,20 @@ void PatternGenerationHaslum::sample_states(vector<State> &samples, double avera
 bool PatternGenerationHaslum::is_heuristic_improved(PDBHeuristic *pdb_heuristic,
                                                     const State &sample) {
     pdb_heuristic->evaluate(sample);
-    if (pdb_heuristic->is_dead_end()) {
+    if (pdb_heuristic->is_dead_end(sample.get_id())) {
         return true;
     }
-    int h_pattern = pdb_heuristic->get_heuristic(); // h-value of the new pattern
+    int h_pattern = pdb_heuristic->get_heuristic(sample.get_id()); // h-value of the new pattern
     vector<vector<PDBHeuristic *> > max_additive_subsets;
     current_heuristic->get_max_additive_subsets(pdb_heuristic->get_pattern(), max_additive_subsets);
     current_heuristic->evaluate(sample);
-    int h_collection = current_heuristic->get_heuristic(); // h-value of the current collection heuristic
+    int h_collection = current_heuristic->get_heuristic(sample.get_id()); // h-value of the current collection heuristic
     for (size_t k = 0; k < max_additive_subsets.size(); ++k) { // for each max additive subset...
         int h_subset = 0;
         for (size_t l = 0; l < max_additive_subsets[k].size(); ++l) { // ...calculate its h-value
             max_additive_subsets[k][l]->evaluate(sample);
-            assert(!max_additive_subsets[k][l]->is_dead_end());
-            h_subset += max_additive_subsets[k][l]->get_heuristic();
+            assert(!max_additive_subsets[k][l]->is_dead_end(sample.get_id()));
+            h_subset += max_additive_subsets[k][l]->get_heuristic(sample.get_id());
         }
         if (h_pattern + h_subset > h_collection) {
             // return true if one max additive subest is found for which the condition is met
@@ -160,11 +160,11 @@ void PatternGenerationHaslum::hill_climbing(double average_operator_cost,
         cout << "current collection size is " << current_heuristic->get_size() << endl;
         current_heuristic->evaluate(*g_initial_state);
         cout << "current initial h value: ";
-        if (current_heuristic->is_dead_end()) {
+        if (current_heuristic->is_dead_end(g_initial_state->get_id())) {
             cout << "infinite => stopping hill-climbing" << endl;
             break;
         } else {
-            cout << current_heuristic->get_heuristic() << endl;
+            cout << current_heuristic->get_heuristic(g_initial_state->get_id()) << endl;
         }
 
         vector<State> samples;
@@ -276,7 +276,7 @@ void PatternGenerationHaslum::initialize() {
     opts.set<vector<vector<int> > >("patterns", initial_pattern_collection);
     current_heuristic = new CanonicalPDBsHeuristic(opts);
     current_heuristic->evaluate(*g_initial_state);
-    if (current_heuristic->is_dead_end())
+    if (current_heuristic->is_dead_end(g_initial_state->get_id()))
         return;
 
     // initial candidate patterns, computed separately for each pattern from the initial collection

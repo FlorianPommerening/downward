@@ -20,20 +20,20 @@ WeightedEvaluator::~WeightedEvaluator() {
 }
 
 void WeightedEvaluator::evaluate(int g, bool preferred) {
-    evaluator->evaluate(g, preferred);
-    value = w * evaluator->get_value();
+    evaluator->evaluate(current_evaluation_context, g, preferred);
+    value = w * evaluator->get_value(current_evaluation_context);
     // TODO: catch overflow?
 }
 
-bool WeightedEvaluator::is_dead_end() const {
-    return evaluator->is_dead_end();
+bool WeightedEvaluator::is_last_evaluated_dead_end() const {
+    return evaluator->is_dead_end(current_evaluation_context);
 }
 
 bool WeightedEvaluator::dead_end_is_reliable() const {
     return evaluator->dead_end_is_reliable();
 }
 
-int WeightedEvaluator::get_value() const {
+int WeightedEvaluator::get_last_evaluated_value() const {
     return value;
 }
 

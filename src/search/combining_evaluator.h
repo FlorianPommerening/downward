@@ -20,14 +20,14 @@ class CombiningEvaluator : public ScalarEvaluator {
     bool dead_end_reliable;
 protected:
     virtual int combine_values(const std::vector<int> &values) = 0;
+    virtual bool is_last_evaluated_dead_end() const;
+    virtual void evaluate(int g, bool preferred);
+    virtual int get_last_evaluated_value() const;
 public:
     CombiningEvaluator(const std::vector<ScalarEvaluator *> &subevaluators_);
     ~CombiningEvaluator();
 
-    virtual void evaluate(int g, bool preferred);
-    virtual bool is_dead_end() const;
     virtual bool dead_end_is_reliable() const;
-    virtual int get_value() const;
     virtual void get_involved_heuristics(std::set<Heuristic *> &hset);
 };
 

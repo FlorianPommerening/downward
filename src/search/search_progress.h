@@ -64,7 +64,7 @@ public:
 
     // h-value
     void get_initial_h_values();
-    bool check_h_progress(int g);
+    bool check_h_progress(int evaluation_context, int g);
 
 
     // output

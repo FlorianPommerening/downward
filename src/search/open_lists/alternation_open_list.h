@@ -25,6 +25,8 @@ class AlternationOpenList : public OpenList<Entry> {
 
 protected:
     Evaluator *get_evaluator() {return this; }
+    void evaluate(int g, bool preferred);
+    bool is_last_evaluated_dead_end() const;
 
 public:
     AlternationOpenList(const Options &opts);
@@ -39,8 +41,6 @@ public:
     void clear();
 
     // Evaluator interface
-    void evaluate(int g, bool preferred);
-    bool is_dead_end() const;
     bool dead_end_is_reliable() const;
     void get_involved_heuristics(std::set<Heuristic *> &hset);
 

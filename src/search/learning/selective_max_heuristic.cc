@@ -165,7 +165,7 @@ void SelectiveMaxHeuristic::train() {
     // initialize all heuristics
     int goal_depth_estimate = 0;
     max.evaluate(*g_initial_state);
-    int h0 = max.get_heuristic();
+    int h0 = max.get_heuristic(g_initial_state->get_id());
     goal_depth_estimate = 2 * h0;
 
     if (min_training_set == 0) {
@@ -307,13 +307,13 @@ int SelectiveMaxHeuristic::eval_heuristic(const State &state, int index, bool co
 
     heuristics[index]->evaluate(state);
 
-    if (heuristics[index]->is_dead_end()) {
+    if (heuristics[index]->is_dead_end(state.get_id())) {
         if (heuristics[index]->dead_ends_are_reliable()) {
             hvalue[index] = numeric_limits<int>::max();
             dead_end = true;
         }
     } else {
-        hvalue[index] = heuristics[index]->get_heuristic();
+        hvalue[index] = heuristics[index]->get_heuristic(state.get_id());
     }
     return hvalue[index];
 }

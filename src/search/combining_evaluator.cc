@@ -17,9 +17,9 @@ void CombiningEvaluator::evaluate(int g, bool preferred) {
     dead_end = false;
     dead_end_reliable = false;
     for (size_t i = 0; i < subevaluators.size(); ++i) {
-        subevaluators[i]->evaluate(g, preferred);
-        subevaluator_values[i] = subevaluators[i]->get_value();
-        if (subevaluators[i]->is_dead_end()) {
+        subevaluators[i]->evaluate(current_evaluation_context, g, preferred);
+        subevaluator_values[i] = subevaluators[i]->get_value(current_evaluation_context);
+        if (subevaluators[i]->is_dead_end(current_evaluation_context)) {
             dead_end = true;
             if (subevaluators[i]->dead_end_is_reliable())
                 dead_end_reliable = true;
@@ -32,7 +32,7 @@ void CombiningEvaluator::evaluate(int g, bool preferred) {
         value = combine_values(subevaluator_values);
 }
 
-bool CombiningEvaluator::is_dead_end() const {
+bool CombiningEvaluator::is_last_evaluated_dead_end() const {
     return dead_end;
 }
 
@@ -40,7 +40,7 @@ bool CombiningEvaluator::dead_end_is_reliable() const {
     return dead_end_reliable;
 }
 
-int CombiningEvaluator::get_value() const {
+int CombiningEvaluator::get_last_evaluated_value() const {
     return value;
 }
 

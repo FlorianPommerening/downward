@@ -48,7 +48,9 @@ template<class Entry>
 int AlternationOpenList<Entry>::insert(const Entry &entry) {
     int new_entries = 0;
     for (size_t i = 0; i < open_lists.size(); i++)
-        if (!open_lists[i]->is_dead_end())
+        // TODO: Alternatively to assuming the current evaluation context we could explicitly
+        // ask for a context in insert()
+        if (!open_lists[i]->is_dead_end(Evaluator::current_evaluation_context))
             new_entries += open_lists[i]->insert(entry);
     size += new_entries;
     return new_entries;
@@ -100,8 +102,8 @@ void AlternationOpenList<Entry>::evaluate(int g, bool preferred) {
     dead_end = true;
     dead_end_reliable = false;
     for (size_t i = 0; i < open_lists.size(); i++) {
-        open_lists[i]->evaluate(g, preferred);
-        if (open_lists[i]->is_dead_end()) {
+        open_lists[i]->evaluate(Evaluator::current_evaluation_context, g, preferred);
+        if (open_lists[i]->is_dead_end(Evaluator::current_evaluation_context)) {
             if (open_lists[i]->dead_end_is_reliable()) {
                 dead_end = true; // Might have been set to false.
                 dead_end_reliable = true;
@@ -114,7 +116,7 @@ void AlternationOpenList<Entry>::evaluate(int g, bool preferred) {
 }
 
 template<class Entry>
-bool AlternationOpenList<Entry>::is_dead_end() const {
+bool AlternationOpenList<Entry>::is_last_evaluated_dead_end() const {
     return dead_end;
 }
 

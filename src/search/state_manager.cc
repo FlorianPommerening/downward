@@ -11,7 +11,7 @@ class StateManager::HashTable
     // table is allocated dynamically in the constructor.
 };
 
-StateManager::StateManager(): next_id(0) {
+StateManager::StateManager() : next_id(0) {
     states = new HashTable;
 }
 

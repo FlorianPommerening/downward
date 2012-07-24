@@ -67,11 +67,11 @@ void EnforcedHillClimbingSearch::initialize() {
     evaluate(node.get_state(), NULL, node.get_state());
     search_progress.get_initial_h_values();
 
-    if (heuristic->is_dead_end()) {
+    if (heuristic->is_dead_end(current_state.get_id())) {
         cout << "Initial state is a dead end, no solution" << endl;
         return;
     }
-    current_h = heuristic->get_heuristic();
+    current_h = heuristic->get_heuristic(current_state.get_id());
     node.open_initial(current_h);
 
     if (!use_preferred || (preferred_usage == PRUNE_BY_PREFERRED)) {
@@ -95,7 +95,7 @@ void EnforcedHillClimbingSearch::get_successors(const State &state, vector<const
             }
             vector<const Operator *> preferred_ops;
             for (int i = 0; i < preferred_heuristics.size(); i++) {
-                preferred_heuristics[i]->get_preferred_operators(preferred_ops);
+                preferred_heuristics[i]->get_preferred_operators(state.get_id(), preferred_ops);
             }
             for (int i = 0; i < preferred_ops.size(); i++) {
                 preferred_ops[i]->mark();
@@ -104,7 +104,7 @@ void EnforcedHillClimbingSearch::get_successors(const State &state, vector<const
     } else {
         vector<const Operator *> preferred_ops;
         for (int i = 0; i < preferred_heuristics.size(); i++) {
-            preferred_heuristics[i]->get_preferred_operators(preferred_ops);
+            preferred_heuristics[i]->get_preferred_operators(state.get_id(), preferred_ops);
             for (int j = 0; j < preferred_ops.size(); j++) {
                 if (!preferred_ops[j]->is_marked()) {
                     preferred_ops[j]->mark();
@@ -124,7 +124,7 @@ int EnforcedHillClimbingSearch::step() {
     //}
     //cout << endl;
     last_expanded = search_progress.get_expanded();
-    search_progress.check_h_progress(current_g);
+    search_progress.check_h_progress(current_state.get_id(), current_g);
 
     // current_state is the current state, and it is the last state to be evaluated
     // cuurent_h is the h value of the current state
@@ -142,7 +142,8 @@ int EnforcedHillClimbingSearch::step() {
     for (int i = 0; i < ops.size(); i++) {
         int d = get_adjusted_cost(*ops[i]);
         OpenListEntryEHC entry = make_pair(current_node.get_state_buffer(), make_pair(d, ops[i]));
-        open_list->evaluate(d, ops[i]->is_marked());
+        // TODO current_state might be wrong here
+        open_list->evaluate(current_state.get_id(), d, ops[i]->is_marked());
         open_list->insert(entry);
         ops[i]->unmark();
     }
@@ -167,13 +168,13 @@ int EnforcedHillClimbingSearch::ehc() {
         if (node.is_new()) {
             evaluate(last_parent, last_op, node.get_state());
 
-            if (heuristic->is_dead_end()) {
+            if (heuristic->is_dead_end(s.get_id())) {
                 node.mark_as_dead_end();
                 search_progress.inc_dead_ends();
                 continue;
             }
 
-            int h = heuristic->get_heuristic();
+            int h = heuristic->get_heuristic(s.get_id());
             node.open(h, search_space.get_node(last_parent), last_op);
 
             if (h < current_h) {
@@ -188,7 +189,7 @@ int EnforcedHillClimbingSearch::ehc() {
                 d_counts[d] = p;
 
                 current_state = node.get_state();
-                current_h = heuristic->get_heuristic();
+                current_h = heuristic->get_heuristic(s.get_id());
                 open_list->clear();
                 return IN_PROGRESS;
             } else {
@@ -199,7 +200,8 @@ int EnforcedHillClimbingSearch::ehc() {
                 for (int i = 0; i < ops.size(); i++) {
                     int new_d = d + get_adjusted_cost(*ops[i]);
                     OpenListEntryEHC entry = make_pair(node.get_state_buffer(), make_pair(new_d, ops[i]));
-                    open_list->evaluate(new_d, ops[i]->is_marked());
+                    // TODO s might be wrong here
+                    open_list->evaluate(s.get_id(), new_d, ops[i]->is_marked());
                     open_list->insert(entry);
                     ops[i]->unmark();
                 }

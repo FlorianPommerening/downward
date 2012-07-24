@@ -33,6 +33,8 @@ class TieBreakingOpenList : public OpenList<Entry> {
     int dimension() const;
 protected:
     Evaluator *get_evaluator() {return this; }
+    bool is_last_evaluated_dead_end() const;
+    void evaluate(int g, bool preferred);
 
 public:
     TieBreakingOpenList(const Options &opts);
@@ -47,8 +49,6 @@ public:
     void clear();
 
     // tuple evaluator interface
-    void evaluate(int g, bool preferred);
-    bool is_dead_end() const;
     bool dead_end_is_reliable() const;
     void get_involved_heuristics(std::set<Heuristic *> &hset);
 

@@ -1,6 +1,8 @@
 #include "search_progress.h"
 
 #include <iostream>
+#include "state.h"
+
 using namespace std;
 
 SearchProgress::SearchProgress() {
@@ -42,16 +44,16 @@ void SearchProgress::report_f_value(int f) {
 
 void SearchProgress::get_initial_h_values() {
     for (unsigned int i = 0; i < heuristics.size(); i++) {
-        initial_h_values.push_back(heuristics[i]->get_heuristic());
+        initial_h_values.push_back(heuristics[i]->get_heuristic(g_initial_state->get_id()));
     }
 }
 
-bool SearchProgress::check_h_progress(int g) {
+bool SearchProgress::check_h_progress(int evaluation_context, int g) {
     bool progress = false;
     for (int i = 0; i < heuristics.size(); i++) {
-        if (heuristics[i]->is_dead_end())
+        if (heuristics[i]->is_dead_end(evaluation_context))
             continue;
-        int h = heuristics[i]->get_heuristic();
+        int h = heuristics[i]->get_heuristic(evaluation_context);
         int &best_h = best_heuristic_values[i];
         if (best_h == -1 || h < best_h) {
             best_h = h;

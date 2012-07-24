@@ -12,7 +12,7 @@ void PrefEvaluator::evaluate(int, bool preferred) {
     value_preferred = preferred;
 }
 
-bool PrefEvaluator::is_dead_end() const {
+bool PrefEvaluator::is_last_evaluated_dead_end() const {
     return false;
 }
 
@@ -20,7 +20,7 @@ bool PrefEvaluator::dead_end_is_reliable() const {
     return true;
 }
 
-int PrefEvaluator::get_value() const {
+int PrefEvaluator::get_last_evaluated_value() const {
     if (value_preferred)
         return 0;
     else

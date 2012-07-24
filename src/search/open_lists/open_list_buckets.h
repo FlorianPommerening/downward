@@ -24,6 +24,8 @@ class BucketOpenList : public OpenList<Entry> {
     bool dead_end_reliable;
 protected:
     ScalarEvaluator *get_evaluator() {return evaluator; }
+    void evaluate(int g, bool preferred);
+    bool is_last_evaluated_dead_end() const;
 
 public:
     BucketOpenList(const Options &opts);
@@ -34,8 +36,6 @@ public:
     bool empty() const;
     void clear();
 
-    void evaluate(int g, bool preferred);
-    bool is_dead_end() const;
     bool dead_end_is_reliable() const;
     void get_involved_heuristics(std::set<Heuristic *> &hset);
 

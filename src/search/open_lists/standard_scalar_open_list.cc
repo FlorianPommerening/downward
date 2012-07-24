@@ -95,15 +95,15 @@ void StandardScalarOpenList<Entry>::clear() {
 
 template<class Entry>
 void StandardScalarOpenList<Entry>::evaluate(int g, bool preferred) {
-    get_evaluator()->evaluate(g, preferred);
-    last_evaluated_value = get_evaluator()->get_value();
+    get_evaluator()->evaluate(Evaluator::current_evaluation_context, g, preferred);
+    last_evaluated_value = get_evaluator()->get_value(Evaluator::current_evaluation_context);
     last_preferred = preferred;
-    dead_end = get_evaluator()->is_dead_end();
+    dead_end = get_evaluator()->is_dead_end(Evaluator::current_evaluation_context);
     dead_end_reliable = get_evaluator()->dead_end_is_reliable();
 }
 
 template<class Entry>
-bool StandardScalarOpenList<Entry>::is_dead_end() const {
+bool StandardScalarOpenList<Entry>::is_last_evaluated_dead_end() const {
     return dead_end;
 }
 

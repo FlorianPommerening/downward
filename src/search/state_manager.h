@@ -7,15 +7,14 @@
 
 class State;
 
-class StateManager
-{
+class StateManager {
 private:
     class HashTable;
     HashTable *states;
     int next_id;
     StateManager();
-    StateManager(StateManager const&);   // Don't implement to avoid copies of singleton
-    void operator=(StateManager const&); // Don't implement to avoid copies of singleton
+    StateManager(StateManager const &);   // Don't implement to avoid copies of singleton
+    void operator=(StateManager const &); // Don't implement to avoid copies of singleton
 public:
     // Singleton for now. Could later be changed to use one instance for each problem
     // in this case the method State::get_id would also have to be changed.
