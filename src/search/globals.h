@@ -27,6 +27,8 @@ int calculate_plan_cost(const std::vector<const Operator *> &plan);
 void read_everything(std::istream &in);
 void dump_everything();
 
+void verify_no_axioms();
+void verify_no_cond_effects();
 void verify_no_axioms_no_cond_effects();
 
 void check_magic(std::istream &in, std::string magic);

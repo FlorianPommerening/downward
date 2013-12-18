@@ -57,20 +57,42 @@ const int COST_MULTIPLIER = 1;
    see the effect, though.
  */
 
-struct RelaxedOperator {
+struct RelaxedOperatorGroup {
     const Operator *op;
+    int base_cost; // 0 for axioms, 1 for regular operators
+    int cost : 31;
+    bool marked : 1;
+    std::vector<RelaxedOperator> relaxed_operators;
+
+    size_t size() const {
+        return relaxed_operators.size();
+    }
+
+    RelaxedOperator &operator[](size_t i) {
+        return relaxed_operators[i];
+    }
+
+    const RelaxedOperator &operator[](size_t i) const {
+        return relaxed_operators[i];
+    }
+
+    RelaxedOperatorGroup(const Operator *op_, int base_cost_)
+        : op(op_), base_cost(base_cost_), marked(false) {
+    }
+};
+
+struct RelaxedOperator {
+    RelaxedOperatorGroup *group;
     std::vector<RelaxedProposition *> precondition;
     std::vector<RelaxedProposition *> effects;
-    int base_cost; // 0 for axioms, 1 for regular operators
 
-    int cost;
     int unsatisfied_preconditions;
     int h_max_supporter_cost; // h_max_cost of h_max_supporter
     RelaxedProposition *h_max_supporter;
     RelaxedOperator(const std::vector<RelaxedProposition *> &pre,
                     const std::vector<RelaxedProposition *> &eff,
-                    const Operator *the_op, int base)
-        : op(the_op), precondition(pre), effects(eff), base_cost(base) {
+                    RelaxedOperatorGroup *group_)
+        : group(group_), precondition(pre), effects(eff) {
     }
 
     inline void update_h_max_supporter();
@@ -105,7 +127,8 @@ struct RelaxedProposition {
 };
 
 class LandmarkCutHeuristic : public Heuristic {
-    std::vector<RelaxedOperator> relaxed_operators;
+    // RelaxedOperators are grouped by the Operator that induced them
+    std::vector<RelaxedOperatorGroup> relaxed_operator_groups;
     std::vector<std::vector<RelaxedProposition> > propositions;
     RelaxedProposition artificial_precondition;
     RelaxedProposition artificial_goal;
@@ -114,10 +137,11 @@ class LandmarkCutHeuristic : public Heuristic {
 
     virtual void initialize();
     virtual int compute_heuristic(const State &state);
-    void build_relaxed_operator(const Operator &op);
+    void build_relaxed_operator(const Operator &op,
+                                RelaxedOperatorGroup &group);
     void add_relaxed_operator(const std::vector<RelaxedProposition *> &precondition,
                               const std::vector<RelaxedProposition *> &effects,
-                              const Operator *op, int base_cost);
+                              RelaxedOperatorGroup &group);
     void setup_exploration_queue();
     void setup_exploration_queue_state(const State &state);
     void first_exploration(const State &state);
@@ -136,6 +160,7 @@ class LandmarkCutHeuristic : public Heuristic {
 
     void mark_goal_plateau(RelaxedProposition *subgoal);
     void validate_h_max() const;
+    void reduce_operator_costs(const std::vector<RelaxedOperator *> &cut, int cut_cost);
 public:
     LandmarkCutHeuristic(const Options &opts);
     virtual ~LandmarkCutHeuristic();

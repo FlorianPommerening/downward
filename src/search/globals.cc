@@ -299,13 +299,15 @@ void dump_everything() {
     */
 }
 
-void verify_no_axioms_no_cond_effects() {
+void verify_no_axioms() {
     if (!g_axioms.empty()) {
         cerr << "Heuristic does not support axioms!" << endl << "Terminating."
              << endl;
         exit_with(EXIT_UNSUPPORTED);
     }
+}
 
+void verify_no_cond_effects() {
     for (int i = 0; i < g_operators.size(); i++) {
         const vector<PrePost> &pre_post = g_operators[i].get_pre_post();
         for (int j = 0; j < pre_post.size(); j++) {
@@ -328,6 +330,11 @@ void verify_no_axioms_no_cond_effects() {
             exit_with(EXIT_UNSUPPORTED);
         }
     }
+}
+
+void verify_no_axioms_no_cond_effects() {
+    verify_no_axioms();
+    verify_no_cond_effects();
 }
 
 bool are_mutex(const pair<int, int> &a, const pair<int, int> &b) {
