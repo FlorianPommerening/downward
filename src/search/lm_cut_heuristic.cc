@@ -40,6 +40,7 @@ void LandmarkCutHeuristic::initialize() {
     }
 
     // Build relaxed operators for operators and axioms.
+    relaxed_operator_groups.reserve(g_operators.size() + 1);
     for (int i = 0; i < g_operators.size(); i++) {
         const Operator &op = g_operators[i];
         relaxed_operator_groups.push_back(RelaxedOperatorGroup(&op, get_adjusted_cost(op)));
@@ -95,7 +96,9 @@ void LandmarkCutHeuristic::build_relaxed_operator(const Operator &op,
             effects.push_back(&propositions[pre_post[i].var][pre_post[i].post]);
         }
     }
-    add_relaxed_operator(precondition, effects, group);
+    if (!effects.empty()) {
+        add_relaxed_operator(precondition, effects, group);
+    }
     for (size_t i = 0; i < pre_post.size(); ++i) {
         const vector<Prevail> &cond = pre_post[i].cond;
         if (!cond.empty()) {
@@ -105,6 +108,11 @@ void LandmarkCutHeuristic::build_relaxed_operator(const Operator &op,
                 cond_precondition.push_back(&propositions[cond[j].var][cond[j].prev]);
             }
             cond_effects.push_back(&propositions[pre_post[i].var][pre_post[i].post]);
+            // TODO: If it's worth grouping together effects that have no effect
+            // condition, then it's probably also worth otherwise grouping together
+            // effects that have the same effect condition. It would require copying
+            // the operator representation in some form and then sorting based on the
+            // preconditions.
             add_relaxed_operator(cond_precondition, cond_effects, group);
         }
     }

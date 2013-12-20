@@ -59,9 +59,11 @@ const int COST_MULTIPLIER = 1;
 
 struct RelaxedOperatorGroup {
     const Operator *op;
-    int base_cost; // 0 for axioms, 1 for regular operators
+    int base_cost;
     int cost : 31;
     bool marked : 1;
+    // NOTE: Mixed type bit fields are not guarantueed to be compact in memory.
+    //       See the comment for SearchNodeInfo.
     std::vector<RelaxedOperator> relaxed_operators;
 
     size_t size() const {
