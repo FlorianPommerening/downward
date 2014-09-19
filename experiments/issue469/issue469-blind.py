@@ -14,7 +14,7 @@ EXPNAME = 'issue469-blind'
 DATADIR = os.path.join(os.path.dirname(__file__), 'data')
 EXPPATH = os.path.join(DATADIR, EXPNAME)
 REPO = os.path.join(HOME, 'projects/downward/issues/issue469')
-PRE_REV = 'c3797ac75b22'
+PRE_REV = '3372a2d5249d'
 REV = PRE_REV
 
 exp = DownwardExperiment(EXPPATH, REPO,
