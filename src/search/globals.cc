@@ -387,3 +387,6 @@ Timer g_timer;
 string g_plan_filename = "sas_plan";
 RandomNumberGenerator g_rng(2011); // Use an arbitrary default seed.
 StateRegistry *g_state_registry = 0;
+
+size_t g_memory_reserve = 512*1024;
+size_t g_memory_limit = 0;

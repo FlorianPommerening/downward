@@ -47,6 +47,7 @@ enum ExitCode {
 extern void exit_with(ExitCode returncode) __attribute__((noreturn));
 
 extern void register_event_handlers();
+extern void set_up_memory_limits(size_t limit, size_t reserve);
 
 extern int get_peak_memory_in_kb();
 extern void print_peak_memory();

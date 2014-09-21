@@ -222,6 +222,18 @@ SearchEngine *OptionParser::parse_cmd_line_aux(
             srand(atoi(args[i].c_str()));
             g_rng.seed(atoi(args[i].c_str()));
             cout << "random seed " << args[i] << endl;
+        } else if (arg.compare("--memory-reserve") == 0) {
+            if (is_last)
+                throw ArgError("missing argument after --memory-reserve");
+            ++i;
+            g_memory_reserve = strtoul(args[i].c_str(), 0, 0);
+            cout << "memory reserve " << args[i] << endl;
+        } else if (arg.compare("--memory-limit") == 0) {
+            if (is_last)
+                throw ArgError("missing argument after --memory-limit");
+            ++i;
+            g_memory_limit = strtoul(args[i].c_str(), 0, 0);
+            cout << "memory limit " << args[i] << endl;
         } else if ((arg.compare("--help") == 0) && dry_run) {
             cout << "Help:" << endl;
             bool txt2tags = false;

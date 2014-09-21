@@ -30,6 +30,7 @@ int main(int argc, const char **argv) {
     try {
         OptionParser::parse_cmd_line(argc, argv, true, unit_cost);
         engine = OptionParser::parse_cmd_line(argc, argv, false, unit_cost);
+        set_up_memory_limits(g_memory_limit, g_memory_reserve);
     } catch (ArgError &error) {
         cerr << error << endl;
         OptionParser::usage(argv[0]);

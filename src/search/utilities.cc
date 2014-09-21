@@ -6,6 +6,7 @@
 #include <fstream>
 #include <limits>
 #include <stdio.h>
+#include <sys/resource.h>
 using namespace std;
 
 
@@ -19,7 +20,7 @@ static void exit_handler();
 #include <psapi.h>
 #endif
 
-static char *memory_padding = new char[512 * 1024];
+static char *memory_padding = 0;
 
 static void out_of_memory_handler();
 static void signal_handler(int signal_number);
@@ -43,6 +44,16 @@ void register_event_handlers() {
     signal(SIGTERM, signal_handler);
     signal(SIGSEGV, signal_handler);
     signal(SIGINT, signal_handler);
+}
+
+void set_up_memory_limits(size_t limit, size_t reserve) {
+    if (limit) {
+        struct rlimit myrlimit;
+        getrlimit(RLIMIT_AS, &myrlimit);
+        myrlimit.rlim_cur = limit;
+        setrlimit(RLIMIT_AS, &myrlimit);
+    }
+    memory_padding = new char[reserve];
 }
 
 #if OPERATING_SYSTEM == LINUX || OPERATING_SYSTEM == OSX

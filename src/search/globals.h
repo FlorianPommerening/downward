@@ -72,6 +72,8 @@ extern RandomNumberGenerator g_rng;
 // changed.
 extern StateRegistry *g_state_registry;
 
+extern size_t g_memory_reserve;
+extern size_t g_memory_limit;
 
 
 #endif
