@@ -1,5 +1,7 @@
 #include "utilities.h"
 
+#include "globals.h"
+
 #include <cassert>
 #include <csignal>
 #include <iostream>
@@ -104,6 +106,8 @@ static void out_of_memory_handler() {
     delete[] memory_padding;
     memory_padding = 0;
     cout << "Failed to allocate memory. Released memory buffer." << endl;
+    // Use up some memory to provoke memory pressure:
+    new char[g_additional_memory_pressure];
     exit_with(EXIT_OUT_OF_MEMORY);
 }
 

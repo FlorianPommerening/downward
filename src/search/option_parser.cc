@@ -173,6 +173,32 @@ static void predefine_lmgraph(std::string s, bool dry_run) {
 Parse command line options
 */
 
+void OptionParser::parse_cmd_line_early(int argc, const char **argv) {
+    for (int i = 1; i < argc; ++i) {
+        string arg = argv[i];
+	bool is_last = (i + 1) == argc;
+        if (arg.compare("--memory-reserve") == 0) {
+	    if (is_last)
+	        throw ArgError("missing argument after --memory-reserve");
+            ++i;
+            g_memory_reserve = strtoul(argv[i], 0, 0);
+            cout << "memory reserve " << argv[i] << endl;
+        } else if (arg.compare("--memory-limit") == 0) {
+	    if (is_last)
+	        throw ArgError("missing argument after --memory-limit");
+            ++i;
+            g_memory_limit = strtoul(argv[i], 0, 0);
+            cout << "memory limit " << argv[i] << endl;
+	} else if (arg.compare("--additional-memory-pressure") == 0) {
+	    if (is_last)
+	        throw ArgError("missing argument after --additional-memory-pressure");
+            ++i;
+            g_additional_memory_pressure = strtoul(argv[i], 0, 0);
+            cout << "additional memory pressure " << argv[i] << endl;
+	}
+    }
+}
+
 SearchEngine *OptionParser::parse_cmd_line(
     int argc, const char **argv, bool dry_run, bool is_unit_cost) {
     vector<string> args;
@@ -223,17 +249,11 @@ SearchEngine *OptionParser::parse_cmd_line_aux(
             g_rng.seed(atoi(args[i].c_str()));
             cout << "random seed " << args[i] << endl;
         } else if (arg.compare("--memory-reserve") == 0) {
-            if (is_last)
-                throw ArgError("missing argument after --memory-reserve");
-            ++i;
-            g_memory_reserve = strtoul(args[i].c_str(), 0, 0);
-            cout << "memory reserve " << args[i] << endl;
+  	    ++i; // already parsed before
         } else if (arg.compare("--memory-limit") == 0) {
-            if (is_last)
-                throw ArgError("missing argument after --memory-limit");
-            ++i;
-            g_memory_limit = strtoul(args[i].c_str(), 0, 0);
-            cout << "memory limit " << args[i] << endl;
+	    ++i; // already parsed before
+        } else if (arg.compare("--additional-memory-pressure") == 0) {
+	    ++i; // already parsed before
         } else if ((arg.compare("--help") == 0) && dry_run) {
             cout << "Help:" << endl;
             bool txt2tags = false;

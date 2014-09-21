@@ -74,6 +74,7 @@ extern StateRegistry *g_state_registry;
 
 extern size_t g_memory_reserve;
 extern size_t g_memory_limit;
+extern size_t g_additional_memory_pressure;
 
 
 #endif

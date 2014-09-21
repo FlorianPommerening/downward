@@ -390,3 +390,4 @@ StateRegistry *g_state_registry = 0;
 
 size_t g_memory_reserve = 512*1024;
 size_t g_memory_limit = 0;
+size_t g_additional_memory_pressure = 0;

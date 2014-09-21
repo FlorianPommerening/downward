@@ -151,6 +151,7 @@ public:
     OptionParser(ParseTree pt, bool dr);
 
     //this is where input from the commandline goes:
+    static void parse_cmd_line_early(int argc, const char **argv);
     static SearchEngine *parse_cmd_line(
         int argc, const char **argv, bool dr, bool is_unit_cost);
 

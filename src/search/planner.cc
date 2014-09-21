@@ -19,6 +19,9 @@ int main(int argc, const char **argv) {
         exit_with(EXIT_INPUT_ERROR);
     }
 
+    OptionParser::parse_cmd_line_early(argc, argv);
+    set_up_memory_limits(g_memory_limit, g_memory_reserve);
+
     if (string(argv[1]).compare("--help") != 0)
         read_everything(cin);
 
@@ -30,7 +33,6 @@ int main(int argc, const char **argv) {
     try {
         OptionParser::parse_cmd_line(argc, argv, true, unit_cost);
         engine = OptionParser::parse_cmd_line(argc, argv, false, unit_cost);
-        set_up_memory_limits(g_memory_limit, g_memory_reserve);
     } catch (ArgError &error) {
         cerr << error << endl;
         OptionParser::usage(argv[0]);
