@@ -1,5 +1,5 @@
-## Variables prefixed with "DOWNWARD_" are used to configure the 
-## build. They can be changed on the command line or set as 
+## Variables prefixed with "DOWNWARD_" are used to configure the
+## build. They can be changed on the command line or set as
 ## environment variables.
 
 ## By default, build in 32-bit mode. Use DOWNWARD_BITWIDTH=64
@@ -16,7 +16,7 @@ DOWNWARD_USE_LP ?= 0
 DOWNWARD_COIN_ROOT ?= /opt/coin
 
 ## To use an LP solver through OSI, set the following variables
-## to paths for the solver's "include" and "lib" directories. 
+## to paths for the solver's "include" and "lib" directories.
 DOWNWARD_CLP_INCDIR ?= $(DOWNWARD_COIN_ROOT)/include/coin
 DOWNWARD_CLP_LIBDIR ?= $(DOWNWARD_COIN_ROOT)/lib
 DOWNWARD_CPLEX_INCDIR ?= /opt/ibm/ILOG/CPLEX_Studio1251/cplex/include/ilcplex
@@ -263,7 +263,7 @@ POSTLINKOPT =
 ## NOTE: This precludes some uses of exceptions.
 ##        For details, see man gcc on -static-libgcc.
 
-CXXFLAGS_RELEASE  = -O3 -DNDEBUG -fomit-frame-pointer
+CXXFLAGS_RELEASE  = -O3 -fomit-frame-pointer
 CXXFLAGS_DEBUG    = -O3
 CXXFLAGS_PROFILE  = -O3 -pg
 
