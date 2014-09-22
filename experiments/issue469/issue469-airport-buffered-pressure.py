@@ -50,7 +50,7 @@ for limit_name, limit in LIMITS.items():
             [
                 '--search', 'astar(blind)',
                 '--memory-limit', str(limit),
-                '--memory-reserve', str(reserve)
+                '--memory-reserve', str(reserve),
                 '--additional-memory-pressure', str(pressure)
             ])
 
