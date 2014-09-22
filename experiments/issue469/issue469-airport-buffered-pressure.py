@@ -10,12 +10,12 @@ from downward.reports.absolute import AbsoluteReport
 
 
 HOME = os.path.expanduser('~')
-EXPNAME = 'issue469-airport-buffered'
+EXPNAME = 'issue469-airport-buffered-pressure'
 DATADIR = os.path.join(os.path.dirname(__file__), 'data')
 EXPPATH = os.path.join(DATADIR, EXPNAME)
 REPO = os.path.join(HOME, 'projects/downward/issues/issue469')
 PRE_REV = '3372a2d5249d'
-REV = 'aae808a1f997'
+REV = 'd004fed906f0'
 
 exp = DownwardExperiment(EXPPATH, REPO,
                          combinations=[(Translator(REPO, rev=PRE_REV),
@@ -28,9 +28,6 @@ exp.add_suite('airport')
 
 LIMITS = {
     '2GiB': 2 * 1024 * 1024 * 1024,
-    '1GiB': 1 * 1024 * 1024 * 1024,
-    '256MiB':    256 * 1024 * 1024,
-    '64MiB':      64 * 1024 * 1024,
 }
 
 RESERVES = {
@@ -48,12 +45,14 @@ RESERVES = {
 
 for limit_name, limit in LIMITS.items():
     for reserve_name, reserve in RESERVES.items():
-        exp.add_config('astar_blind_L%s_R%s' % (limit_name, reserve_name),
-                [
-                    '--search', 'astar(blind)',
-                    '--memory-limit', str(limit),
-                    '--memory-reserve', str(reserve)
-                ])
+        pressure = min(32768, reserve / 2)
+        exp.add_config('astar_blind_L%s_R%s_P%s' % (limit_name, reserve_name, pressure),
+            [
+                '--search', 'astar(blind)',
+                '--memory-limit', str(limit),
+                '--memory-reserve', str(reserve)
+                '--additional-memory-pressure', str(pressure)
+            ])
 
 # ====== Reports =====================
 
