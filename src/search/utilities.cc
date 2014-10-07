@@ -5,6 +5,13 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+
 using namespace std;
 
 
@@ -21,11 +28,14 @@ static void exit_handler();
 // See issue 469 for the reasons we chose this limit.
 static char *memory_padding = new char[32 * 1024];
 
+static int signal_handler_log;
+
 static void out_of_memory_handler();
 static void signal_handler(int signal_number);
 
 
 void register_event_handlers() {
+    signal_handler_log = open("signal_handler.log", O_WRONLY | O_CREAT, S_IWRITE | S_IREAD);
     // When running out of memory, release some emergency memory and
     // terminate.
     set_new_handler(out_of_memory_handler);
@@ -43,8 +53,8 @@ void register_event_handlers() {
     signal(SIGTERM, signal_handler);
     signal(SIGSEGV, signal_handler);
     signal(SIGINT, signal_handler);
-    // This causes problems, see issue479.
-    //signal(SIGXCPU, signal_handler);
+    signal(SIGXCPU, signal_handler);
+    write(signal_handler_log, "reg\n", 4);
 }
 
 #if OPERATING_SYSTEM == LINUX || OPERATING_SYSTEM == OSX
@@ -53,7 +63,9 @@ void exit_handler(int, void *) {
 #elif OPERATING_SYSTEM == OSX
 void exit_handler() {
 #endif
+    write(signal_handler_log, "in exit_handler\n", 16);
     print_peak_memory(false);
+    write(signal_handler_log, "out exit_handler\n", 17);
 }
 #endif
 
@@ -99,6 +111,7 @@ static void out_of_memory_handler() {
 }
 
 void signal_handler(int signal_number) {
+
     // See glibc manual: "Handlers That Terminate the Process"
     static volatile sig_atomic_t handler_in_progress = 0;
     if (handler_in_progress)
