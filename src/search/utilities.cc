@@ -66,10 +66,12 @@ void exit_handler() {
     write(signal_handler_log, "in exit_handler\n", 16);
     print_peak_memory(false);
     write(signal_handler_log, "out exit_handler\n", 17);
+    close(signal_handler_log);
 }
 #endif
 
 void exit_with(ExitCode exitcode) {
+    write(signal_handler_log, "in exit_with\n", 13);
     switch (exitcode) {
     case EXIT_PLAN_FOUND:
         cout << "Solution found." << endl;
@@ -99,33 +101,47 @@ void exit_with(ExitCode exitcode) {
         cerr << "Exitcode: " << exitcode << endl;
         ABORT("Unknown exitcode.");
     }
+    write(signal_handler_log, "out exit_with\n", 14);
     exit(exitcode);
 }
 
 static void out_of_memory_handler() {
+    write(signal_handler_log, "in out_of_memory_handler\n", 25);
     assert(memory_padding);
     delete[] memory_padding;
     memory_padding = 0;
     cout << "Failed to allocate memory. Released memory buffer." << endl;
+    write(signal_handler_log, "out out_of_memory_handler\n", 26);
     exit_with(EXIT_OUT_OF_MEMORY);
 }
 
 void signal_handler(int signal_number) {
-
+    write(signal_handler_log, "in signal_handler\n", 18);
     // See glibc manual: "Handlers That Terminate the Process"
     static volatile sig_atomic_t handler_in_progress = 0;
-    if (handler_in_progress)
+    write(signal_handler_log, "signal_handler 1\n", 17);
+    if (handler_in_progress) {
+        write(signal_handler_log, "signal_handler if\n", 18);
         raise(signal_number);
+    }
+    write(signal_handler_log, "signal_handler 2\n", 17);
     handler_in_progress = 1;
+    write(signal_handler_log, "signal_handler 3\n", 17);
     print_peak_memory(false);
+    write(signal_handler_log, "signal_handler 4\n", 17);
     cout << "caught signal " << signal_number << " -- exiting" << endl;
+    write(signal_handler_log, "signal_handler 5\n", 17);
     signal(signal_number, SIG_DFL);
+    write(signal_handler_log, "out signal_handler\n", 19);
+    close(signal_handler_log);
     raise(signal_number);
 }
 
 int get_peak_memory_in_kb(bool use_buffered_input) {
+    if (!use_buffered_input) write(signal_handler_log, "in get_peak_memory_in_kb\n", 25);
     // On error, produces a warning on cerr and returns -1.
     int memory_in_kb = -1;
+    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 1\n", 24);
 
 #if OPERATING_SYSTEM == OSX
     // Based on http://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
@@ -143,31 +159,49 @@ int get_peak_memory_in_kb(bool use_buffered_input) {
     memory_in_kb = pmc.PeakPagefileUsage / 1024;
 #else
     ifstream procfile;
+    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 2\n", 24);
     if (!use_buffered_input) {
+        write(signal_handler_log, "get_peak_memory_in_kb 3\n", 24);
         procfile.rdbuf()->pubsetbuf(0, 0);
     }
+    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 4\n", 24);
     procfile.open("/proc/self/status");
+    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 5\n", 24);
     string word;
+    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 6\n", 24);
     while (procfile.good()) {
+        if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 7a\n", 25);
         procfile >> word;
+        if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 7b\n", 25);
         if (word == "VmPeak:") {
+            if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 7c\n", 25);
             procfile >> memory_in_kb;
+            if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 7d\n", 25);
             break;
         }
         // Skip to end of line.
         procfile.ignore(numeric_limits<streamsize>::max(), '\n');
     }
-    if (procfile.fail())
+    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 8\n", 24);
+    if (procfile.fail()) {
+        if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb failed\n", 29);
         memory_in_kb = -1;
+    }
 #endif
 
-    if (memory_in_kb == -1)
+    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 9\n", 24);
+    if (memory_in_kb == -1) {
+        if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb failed 2\n", 31);
         cerr << "warning: could not determine peak memory" << endl;
+    }
+    if (!use_buffered_input) write(signal_handler_log, "out get_peak_memory_in_kb\n", 26);
     return memory_in_kb;
 }
 
 void print_peak_memory(bool use_buffered_input) {
+    if (!use_buffered_input) write(signal_handler_log, "in print_peak_memory\n", 21);
     cout << "Peak memory: " << get_peak_memory_in_kb(use_buffered_input) << " KB" << endl;
+    if (!use_buffered_input) write(signal_handler_log, "out print_peak_memory\n", 22);
 }
 
 
