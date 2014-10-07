@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <cstring>
 
 using namespace std;
 
@@ -28,14 +29,17 @@ static void exit_handler();
 // See issue 469 for the reasons we chose this limit.
 static char *memory_padding = new char[32 * 1024];
 
-static int signal_handler_log;
-
 static void out_of_memory_handler();
 static void signal_handler(int signal_number);
 
 
+void write_log_message(const char *message) {
+    int log_file = open("signal_handler.log", O_WRONLY | O_APPEND | O_CREAT, S_IWRITE | S_IREAD);
+    write(log_file, message, strlen(message));
+    close(log_file);
+}
+
 void register_event_handlers() {
-    signal_handler_log = open("signal_handler.log", O_WRONLY | O_CREAT, S_IWRITE | S_IREAD);
     // When running out of memory, release some emergency memory and
     // terminate.
     set_new_handler(out_of_memory_handler);
@@ -54,7 +58,7 @@ void register_event_handlers() {
     signal(SIGSEGV, signal_handler);
     signal(SIGINT, signal_handler);
     signal(SIGXCPU, signal_handler);
-    write(signal_handler_log, "reg\n", 4);
+    write_log_message("reg\n");
 }
 
 #if OPERATING_SYSTEM == LINUX || OPERATING_SYSTEM == OSX
@@ -63,15 +67,14 @@ void exit_handler(int, void *) {
 #elif OPERATING_SYSTEM == OSX
 void exit_handler() {
 #endif
-    write(signal_handler_log, "in exit_handler\n", 16);
+    write_log_message("in exit_handler\n");
     print_peak_memory(false);
-    write(signal_handler_log, "out exit_handler\n", 17);
-    close(signal_handler_log);
+    write_log_message("out exit_handler\n");
 }
 #endif
 
 void exit_with(ExitCode exitcode) {
-    write(signal_handler_log, "in exit_with\n", 13);
+    write_log_message("in exit_with\n");
     switch (exitcode) {
     case EXIT_PLAN_FOUND:
         cout << "Solution found." << endl;
@@ -101,47 +104,46 @@ void exit_with(ExitCode exitcode) {
         cerr << "Exitcode: " << exitcode << endl;
         ABORT("Unknown exitcode.");
     }
-    write(signal_handler_log, "out exit_with\n", 14);
+    write_log_message("out exit_with\n");
     exit(exitcode);
 }
 
 static void out_of_memory_handler() {
-    write(signal_handler_log, "in out_of_memory_handler\n", 25);
+    write_log_message("in out_of_memory_handler\n");
     assert(memory_padding);
     delete[] memory_padding;
     memory_padding = 0;
     cout << "Failed to allocate memory. Released memory buffer." << endl;
-    write(signal_handler_log, "out out_of_memory_handler\n", 26);
+    write_log_message("out out_of_memory_handler\n");
     exit_with(EXIT_OUT_OF_MEMORY);
 }
 
 void signal_handler(int signal_number) {
-    write(signal_handler_log, "in signal_handler\n", 18);
+    write_log_message("in signal_handler\n");
     // See glibc manual: "Handlers That Terminate the Process"
     static volatile sig_atomic_t handler_in_progress = 0;
-    write(signal_handler_log, "signal_handler 1\n", 17);
+    write_log_message("signal_handler 1\n");
     if (handler_in_progress) {
-        write(signal_handler_log, "signal_handler if\n", 18);
+        write_log_message("signal_handler if\n");
         raise(signal_number);
     }
-    write(signal_handler_log, "signal_handler 2\n", 17);
+    write_log_message("signal_handler 2\n");
     handler_in_progress = 1;
-    write(signal_handler_log, "signal_handler 3\n", 17);
+    write_log_message("signal_handler 3\n");
     print_peak_memory(false);
-    write(signal_handler_log, "signal_handler 4\n", 17);
+    write_log_message("signal_handler 4\n");
     cout << "caught signal " << signal_number << " -- exiting" << endl;
-    write(signal_handler_log, "signal_handler 5\n", 17);
+    write_log_message("signal_handler 5\n");
     signal(signal_number, SIG_DFL);
-    write(signal_handler_log, "out signal_handler\n", 19);
-    close(signal_handler_log);
+    write_log_message("out signal_handler\n");
     raise(signal_number);
 }
 
 int get_peak_memory_in_kb(bool use_buffered_input) {
-    if (!use_buffered_input) write(signal_handler_log, "in get_peak_memory_in_kb\n", 25);
+    if (!use_buffered_input) write_log_message("in get_peak_memory_in_kb\n");
     // On error, produces a warning on cerr and returns -1.
     int memory_in_kb = -1;
-    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 1\n", 24);
+    if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 1\n");
 
 #if OPERATING_SYSTEM == OSX
     // Based on http://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
@@ -159,49 +161,49 @@ int get_peak_memory_in_kb(bool use_buffered_input) {
     memory_in_kb = pmc.PeakPagefileUsage / 1024;
 #else
     ifstream procfile;
-    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 2\n", 24);
+    if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 2\n");
     if (!use_buffered_input) {
-        write(signal_handler_log, "get_peak_memory_in_kb 3\n", 24);
+        write_log_message("get_peak_memory_in_kb 3\n");
         procfile.rdbuf()->pubsetbuf(0, 0);
     }
-    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 4\n", 24);
+    if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 4\n");
     procfile.open("/proc/self/status");
-    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 5\n", 24);
+    if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 5\n");
     string word;
-    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 6\n", 24);
+    if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 6\n");
     while (procfile.good()) {
-        if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 7a\n", 25);
+        if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 7a\n");
         procfile >> word;
-        if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 7b\n", 25);
+        if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 7b\n");
         if (word == "VmPeak:") {
-            if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 7c\n", 25);
+            if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 7c\n");
             procfile >> memory_in_kb;
-            if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 7d\n", 25);
+            if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 7d\n");
             break;
         }
         // Skip to end of line.
         procfile.ignore(numeric_limits<streamsize>::max(), '\n');
     }
-    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 8\n", 24);
+    if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 8\n");
     if (procfile.fail()) {
-        if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb failed\n", 29);
+        if (!use_buffered_input) write_log_message("get_peak_memory_in_kb failed\n");
         memory_in_kb = -1;
     }
 #endif
 
-    if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb 9\n", 24);
+    if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 9\n");
     if (memory_in_kb == -1) {
-        if (!use_buffered_input) write(signal_handler_log, "get_peak_memory_in_kb failed 2\n", 31);
+        if (!use_buffered_input) write_log_message("get_peak_memory_in_kb failed 2\n");
         cerr << "warning: could not determine peak memory" << endl;
     }
-    if (!use_buffered_input) write(signal_handler_log, "out get_peak_memory_in_kb\n", 26);
+    if (!use_buffered_input) write_log_message("out get_peak_memory_in_kb\n");
     return memory_in_kb;
 }
 
 void print_peak_memory(bool use_buffered_input) {
-    if (!use_buffered_input) write(signal_handler_log, "in print_peak_memory\n", 21);
+    if (!use_buffered_input) write_log_message("in print_peak_memory\n");
     cout << "Peak memory: " << get_peak_memory_in_kb(use_buffered_input) << " KB" << endl;
-    if (!use_buffered_input) write(signal_handler_log, "out print_peak_memory\n", 22);
+    if (!use_buffered_input) write_log_message("out print_peak_memory\n");
 }
 
 
