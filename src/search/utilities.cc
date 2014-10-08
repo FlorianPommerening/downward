@@ -167,7 +167,7 @@ int get_peak_memory_in_kb(bool use_buffered_input) {
         procfile.rdbuf()->pubsetbuf(0, 0);
     }
     if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 4\n");
-    procfile.open("/proc/self/status");
+    procfile.open("/proc/self/status", ios_base::in);
     if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 5\n");
     string word;
     if (!use_buffered_input) write_log_message("get_peak_memory_in_kb 6\n");
