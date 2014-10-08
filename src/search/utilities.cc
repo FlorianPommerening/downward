@@ -53,11 +53,19 @@ void register_event_handlers() {
 #elif OPERATING_SYSTEM == CYGWIN || OPERATING_SYSTEM == WINDOWS
     // nothing
 #endif
-    signal(SIGABRT, signal_handler);
-    signal(SIGTERM, signal_handler);
-    signal(SIGSEGV, signal_handler);
-    signal(SIGINT, signal_handler);
-    signal(SIGXCPU, signal_handler);
+    struct sigaction default_signal_action;
+    default_signal_action.sa_handler = signal_handler;
+    /* Do not block additional signals during handler execution
+       (the currently handled signal is always blocked). */
+    sigemptyset(&default_signal_action.sa_mask);
+    // Reset handler to default action after completion.
+    default_signal_action.sa_flags = SA_RESETHAND;
+
+    sigaction(SIGABRT, &default_signal_action, 0);
+    sigaction(SIGTERM, &default_signal_action, 0);
+    sigaction(SIGSEGV, &default_signal_action, 0);
+    sigaction(SIGINT, &default_signal_action, 0);
+    sigaction(SIGXCPU, &default_signal_action, 0);
     write_log_message("reg\n");
 }
 
@@ -120,21 +128,9 @@ static void out_of_memory_handler() {
 
 void signal_handler(int signal_number) {
     write_log_message("in signal_handler\n");
-    // See glibc manual: "Handlers That Terminate the Process"
-    static volatile sig_atomic_t handler_in_progress = 0;
-    write_log_message("signal_handler 1\n");
-    if (handler_in_progress) {
-        write_log_message("signal_handler if\n");
-        raise(signal_number);
-    }
-    write_log_message("signal_handler 2\n");
-    handler_in_progress = 1;
-    write_log_message("signal_handler 3\n");
     print_peak_memory(false);
-    write_log_message("signal_handler 4\n");
+    write_log_message("signal_handler 1\n");
     cout << "caught signal " << signal_number << " -- exiting" << endl;
-    write_log_message("signal_handler 5\n");
-    signal(signal_number, SIG_DFL);
     write_log_message("out signal_handler\n");
     raise(signal_number);
 }
