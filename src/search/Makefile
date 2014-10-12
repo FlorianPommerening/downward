@@ -263,7 +263,9 @@ POSTLINKOPT =
 ## NOTE: This precludes some uses of exceptions.
 ##        For details, see man gcc on -static-libgcc.
 
-CXXFLAGS_RELEASE  = -O3 -DNDEBUG -fomit-frame-pointer
+CXXFLAGS_RELEASE  = -O3
+## HACK: switched release build to debug build for experiment
+## -DNDEBUG -fomit-frame-pointer
 CXXFLAGS_DEBUG    = -O3
 CXXFLAGS_PROFILE  = -O3 -pg
 

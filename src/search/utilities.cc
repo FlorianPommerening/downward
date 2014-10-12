@@ -39,6 +39,19 @@ void write_log_message(const char *message) {
     close(log_file);
 }
 
+void report_existing_signal_handler(const char *signal_name, struct sigaction existing_signal_action) {
+    write_log_message("Existing signal for ");
+    write_log_message(signal_name);
+    write_log_message(": ");
+    if (existing_signal_action.sa_handler == SIG_DFL) {
+        write_log_message("default\n");
+    } else if (existing_signal_action.sa_handler == SIG_IGN) {
+        write_log_message("ignore\n");
+    } else {
+        write_log_message("custom\n");
+    }
+}
+
 void register_event_handlers() {
     // When running out of memory, release some emergency memory and
     // terminate.
@@ -54,18 +67,28 @@ void register_event_handlers() {
     // nothing
 #endif
     struct sigaction default_signal_action;
+    struct sigaction existing_signal_action;
     default_signal_action.sa_handler = signal_handler;
-    /* Do not block additional signals during handler execution
-       (the currently handled signal is always blocked). */
+    // Block all signals we handle while one of them is handled.
     sigemptyset(&default_signal_action.sa_mask);
+    sigaddset(&default_signal_action.sa_mask, SIGABRT);
+    sigaddset(&default_signal_action.sa_mask, SIGTERM);
+    sigaddset(&default_signal_action.sa_mask, SIGSEGV);
+    sigaddset(&default_signal_action.sa_mask, SIGINT);
+    sigaddset(&default_signal_action.sa_mask, SIGXCPU);
     // Reset handler to default action after completion.
     default_signal_action.sa_flags = SA_RESETHAND;
 
-    sigaction(SIGABRT, &default_signal_action, 0);
-    sigaction(SIGTERM, &default_signal_action, 0);
-    sigaction(SIGSEGV, &default_signal_action, 0);
-    sigaction(SIGINT, &default_signal_action, 0);
-    sigaction(SIGXCPU, &default_signal_action, 0);
+    sigaction(SIGABRT, &default_signal_action, &existing_signal_action);
+    report_existing_signal_handler("SIGABRT", existing_signal_action);
+    sigaction(SIGTERM, &default_signal_action, &existing_signal_action);
+    report_existing_signal_handler("SIGTERM", existing_signal_action);
+    sigaction(SIGSEGV, &default_signal_action, &existing_signal_action);
+    report_existing_signal_handler("SIGSEGV", existing_signal_action);
+    sigaction(SIGINT, &default_signal_action, &existing_signal_action);
+    report_existing_signal_handler("SIGINT", existing_signal_action);
+    sigaction(SIGXCPU, &default_signal_action, &existing_signal_action);
+    report_existing_signal_handler("SIGXCPU", existing_signal_action);
     write_log_message("reg\n");
 }
 
