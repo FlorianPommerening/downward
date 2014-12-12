@@ -47,6 +47,12 @@ public:
     double lower_bound;
     double upper_bound;
     LP_METHOD(CoinPackedVectorBase *create_coin_vector() const)
+    const std::vector<int> &get_variables() const {return variables; }
+    const std::vector<double> &get_coefficients() const {return coefficients; }
+    void reserve(size_t n) {
+        variables.reserve(n);
+        coefficients.reserve(n);
+    }
 
     LP_METHOD(bool empty() const)
     LP_METHOD(void insert(int index, double coefficient))
@@ -68,6 +74,16 @@ class LpSolver {
     bool is_solved;
     int num_permanent_constraints;
     bool has_temporary_constraints;
+
+    // Temporary data for assigning a new problem. We keep the vectors
+    // around to avoid recreating them in every assignment.
+    std::vector<double> elements;
+    std::vector<int> row_indices;
+    std::vector<int> col_indices;
+    std::vector<int> indices;
+    std::vector<int> starts;
+    std::vector<int> lengths;
+
     OsiSolverInterface *lp_solver;
 
     template<typename T>

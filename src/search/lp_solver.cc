@@ -118,14 +118,7 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
           the data is transfered to the LP solver. It will delete the matrix,
           bounds and the objective so we do not delete them afterwards.
         */
-        CoinPackedMatrix *matrix = new CoinPackedMatrix(false, 0, 0);
-        matrix->setDimensions(0, num_columns);
-        CoinPackedVectorBase **rows = create_rows(constraints);
-        matrix->appendRows(num_rows, rows);
-        for (size_t i = 0; i < constraints.size(); ++i) {
-            delete rows[i];
-        }
-        delete[] rows;
+
         double *col_lb = build_array<LpVariable>(
             variables,
             [](const LpVariable &var) {return var.lower_bound; });
@@ -146,7 +139,83 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
         } else {
             lp_solver->setObjSense(-1);
         }
+
+        // Version 1:
+        elements.clear();
+        indices.clear();
+        starts.clear();
+        lengths.clear();
+        for (size_t i = 0; i < constraints.size(); ++i) {
+            const LpConstraint &constraint = constraints[i];
+            const vector<int> &vars = constraint.get_variables();
+            const vector<double> &coeffs = constraint.get_coefficients();
+            assert(vars.size() == coeffs.size());
+            starts.push_back(elements.size());
+            lengths.push_back(vars.size());
+            indices.insert(indices.end(), vars.begin(), vars.end());
+            elements.insert(elements.end(), coeffs.begin(), coeffs.end());
+        }
+
+        CoinPackedMatrix *matrix = new CoinPackedMatrix(false,
+                                                        num_columns,
+                                                        num_rows,
+                                                        elements.size(),
+                                                        elements.data(),
+                                                        indices.data(),
+                                                        starts.data(),
+                                                        lengths.data());
         lp_solver->assignProblem(matrix, col_lb, col_ub, objective, row_lb, row_ub);
+
+        /*
+        // Version 2:
+        unused_parameter(num_columns);
+        elements.clear();
+        row_indices.clear();
+        col_indices.clear();
+        for (size_t i = 0; i < constraints.size(); ++i) {
+            const LpConstraint &constraint = constraints[i];
+            const vector<int> &vars = constraint.get_variables();
+            const vector<double> &coeffs = constraint.get_coefficients();
+            assert(vars.size() == coeffs.size());
+            row_indices.resize(row_indices.size() + coeffs.size(), i);
+            col_indices.insert(col_indices.end(), vars.begin(), vars.end());
+            elements.insert(elements.end(), coeffs.begin(), coeffs.end());
+        }
+
+        CoinPackedMatrix *matrix = new CoinPackedMatrix(
+            false,
+            row_indices.data(),
+            col_indices.data(),
+            elements.data(),
+            elements.size());
+        lp_solver->assignProblem(matrix, col_lb, col_ub, objective, row_lb, row_ub);
+        */
+
+        /*
+        // Version 3: (not working right now)
+        elements.clear();
+        indices.clear();
+        starts.clear();
+        lengths.clear();
+        for (size_t i = 0; i < constraints.size(); ++i) {
+            const LpConstraint &constraint = constraints[i];
+            const vector<int> &vars = constraint.get_variables();
+            const vector<double> &coeffs = constraint.get_coefficients();
+            assert(vars.size() == coeffs.size());
+            starts.push_back(elements.size());
+            lengths.push_back(vars.size());
+            indices.insert(indices.end(), vars.begin(), vars.end());
+            elements.insert(elements.end(), coeffs.begin(), coeffs.end());
+        }
+        lp_solver->loadProblem(num_columns, num_rows,
+                               starts.data(), indices.data(), elements.data(),
+                               col_lb, col_ub, objective, row_lb, row_ub);
+        delete[] col_lb;
+        delete[] col_ub;
+        delete[] objective;
+        delete[] row_lb;
+        delete[] row_ub;
+        */
     } catch (CoinError &error) {
         handle_coin_error(error);
     }
