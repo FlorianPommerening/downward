@@ -61,7 +61,7 @@ bool LpConstraint::empty() const {
 }
 
 void LpConstraint::insert(int index, double coefficient) {
-    assert(find(variables.begin(), variables.end(), index) == variables.end());
+//    assert(find(variables.begin(), variables.end(), index) == variables.end());
     variables.push_back(index);
     coefficients.push_back(coefficient);
 }
@@ -112,7 +112,7 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
     int num_columns = variables.size();
     int num_rows = constraints.size();
     num_permanent_constraints = num_rows;
-    is_initialized = false;
+//    is_initialized = false;
     try {
         /*
           Note that using assignProblem instead of loadProblem, the ownership of
