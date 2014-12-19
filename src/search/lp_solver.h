@@ -57,6 +57,11 @@ public:
         coefficients.reserve(n);
     }
 
+    void clear() {
+        variables.clear();
+        coefficients.clear();
+    }
+
     LP_METHOD(bool empty() const)
     LP_METHOD(void insert(int index, double coefficient))
 };
@@ -86,6 +91,12 @@ class LpSolver {
     std::vector<int> indices;
     std::vector<int> starts;
     std::vector<int> lengths;
+
+    std::vector<double> col_lb;
+    std::vector<double> col_ub;
+    std::vector<double> objective;
+    std::vector<double> row_lb;
+    std::vector<double> row_ub;
 
     OsiSolverInterface *lp_solver;
 

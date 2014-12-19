@@ -6,6 +6,7 @@
 #include "../operator_cost.h"
 
 #include <set>
+#include <vector>
 
 class LandmarkGraph;
 class LandmarkNode;
@@ -36,6 +37,8 @@ public:
 
 class LandmarkEfficientOptimalSharedCostAssignment : public LandmarkCostAssignment {
     LpSolver lp_solver;
+    std::vector<LpVariable> lp_variables;
+    std::vector<LpConstraint> lp_constraints;
 public:
     LandmarkEfficientOptimalSharedCostAssignment(LandmarkGraph &graph, OperatorCost cost_type, LpSolverType solver_type);
     virtual ~LandmarkEfficientOptimalSharedCostAssignment();

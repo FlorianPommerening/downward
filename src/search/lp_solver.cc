@@ -112,29 +112,29 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
     int num_columns = variables.size();
     int num_rows = constraints.size();
     num_permanent_constraints = num_rows;
-//    is_initialized = false;
+    is_initialized = false;
     try {
         /*
           Note that using assignProblem instead of loadProblem, the ownership of
           the data is transfered to the LP solver. It will delete the matrix,
           bounds and the objective so we do not delete them afterwards.
         */
+        col_lb.clear();
+        col_ub.clear();
+        objective.clear();
+        for (const LpVariable &var : variables) {
+            col_lb.push_back(var.lower_bound);
+            col_ub.push_back(var.upper_bound);
+            objective.push_back(var.objective_coefficient);
+        }
 
-        double *col_lb = build_array<LpVariable>(
-            variables,
-            [](const LpVariable &var) {return var.lower_bound; });
-        double *col_ub = build_array<LpVariable>(
-            variables,
-            [](const LpVariable &var) {return var.upper_bound; });
-        double *objective = build_array<LpVariable>(
-            variables,
-            [](const LpVariable &var) {return var.objective_coefficient; });
-        double *row_lb = build_array<LpConstraint>(
-            constraints,
-            [](const LpConstraint &constraint) {return constraint.lower_bound; });
-        double *row_ub = build_array<LpConstraint>(
-            constraints,
-            [](const LpConstraint &constraint) {return constraint.upper_bound; });
+        row_lb.clear();
+        row_ub.clear();
+        for (const LpConstraint &constraint : constraints) {
+            row_lb.push_back(constraint.lower_bound);
+            row_ub.push_back(constraint.upper_bound);
+        }
+
         if (sense == LPObjectiveSense::MINIMIZE) {
             lp_solver->setObjSense(1);
         } else {
@@ -157,15 +157,20 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
             elements.insert(elements.end(), coeffs.begin(), coeffs.end());
         }
 
-        CoinPackedMatrix *matrix = new CoinPackedMatrix(false,
-                                                        num_columns,
-                                                        num_rows,
-                                                        elements.size(),
-                                                        elements.data(),
-                                                        indices.data(),
-                                                        starts.data(),
-                                                        lengths.data());
-        lp_solver->assignProblem(matrix, col_lb, col_ub, objective, row_lb, row_ub);
+        CoinPackedMatrix matrix(false,
+                                num_columns,
+                                num_rows,
+                                elements.size(),
+                                elements.data(),
+                                indices.data(),
+                                starts.data(),
+                                lengths.data());
+        lp_solver->loadProblem(matrix,
+                               col_lb.data(),
+                               col_ub.data(),
+                               objective.data(),
+                               row_lb.data(),
+                               row_ub.data());
 
         /*
         // Version 2:

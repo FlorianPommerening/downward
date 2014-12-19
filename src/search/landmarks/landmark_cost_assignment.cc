@@ -147,6 +147,27 @@ LandmarkEfficientOptimalSharedCostAssignment::LandmarkEfficientOptimalSharedCost
     LandmarkGraph &graph, OperatorCost cost_type, LpSolverType solver_type)
     : LandmarkCostAssignment(graph, cost_type),
       lp_solver(solver_type) {
+    // The LP has one variable (column) per landmark and one
+    // inequality (row) per operator.
+    int num_cols = lm_graph.number_of_landmarks();
+    int num_rows = g_operators.size();
+
+    // Set up lower bounds, upper bounds and objective function
+    // coefficients for the landmarks.
+    // We want to maximize 1 * cost(lm_1) + ... + 1 * cost(lm_n),
+    // so the coefficients are all 1.
+    // We start with range(cost(lm_1)) = {0}.
+    lp_variables.resize(num_cols, LpVariable(0.0, 0.0, 1.0));
+
+    // Set up lower bounds and upper bounds for the inequalities.
+    // These simply say that the operator's total cost must fall
+    // between 0 and the real operator cost.
+    lp_constraints.resize(num_rows, LpConstraint(0.0, 0.0));
+    for (size_t op_id = 0; op_id < g_operators.size(); ++op_id) {
+        const GlobalOperator &op = g_operators[op_id];
+        lp_constraints[op_id].lower_bound = 0;
+        lp_constraints[op_id].upper_bound = get_adjusted_action_cost(op, cost_type);
+    }
 }
 
 LandmarkEfficientOptimalSharedCostAssignment::~LandmarkEfficientOptimalSharedCostAssignment() {
@@ -165,30 +186,16 @@ double LandmarkEfficientOptimalSharedCostAssignment::cost_sharing_h_value() {
     // The LP has one variable (column) per landmark and one
     // inequality (row) per operator.
     int num_cols = lm_graph.number_of_landmarks();
-    int num_rows = g_operators.size();
 
-    // Set up lower bounds, upper bounds and objective function
-    // coefficients for the landmarks.
-    // We want to maximize 1 * cost(lm_1) + ... + 1 * cost(lm_n),
-    // so the coefficients are all 1.
     // The range of cost(lm_1) is {0} if the landmark is already
     // reached; otherwise it is [0, infinity].
-    vector<LpVariable> variables(num_cols, LpVariable(0.0, 0.0, 1.0));
     for (int lm_id = 0; lm_id < num_cols; ++lm_id) {
         const LandmarkNode *lm = lm_graph.get_lm_for_index(lm_id);
-        if (lm->get_status() != lm_reached) {
-            variables[lm_id].upper_bound = lp_solver.get_infinity();
+        if (lm->get_status() == lm_reached) {
+            lp_variables[lm_id].upper_bound = 0;
+        } else {
+            lp_variables[lm_id].upper_bound = lp_solver.get_infinity();
         }
-    }
-
-    // Set up lower bounds and upper bounds for the inequalities.
-    // These simply say that the operator's total cost must fall
-    // between 0 and the real operator cost.
-    vector<LpConstraint> constraints(num_rows, LpConstraint(0.0, 0.0));
-    for (size_t op_id = 0; op_id < g_operators.size(); ++op_id) {
-        const GlobalOperator &op = g_operators[op_id];
-        constraints[op_id].lower_bound = 0;
-        constraints[op_id].upper_bound = get_adjusted_action_cost(op, cost_type);
     }
 
     // Define the constraint matrix. The constraints are of the form
@@ -197,6 +204,9 @@ double LandmarkEfficientOptimalSharedCostAssignment::cost_sharing_h_value() {
     // relevant achiever. Hence, we add a triple (op, lm, 1.0)
     // for each relevant achiever op of landmark lm, denoting that
     // in the op-th row and lm-th column, the matrix has a 1.0 entry.
+    for (size_t op_id = 0; op_id < g_operators.size(); ++op_id) {
+        lp_constraints[op_id].clear();
+    }
     for (int lm_id = 0; lm_id < num_cols; ++lm_id) {
         const LandmarkNode *lm = lm_graph.get_lm_for_index(lm_id);
         int lm_status = lm->get_status();
@@ -208,11 +218,11 @@ double LandmarkEfficientOptimalSharedCostAssignment::cost_sharing_h_value() {
                  ++ach_it) {
                 int op_id = *ach_it;
                 assert(in_bounds(op_id, g_operators));
-                constraints[op_id].insert(lm_id, 1.0);
+                lp_constraints[op_id].insert(lm_id, 1.0);
             }
         }
     }
-    lp_solver.assign_problem(LPObjectiveSense::MAXIMIZE, variables, constraints);
+    lp_solver.assign_problem(LPObjectiveSense::MAXIMIZE, lp_variables, lp_constraints);
 
     times(&end_build);
 
