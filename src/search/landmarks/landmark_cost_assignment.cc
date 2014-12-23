@@ -223,9 +223,9 @@ double LandmarkEfficientOptimalSharedCostAssignment::cost_sharing_h_value() {
         }
     }
     non_empty_lp_constraints.clear();
-    for (const LpConstraint &constraint : lp_constraints) {
+    for (LpConstraint &constraint : lp_constraints) {
         if (!constraint.empty())
-            non_empty_lp_constraints.push_back(constraint);
+            non_empty_lp_constraints.push_back(&constraint);
     }
     lp_solver.assign_problem(LPObjectiveSense::MAXIMIZE,
                              lp_variables, non_empty_lp_constraints);

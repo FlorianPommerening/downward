@@ -108,7 +108,7 @@ CoinPackedVectorBase **LpSolver::create_rows(const std::vector<LpConstraint> &co
 
 void LpSolver::assign_problem(LPObjectiveSense sense,
                         const std::vector<LpVariable> &variables,
-                        const std::vector<LpConstraint> &constraints) {
+                        const std::vector<LpConstraint *> &constraints) {
     int num_columns = variables.size();
     int num_rows = constraints.size();
     num_permanent_constraints = num_rows;
@@ -130,9 +130,9 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
 
         row_lb.clear();
         row_ub.clear();
-        for (const LpConstraint &constraint : constraints) {
-            row_lb.push_back(constraint.lower_bound);
-            row_ub.push_back(constraint.upper_bound);
+        for (LpConstraint *constraint : constraints) {
+            row_lb.push_back(constraint->lower_bound);
+            row_ub.push_back(constraint->upper_bound);
         }
 
         if (sense == LPObjectiveSense::MINIMIZE) {
@@ -146,7 +146,7 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
         indices.clear();
         starts.clear();
         for (size_t i = 0; i < constraints.size(); ++i) {
-            const LpConstraint &constraint = constraints[i];
+            const LpConstraint &constraint = *constraints[i];
             const vector<int> &vars = constraint.get_variables();
             const vector<double> &coeffs = constraint.get_coefficients();
             assert(vars.size() == coeffs.size());

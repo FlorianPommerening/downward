@@ -112,7 +112,7 @@ public:
     LP_METHOD(void assign_problem(
                   LPObjectiveSense sense,
                   const std::vector<LpVariable> &variables,
-                  const std::vector<LpConstraint> &constraints))
+                  const std::vector<LpConstraint *> &constraints))
     LP_METHOD(int add_temporary_constraints(const std::vector<LpConstraint> &constraints))
     LP_METHOD(void clear_temporary_constraints())
     LP_METHOD(double get_infinity())
