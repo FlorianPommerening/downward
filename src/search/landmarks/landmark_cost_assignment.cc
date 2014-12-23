@@ -204,8 +204,8 @@ double LandmarkEfficientOptimalSharedCostAssignment::cost_sharing_h_value() {
     // relevant achiever. Hence, we add a triple (op, lm, 1.0)
     // for each relevant achiever op of landmark lm, denoting that
     // in the op-th row and lm-th column, the matrix has a 1.0 entry.
-    for (size_t op_id = 0; op_id < g_operators.size(); ++op_id) {
-        lp_constraints[op_id].clear();
+    for (LpConstraint &constraint : lp_constraints) {
+        constraint.clear();
     }
     for (int lm_id = 0; lm_id < num_cols; ++lm_id) {
         const LandmarkNode *lm = lm_graph.get_lm_for_index(lm_id);
@@ -222,7 +222,13 @@ double LandmarkEfficientOptimalSharedCostAssignment::cost_sharing_h_value() {
             }
         }
     }
-    lp_solver.assign_problem(LPObjectiveSense::MAXIMIZE, lp_variables, lp_constraints);
+    non_empty_lp_constraints.clear();
+    for (const LpConstraint &constraint : lp_constraints) {
+        if (!constraint.empty())
+            non_empty_lp_constraints.push_back(constraint);
+    }
+    lp_solver.assign_problem(LPObjectiveSense::MAXIMIZE,
+                             lp_variables, non_empty_lp_constraints);
 
     times(&end_build);
 
