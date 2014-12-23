@@ -145,18 +145,22 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
         elements.clear();
         indices.clear();
         starts.clear();
-        lengths.clear();
         for (size_t i = 0; i < constraints.size(); ++i) {
             const LpConstraint &constraint = constraints[i];
             const vector<int> &vars = constraint.get_variables();
             const vector<double> &coeffs = constraint.get_coefficients();
             assert(vars.size() == coeffs.size());
             starts.push_back(elements.size());
-            lengths.push_back(vars.size());
             indices.insert(indices.end(), vars.begin(), vars.end());
             elements.insert(elements.end(), coeffs.begin(), coeffs.end());
         }
+        starts.push_back(elements.size());
 
+        /*
+          The last parameter is an array containing the lengths of rows.
+          We could also prepare this, but OSI recreates it anyway and uses
+          optimized code for the case when this parameter is 0.
+         */
         CoinPackedMatrix matrix(false,
                                 num_columns,
                                 num_rows,
@@ -164,7 +168,7 @@ void LpSolver::assign_problem(LPObjectiveSense sense,
                                 elements.data(),
                                 indices.data(),
                                 starts.data(),
-                                lengths.data());
+                                0);
         lp_solver->loadProblem(matrix,
                                col_lb.data(),
                                col_ub.data(),
