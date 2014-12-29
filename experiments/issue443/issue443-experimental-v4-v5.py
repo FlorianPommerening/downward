@@ -54,4 +54,32 @@ exp.add_report(RelativeScatterPlotReport(
               outfile="%s-relative-scatter-time-v4-v5.png" % exp.name,
 )
 
+
+def no_psr(run):
+    return run['domain'] != 'psr-small'
+
+exp.add_report(RelativeScatterPlotReport(
+                   attributes=["total_time"],
+                   get_category=lambda r1,r2: r1["domain"],
+                   filter_config=[
+                        "issue443-base-astar_lmcount",
+                        "issue443-experimental-v5-astar_lmcount",
+                   ],
+                   filter=no_psr,
+              ),
+              outfile="%s-relative-scatter-time-v5-no-psr.png" % exp.name,
+)
+
+exp.add_report(RelativeScatterPlotReport(
+                   attributes=["total_time"],
+                   get_category=lambda r1,r2: r1["domain"],
+                   filter_config=[
+                        "issue443-experimental-v4-astar_lmcount",
+                        "issue443-experimental-v5-astar_lmcount",
+                   ],
+                   filter=no_psr,
+              ),
+              outfile="%s-relative-scatter-time-v4-v5-no-psr.png" % exp.name,
+)
+
 exp()
