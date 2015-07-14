@@ -1,5 +1,7 @@
 #include "dominance_pruner.h"
 
+#include "pattern_database.h"
+
 #include <algorithm>
 
 using namespace std;

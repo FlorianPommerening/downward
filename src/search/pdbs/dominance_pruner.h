@@ -1,13 +1,13 @@
 #ifndef PDBS_DOMINANCE_PRUNER_H
 #define PDBS_DOMINANCE_PRUNER_H
 
-#include "pattern_database.h"
-
-#include "../utilities.h"
 #include "../utilities_hash.h"
 
 #include <unordered_set>
+#include <utility>
 #include <vector>
+
+class PatternDatabase;
 
 class DominancePruner {
 private:

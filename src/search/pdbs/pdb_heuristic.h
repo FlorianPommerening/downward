@@ -5,8 +5,9 @@
 
 #include "../heuristic.h"
 
+#include <vector>
+
 class GlobalState;
-class OperatorProxy;
 
 // Implements a heuristic for a single PDB.
 class PDBHeuristic : public Heuristic {

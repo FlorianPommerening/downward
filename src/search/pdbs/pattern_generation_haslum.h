@@ -2,17 +2,15 @@
 #define PDBS_PATTERN_GENERATION_HASLUM_H
 
 #include "../operator_cost.h"
-#include "../state_registry.h"
 #include "../task_proxy.h"
 
-#include <map>
 #include <memory>
 #include <set>
+#include <utility>
 #include <vector>
 
 class CanonicalPDBsHeuristic;
 class CountdownTimer;
-class GlobalState;
 class Options;
 class PatternDatabase;
 

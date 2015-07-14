@@ -3,12 +3,13 @@
 #include "pattern_database.h"
 #include "util.h"
 
-#include "../evaluation_context.h"
 #include "../option_parser.h"
 #include "../plugin.h"
 #include "../utilities.h"
 
-#include <vector>
+#include <cassert>
+#include <iostream>
+#include <limits>
 
 using namespace std;
 

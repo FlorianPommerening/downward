@@ -5,16 +5,16 @@
 #include "pattern_database.h"
 #include "util.h"
 
-#include "../evaluation_context.h"
 #include "../option_parser.h"
 #include "../plugin.h"
 #include "../timer.h"
 #include "../utilities.h"
 
+#include <algorithm>
 #include <cassert>
-#include <cstdlib>
+#include <iostream>
+#include <limits>
 #include <unordered_map>
-#include <vector>
 
 using namespace std;
 

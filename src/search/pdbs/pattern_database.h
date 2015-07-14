@@ -4,6 +4,7 @@
 #include "../task_proxy.h"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 class AbstractOperator {
@@ -65,9 +66,6 @@ public:
     void dump(const std::vector<int> &pattern,
               const TaskProxy &task_proxy) const;
 };
-
-class State;
-class OperatorProxy;
 
 // Implements a single pattern database
 class PatternDatabase {

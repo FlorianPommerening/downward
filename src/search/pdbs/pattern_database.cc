@@ -5,11 +5,10 @@
 #include "../priority_queue.h"
 #include "../task_tools.h"
 #include "../timer.h"
-#include "../utilities.h"
 
 #include <algorithm>
 #include <cassert>
-#include <cstdlib>
+#include <iostream>
 #include <limits>
 #include <string>
 #include <vector>

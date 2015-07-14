@@ -5,6 +5,7 @@
 
 #include "../causal_graph.h"
 #include "../countdown_timer.h"
+#include "../globals.h"
 #include "../option_parser.h"
 #include "../plugin.h"
 #include "../rng.h"
@@ -14,14 +15,10 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
-#include <cstdlib>
 #include <exception>
-#include <set>
-#include <string>
+#include <iostream>
+#include <limits>
 #include <unordered_map>
-#include <utility>
-#include <vector>
 
 using namespace std;
 

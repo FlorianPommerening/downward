@@ -1,9 +1,15 @@
 #include "util.h"
 
 #include "../option_parser.h"
+#include "../task_tools.h"
 #include "../utilities.h"
-
 #include "../variable_order_finder.h"
+
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <memory>
+#include <set>
 #include <vector>
 
 using namespace std;
