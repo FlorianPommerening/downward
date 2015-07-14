@@ -2,8 +2,19 @@
 #define LANDMARKS_H_M_LANDMARKS_H
 
 #include "landmark_factory.h"
-#include "landmark_graph.h"
-#include "../globals.h"
+
+#include "../option_parser.h"
+
+#include <iostream>
+#include <list>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+class GlobalState;
+class LandmarkNode;
 
 typedef std::pair<int, int> Fluent;
 typedef std::vector<Fluent> FluentSet;

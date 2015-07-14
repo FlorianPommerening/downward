@@ -1,15 +1,19 @@
 #ifndef LANDMARKS_LAMA_FF_SYNERGY_H
 #define LANDMARKS_LAMA_FF_SYNERGY_H
 
-#include "../heuristic.h"
+#include "../evaluation_result.h"
 
 #include <memory>
 
+class EvaluationContext;
 class Exploration;
-class LandmarkCountHeuristic;
-
 class FFSlaveHeuristic;
+class GlobalOperator;
+class GlobalState;
+class Options;
+class Heuristic;
 class LamaMasterHeuristic;
+class LandmarkCountHeuristic;
 
 /*
   TODO: The synergy class stores EvaluationResult objects for "the

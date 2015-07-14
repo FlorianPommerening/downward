@@ -2,9 +2,7 @@
 #define LANDMARKS_LANDMARK_FACTORY_ZHU_GIVAN_H
 
 #include "landmark_factory.h"
-#include "landmark_graph.h"
 #include "landmark_types.h"
-#include "../globals.h"
 
 #include <vector>
 

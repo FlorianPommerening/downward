@@ -1,17 +1,22 @@
 #include "landmark_factory_rpg_sasp.h"
 
+#include "exploration.h"
 #include "landmark_graph.h"
 #include "util.h"
 
 #include "../domain_transition_graph.h"
 #include "../global_operator.h"
 #include "../global_state.h"
-#include "../globals.h"
 #include "../option_parser.h"
 #include "../plugin.h"
+#include "../utilities.h"
 
+#include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <limits>
+#include <map>
+#include <string>
 
 using namespace std;
 

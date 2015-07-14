@@ -6,9 +6,12 @@
 
 #include "../globals.h"
 
+#include <list>
+#include <set>
 #include <unordered_map>
+#include <unordered_set>
+#include <utility>
 #include <vector>
-
 
 class LandmarkFactoryRpgSasp : public LandmarkFactory {
     std::list<LandmarkNode *> open_landmarks;

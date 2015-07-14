@@ -1,9 +1,17 @@
-#include <vector>
-
 #include "landmark_factory_rpg_exhaust.h"
+
+#include "exploration.h"
+#include "landmark_graph.h"
+
 #include "../global_state.h"
+#include "../globals.h"
 #include "../option_parser.h"
 #include "../plugin.h"
+
+#include <cassert>
+#include <iostream>
+#include <utility>
+#include <vector>
 
 /* Problem: We don't get any orders here. (All we have is the reasonable orders
    that are inferred later.) It's thus best to combine this landmark generation

@@ -2,16 +2,17 @@
 
 #include "exploration.h"
 #include "landmark_count_heuristic.h"
-#include "landmark_factory_rpg_sasp.h"
 
 #include "../evaluation_context.h"
-#include "../evaluation_result.h"
+#include "../global_operator.h"
 #include "../option_parser.h"
 #include "../plugin.h"
 #include "../utilities.h"
 
-using namespace std;
+#include <iostream>
+#include <vector>
 
+using namespace std;
 
 /*
   Implementation notes:

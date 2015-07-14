@@ -2,7 +2,6 @@
 #define LANDMARKS_LANDMARK_FACTORY_RPG_EXHAUST_H
 
 #include "landmark_factory.h"
-#include "landmark_graph.h"
 
 class LandmarkFactoryRpgExhaust : public LandmarkFactory {
 public:

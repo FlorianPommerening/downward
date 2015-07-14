@@ -1,7 +1,6 @@
 #ifndef LANDMARKS_LANDMARK_COST_ASSIGNMENT_H
 #define LANDMARKS_LANDMARK_COST_ASSIGNMENT_H
 
-#include "../globals.h"
 #include "../lp_solver.h"
 #include "../operator_cost.h"
 

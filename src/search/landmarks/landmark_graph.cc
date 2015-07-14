@@ -1,17 +1,17 @@
 #include "landmark_graph.h"
 
-#include "../exact_timer.h"
 #include "../global_operator.h"
-#include "../global_state.h"
 #include "../globals.h"
 
 #include <cassert>
-#include <list>
+#include <iostream>
 #include <map>
 #include <set>
-#include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
+
+class Exploration;
 
 using namespace std;
 

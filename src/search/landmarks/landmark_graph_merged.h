@@ -2,8 +2,11 @@
 #define LANDMARKS_LANDMARK_GRAPH_MERGED_H
 
 #include "landmark_factory.h"
-#include "landmark_graph.h"
+
 #include <vector>
+
+class LandmarkGraph;
+class LandmarkNode;
 
 class LandmarkGraphMerged : public LandmarkFactory {
     std::vector<LandmarkGraph *> lm_graphs;

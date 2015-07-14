@@ -1,11 +1,19 @@
 #include "landmark_count_heuristic.h"
 
+#include "exploration.h"
+#include "landmark_cost_assignment.h"
+
 #include "../global_successor_generator.h"
+#include "../globals.h"
 #include "../lp_solver.h"
 #include "../plugin.h"
+#include "../utilities.h"
 
+#include <cassert>
 #include <cmath>
+#include <iostream>
 #include <limits>
+#include <set>
 #include <unordered_map>
 
 using namespace std;

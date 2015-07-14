@@ -1,19 +1,21 @@
 #ifndef LANDMARKS_LANDMARK_GRAPH_H
 #define LANDMARKS_LANDMARK_GRAPH_H
 
+#include "../global_operator.h"
+#include "../global_state.h"
+#include "../globals.h"
+#include "../option_parser.h"
+#include "../utilities_hash.h"
+
 #include <cassert>
-#include <list>
-#include <map>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
-#include "exploration.h"
-#include "landmark_types.h"
-#include "../global_operator.h"
-#include "../option_parser.h"
-#include "../utilities_hash.h"
+class Exploration;
+class GlobalOperator;
 
 enum edge_type {
     /* NOTE: The code relies on the fact that larger numbers are

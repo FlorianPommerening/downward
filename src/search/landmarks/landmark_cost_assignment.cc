@@ -2,11 +2,11 @@
 
 #include "landmark_graph.h"
 
-#include "../utilities.h"
+#include "../globals.h"
+#include "../global_operator.h"
 
-#include <cstdlib>
-#include <functional>
-#include <iostream>
+#include <algorithm>
+#include <cassert>
 #include <limits>
 
 

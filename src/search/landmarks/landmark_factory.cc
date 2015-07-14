@@ -1,11 +1,16 @@
 #include "landmark_factory.h"
 
+#include "exploration.h"
 #include "util.h"
 
 #include "../exact_timer.h"
+#include "../globals.h"
+#include "../utilities_hash.h"
 
-#include <fstream>
+#include <cassert>
+#include <iostream>
 #include <limits>
+#include <map>
 
 using namespace std;
 

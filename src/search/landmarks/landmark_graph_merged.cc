@@ -1,8 +1,14 @@
 #include "landmark_graph_merged.h"
+
+#include "exploration.h"
+
 #include "../option_parser.h"
 #include "../plugin.h"
+#include "../utilities.h"
 
+#include <iostream>
 #include <set>
+#include <utility>
 
 LandmarkGraphMerged::LandmarkGraphMerged(const Options &opts)
     : LandmarkFactory(opts),

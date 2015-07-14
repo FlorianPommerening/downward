@@ -3,7 +3,9 @@
 #include "landmark_graph.h"
 #include "../global_operator.h"
 
+#include <cassert>
 #include <limits>
+#include <utility>
 
 using namespace std;
 

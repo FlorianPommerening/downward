@@ -1,6 +1,17 @@
 #include "h_m_landmarks.h"
+
+#include "exploration.h"
+#include "landmark_graph.h"
+
+#include "../global_operator.h"
+#include "../global_state.h"
+#include "../globals.h"
 #include "../plugin.h"
-#include "../exact_timer.h"
+#include "../utilities.h"
+
+#include <algorithm>
+#include <cassert>
+#include <string>
 
 
 std::ostream & operator<<(std::ostream &os, const Fluent &p) {

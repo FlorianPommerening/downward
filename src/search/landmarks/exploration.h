@@ -2,19 +2,17 @@
 #define LANDMARKS_EXPLORATION_H
 
 #include "../heuristic.h"
-#include "../globals.h"
 #include "../priority_queue.h"
-#include "landmark_types.h"
 
-#include <cassert>
 #include <unordered_map>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
+struct ExUnaryOperator;
 class GlobalOperator;
 class GlobalState;
-
-struct ExProposition;
-struct ExUnaryOperator;
+class Options;
 
 struct ExProposition {
     int var;

@@ -2,13 +2,16 @@
 #define LANDMARKS_LANDMARK_FACTORY_H
 
 #include "landmark_graph.h"
-#include "exploration.h"
 
-#include <map>
+#include <list>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
+
+class GlobalOperator;
+struct GlobalEffect;
 
 class LandmarkFactory {
 public:

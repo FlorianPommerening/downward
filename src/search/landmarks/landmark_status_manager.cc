@@ -1,5 +1,16 @@
 #include "landmark_status_manager.h"
 
+#include "landmark_graph.h"
+
+#include "../globals.h"
+#include "../global_state.h"
+
+#include <cassert>
+#include <iostream>
+#include <set>
+#include <unordered_map>
+#include <utility>
+
 using namespace std;
 
 LandmarkStatusManager::LandmarkStatusManager(LandmarkGraph &graph)

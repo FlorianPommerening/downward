@@ -1,8 +1,14 @@
 #ifndef LANDMARKS_LANDMARK_STATUS_MANAGER_H
 #define LANDMARKS_LANDMARK_STATUS_MANAGER_H
 
-#include "landmark_graph.h"
 #include "../per_state_information.h"
+
+#include <vector>
+
+class GlobalOperator;
+class GlobalState;
+class LandmarkGraph;
+class LandmarkNode;
 
 class LandmarkStatusManager {
 private:
