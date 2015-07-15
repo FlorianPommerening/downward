@@ -5,8 +5,8 @@
 #include "option_parser.h"
 #include "plugin.h"
 
-
-
+#include <iostream>
+#include <vector>
 
 GoalCountHeuristic::GoalCountHeuristic(const Options &opts)
     : Heuristic(opts) {

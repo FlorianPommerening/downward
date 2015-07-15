@@ -4,6 +4,8 @@
 #include "option_parser.h"
 #include "plugin.h"
 
+#include <algorithm>
+
 using namespace std;
 
 

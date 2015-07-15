@@ -4,12 +4,13 @@
 #include "option_parser.h"
 #include "plugin.h"
 
+#include <algorithm>
 #include <cassert>
+#include <iostream>
+#include <utility>
 #include <vector>
+
 using namespace std;
-
-
-
 
 /*
   TODO: At the time of this writing, this shares huge amounts of code

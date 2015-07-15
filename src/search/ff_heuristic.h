@@ -14,7 +14,6 @@
         implementation in the landmark code.
 */
 
-
 class FFHeuristic : public AdditiveHeuristic {
     // Relaxed plans are represented as a set of operators implemented
     // as a bit vector.

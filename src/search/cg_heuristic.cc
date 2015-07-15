@@ -7,11 +7,14 @@
 #include "globals.h"
 #include "option_parser.h"
 #include "plugin.h"
+#include "priority_queue.h"
 
-#include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <limits>
+#include <utility>
 #include <vector>
+
 using namespace std;
 
 // TODO: Turn this into an option and check its impact.

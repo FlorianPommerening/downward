@@ -3,6 +3,7 @@
 
 #include "priority_queue.h"
 #include "relaxation_heuristic.h"
+
 #include <cassert>
 
 class HSPMaxHeuristic : public RelaxationHeuristic {

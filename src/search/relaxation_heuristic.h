@@ -10,7 +10,6 @@ class GlobalState;
 class OperatorProxy;
 
 struct Proposition;
-struct UnaryOperator;
 
 struct UnaryOperator {
     int operator_no; // -1 for axioms; index into g_operators otherwise

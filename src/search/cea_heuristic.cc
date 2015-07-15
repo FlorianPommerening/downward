@@ -8,7 +8,9 @@
 #include "plugin.h"
 
 #include <cassert>
+#include <iostream>
 #include <limits>
+#include <utility>
 #include <vector>
 
 using namespace std;

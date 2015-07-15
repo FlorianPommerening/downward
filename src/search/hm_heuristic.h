@@ -1,21 +1,14 @@
 #ifndef HM_HEURISTIC_H
 #define HM_HEURISTIC_H
 
-#include <algorithm>
-#include <iostream>
 #include <map>
-#include <string>
 #include <vector>
 
-#include "global_state.h"
-#include "global_operator.h"
-#include "globals.h"
 #include "heuristic.h"
 
+#include <utility>
 
 typedef std::vector<std::pair<int, int> > Tuple;
-
-class Options;
 
 /*
   Haslum's h^m heuristic family ("critical path heuristics").

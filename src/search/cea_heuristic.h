@@ -6,7 +6,6 @@
 
 #include <vector>
 
-
 namespace cea_heuristic {
 struct LocalProblem;
 struct LocalProblemNode;

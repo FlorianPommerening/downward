@@ -2,11 +2,10 @@
 #define CG_HEURISTIC_H
 
 #include "heuristic.h"
-#include "priority_queue.h"
 
-#include <string>
 #include <vector>
 
+template <typename Value> class AdaptiveQueue;
 class CGCache;
 class DomainTransitionGraph;
 class GlobalState;

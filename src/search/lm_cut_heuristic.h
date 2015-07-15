@@ -4,18 +4,16 @@
 #include "heuristic.h"
 #include "priority_queue.h"
 
-#include <algorithm>
 #include <cassert>
 #include <vector>
 
 // TODO: Fix duplication with the other relaxation heuristics.
 
+class FactProxy;
 class GlobalState;
 class OperatorProxy;
 struct RelaxedProposition;
-struct RelaxedOperator;
 
-class Options;
 /* TODO: Check the impact of using unary relaxed operators instead of
    multi-effect ones.
 

@@ -9,7 +9,9 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <vector>
+
 using namespace std;
 
 const int CGCache::NOT_COMPUTED;

@@ -2,16 +2,16 @@
 
 #include "option_parser.h"
 #include "plugin.h"
-#include "task_proxy.h"
 #include "task_tools.h"
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <utility>
 #include <vector>
+
 using namespace std;
-
-
 
 // construction and destruction
 LandmarkCutHeuristic::LandmarkCutHeuristic(const Options &opts)
