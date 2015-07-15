@@ -1,9 +1,6 @@
 #ifndef LP_SOLVER_H
 #define LP_SOLVER_H
 
-#include "utilities.h"
-
-#include <functional>
 #include <memory>
 #include <vector>
 

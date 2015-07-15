@@ -12,6 +12,8 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 #include <OsiSolverInterface.hpp>
+#include <CoinError.hpp>
+#include <CoinMessageHandler.hpp>
 
 #ifdef COIN_HAS_CLP
 #include <OsiClpSolverInterface.hpp>
@@ -28,6 +30,10 @@
 #ifdef __GNUG__
 #pragma GCC diagnostic pop
 #endif
+
+#include <iostream>
+#include <string>
+
 using namespace std;
 
 // CPLEX warning that is misleadingly reported with the severity of a critical error.

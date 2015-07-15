@@ -18,7 +18,10 @@
 #endif
 
 #include <cassert>
-#include <limits>
+#include <iostream>
+#include <string>
+
+class CoinError;
 
 using namespace std;
 
