@@ -1,5 +1,7 @@
 #include "max_cliques.h"
 
+#include "../utilities.h"
+
 #include <algorithm>
 #include <cassert>
 #include <iterator>
