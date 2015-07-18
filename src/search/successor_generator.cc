@@ -24,18 +24,43 @@ using namespace std;
 
 */
 
-bool smaller_variable_id(const FactProxy &f1, const FactProxy &f2) {
-    return f1.get_variable().get_id() < f2.get_variable().get_id();
-}
+class ByArraySorter {
+    const vector<int> &values;
+    bool invert;
+public:
+    ByArraySorter(const vector<int> &values, bool invert = false)
+        : values(values),
+          invert(invert) {
+    }
+
+    bool operator() (int i,int j) {
+        if (invert) {
+            return (values[i] > values[j]);
+        } else {
+            return (values[i] < values[j]);
+        }
+    }
+    bool operator() (const FactProxy &f1, const FactProxy &f2) {
+        int i1 = f1.get_variable().get_id();
+        int i2 = f2.get_variable().get_id();
+        return operator()(i1, i2);
+    }
+};
 
 class GeneratorBase {
 public:
+    GeneratorBase() {
+        static int id_counter = 0;
+        id = id_counter++;
+    }
     virtual ~GeneratorBase() = default;
     virtual void generate_applicable_ops(
         const State &state, vector<OperatorProxy> &applicable_ops) const = 0;
     // Transitional method, used until the search is switched to the new task interface.
     virtual void generate_applicable_ops(
         const GlobalState &state, vector<const GlobalOperator *> &applicable_ops) const = 0;
+    int id;
+    virtual bool dump_dot(ofstream &f) const = 0;
 };
 
 class GeneratorSwitch : public GeneratorBase {
@@ -44,7 +69,7 @@ class GeneratorSwitch : public GeneratorBase {
     vector<GeneratorBase *> generator_for_value;
     GeneratorBase *default_generator;
 public:
-    ~GeneratorSwitch();
+    virtual ~GeneratorSwitch() override;
     GeneratorSwitch(const VariableProxy &switch_var,
                     list<OperatorProxy> && immediate_operators,
                     const vector<GeneratorBase *> && generator_for_value,
@@ -54,6 +79,7 @@ public:
     // Transitional method, used until the search is switched to the new task interface.
     virtual void generate_applicable_ops(
         const GlobalState &state, vector<const GlobalOperator *> &applicable_ops) const;
+    bool dump_dot(ofstream &f) const;
 };
 
 class GeneratorLeaf : public GeneratorBase {
@@ -65,6 +91,7 @@ public:
     // Transitional method, used until the search is switched to the new task interface.
     virtual void generate_applicable_ops(
         const GlobalState &state, vector<const GlobalOperator *> &applicable_ops) const;
+    bool dump_dot(ofstream &f) const;
 };
 
 class GeneratorEmpty : public GeneratorBase {
@@ -74,6 +101,7 @@ public:
     // Transitional method, used until the search is switched to the new task interface.
     virtual void generate_applicable_ops(
         const GlobalState &state, vector<const GlobalOperator *> &applicable_ops) const;
+    bool dump_dot(ofstream &f) const;
 };
 
 GeneratorSwitch::GeneratorSwitch(
@@ -112,6 +140,33 @@ void GeneratorSwitch::generate_applicable_ops(
     default_generator->generate_applicable_ops(state, applicable_ops);
 }
 
+bool GeneratorSwitch::dump_dot(ofstream &f) const {
+    f << "n" << id
+      << " [label=\"V " << switch_var.get_id() << "\"];" << endl;
+
+    if (!immediate_operators.empty()) {
+        f << "imm_n" << id << " [label=\"";
+        for (OperatorProxy op : immediate_operators) {
+            f << op.get_id() << ", ";
+        }
+        f << "\", shape=box];" << endl;
+        f << "n" << id << " -> imm_n" << id << ";" << endl;
+    }
+
+    for (int val = 0; val < switch_var.get_domain_size(); ++val) {
+        if (generator_for_value[val]->dump_dot(f)) {
+            f << "n" << id << " -> n" << generator_for_value[val]->id
+              << " [label=\"" << val
+              << "\"];" << endl;
+        }
+    }
+    if (default_generator->dump_dot(f)) {
+        f << "n" << id << " -> n" << default_generator->id
+          << " [label=\"*\"];" << endl;
+    }
+    return true;
+}
+
 GeneratorLeaf::GeneratorLeaf(list<OperatorProxy> && applicable_operators)
     : applicable_operators(move(applicable_operators)) {
 }
@@ -130,6 +185,18 @@ void GeneratorLeaf::generate_applicable_ops(
     }
 }
 
+bool GeneratorLeaf::dump_dot(ofstream &f) const {
+    if (!applicable_operators.empty()) {
+        f << "n" << id << " [label=\"";
+        for (OperatorProxy op : applicable_operators) {
+            f << op.get_id() << ", ";
+        }
+        f << "\", shape=box];" << endl;
+        return true;
+    }
+    return false;
+}
+
 void GeneratorEmpty::generate_applicable_ops(
     const State &, vector<OperatorProxy> &) const {
 }
@@ -138,29 +205,93 @@ void GeneratorEmpty::generate_applicable_ops(
     const GlobalState &, vector<const GlobalOperator *> &) const {
 }
 
-SuccessorGenerator::SuccessorGenerator(const shared_ptr<AbstractTask> task)
+bool GeneratorEmpty::dump_dot(ofstream &) const {
+    return false;
+}
+
+SuccessorGenerator::SuccessorGenerator(const shared_ptr<AbstractTask> task,
+                                       SuccessorGeneratorVariableOrder order)
     : task(task),
       task_proxy(*task) {
+    num_switch_nodes = 0;
+    num_leaf_nodes = 0;
+    num_empty_nodes = 0;
+    num_nodes = 0;
     OperatorsProxy operators = task_proxy.get_operators();
-    // We need the iterators to conditions to be stable:
-    conditions.reserve(operators.size());
-    list<OperatorProxy> all_operators;
-    for (OperatorProxy op : operators) {
-        Condition cond;
-        cond.reserve(op.get_preconditions().size());
-        for (FactProxy pre : op.get_preconditions()) {
-            cond.push_back(pre);
+    VariablesProxy vars = task_proxy.get_variables();
+    if (order == SuccessorGeneratorVariableOrder::INPUT
+            || order == SuccessorGeneratorVariableOrder::RANDOM
+            || order == SuccessorGeneratorVariableOrder::GREEDY) {
+        for (VariableProxy var : vars) {
+            variable_order.push_back(var.get_id());
         }
-        // Conditions must be ordered by variable id.
-        sort(cond.begin(), cond.end(), smaller_variable_id);
-        all_operators.push_back(op);
-        conditions.push_back(cond);
-        next_condition_by_op.push_back(conditions.back().begin());
-    }
+        if (order == SuccessorGeneratorVariableOrder::RANDOM) {
+            random_shuffle(variable_order.begin(), variable_order.end() );
+        } else if (order == SuccessorGeneratorVariableOrder::GREEDY) {
+            vector<int> occurrences_in_preconditions(vars.size(), 0);
+            for (OperatorProxy op : operators) {
+                for (FactProxy pre : op.get_preconditions()) {
+                    int pre_var_id = pre.get_variable().get_id();
+                    ++occurrences_in_preconditions[pre_var_id];
+                }
+            }
+            sort(variable_order.begin(), variable_order.end(),
+                 ByArraySorter(occurrences_in_preconditions, true));
+        }
+        variable_order_index.resize(vars.size());
+        for (int i = 0; i < (int) variable_order.size(); ++i) {
+            variable_order_index[variable_order[i]] = i;
+        }
 
-    root = unique_ptr<GeneratorBase>(construct_recursive(0, all_operators));
-    release_vector_memory(conditions);
-    release_vector_memory(next_condition_by_op);
+        // We need the iterators to conditions to be stable:
+        conditions.reserve(operators.size());
+        list<OperatorProxy> all_operators;
+        for (OperatorProxy op : operators) {
+            Condition cond;
+            cond.reserve(op.get_preconditions().size());
+            for (FactProxy pre : op.get_preconditions()) {
+                cond.push_back(pre);
+            }
+            // Conditions must be ordered by variable id.
+            sort(cond.begin(), cond.end(),
+                 ByArraySorter(variable_order_index));
+            all_operators.push_back(op);
+            conditions.push_back(cond);
+            next_condition_by_op.push_back(conditions.back().begin());
+        }
+
+        root = unique_ptr<GeneratorBase>(construct_recursive(0, all_operators));
+        release_vector_memory(conditions);
+        release_vector_memory(next_condition_by_op);
+        release_vector_memory(variable_order);
+        release_vector_memory(variable_order_index);
+    } else if (order == SuccessorGeneratorVariableOrder::GREEDY_DYNAMIC) {
+        // We need the iterators to conditions to be stable:
+        condition_sets.reserve(operators.size());
+        num_unchecked_conditions.reserve(operators.size());
+        list<OperatorProxy> all_operators;
+        for (OperatorProxy op : operators) {
+            unordered_map<int, int> cond;
+            cond.reserve(op.get_preconditions().size());
+            for (FactProxy pre : op.get_preconditions()) {
+                cond[pre.get_variable().get_id()] = pre.get_value();
+            }
+            all_operators.push_back(op);
+            condition_sets.push_back(cond);
+            num_unchecked_conditions.push_back(cond.size());
+        }
+        unordered_set<int> variable_queue;
+        for (VariableProxy var : vars) {
+            variable_queue.insert(var.get_id());
+        }
+        root = unique_ptr<GeneratorBase>(
+            construct_dynamic_recursive(all_operators,
+            variable_queue)
+        );
+        release_vector_memory(condition_sets);
+    } else {
+        ABORT("Unknown variable order");
+    }
 }
 
 SuccessorGenerator::~SuccessorGenerator() {
@@ -168,18 +299,24 @@ SuccessorGenerator::~SuccessorGenerator() {
 
 GeneratorBase *SuccessorGenerator::construct_recursive(
     int switch_var_id, list<OperatorProxy> &operator_queue) {
-    if (operator_queue.empty())
+    if (operator_queue.empty()) {
+        ++num_nodes;
+        ++num_empty_nodes;
         return new GeneratorEmpty;
+    }
 
     VariablesProxy variables = task_proxy.get_variables();
     int num_variables = variables.size();
 
     while (true) {
         // Test if no further switch is necessary (or possible).
-        if (switch_var_id == num_variables)
+        if (switch_var_id == num_variables) {
+            ++num_nodes;
+            ++num_leaf_nodes;
             return new GeneratorLeaf(move(operator_queue));
+        }
 
-        VariableProxy switch_var = variables[switch_var_id];
+        VariableProxy switch_var = variables[variable_order[switch_var_id]];
         int number_of_children = switch_var.get_domain_size();
 
         vector<list<OperatorProxy> > operators_for_val(number_of_children);
@@ -218,6 +355,8 @@ GeneratorBase *SuccessorGenerator::construct_recursive(
         }
 
         if (all_ops_are_immediate) {
+            ++num_nodes;
+            ++num_leaf_nodes;
             return new GeneratorLeaf(move(applicable_operators));
         } else if (var_is_interesting) {
             vector<GeneratorBase *> generator_for_val;
@@ -227,6 +366,8 @@ GeneratorBase *SuccessorGenerator::construct_recursive(
             }
             GeneratorBase *default_generator = construct_recursive(
                 switch_var_id + 1, default_operators);
+            ++num_nodes;
+            ++num_switch_nodes;
             return new GeneratorSwitch(switch_var,
                                        move(applicable_operators),
                                        move(generator_for_val),
@@ -237,6 +378,116 @@ GeneratorBase *SuccessorGenerator::construct_recursive(
             default_operators.swap(operator_queue);
         }
     }
+}
+
+GeneratorBase *SuccessorGenerator::construct_dynamic_recursive(
+    list<OperatorProxy> &operator_queue,
+    unordered_set<int> variable_queue) {
+    if (operator_queue.empty()) {
+        ++num_nodes;
+        ++num_empty_nodes;
+        return new GeneratorEmpty;
+    }
+
+    VariablesProxy variables = task_proxy.get_variables();
+    int num_variables = variables.size();
+
+    while (true) {
+        vector<int> occurrences_in_preconditions(num_variables, 0);
+        for (OperatorProxy op : operator_queue) {
+            const unordered_map<int, int> &cond = condition_sets[op.get_id()];
+            for (const pair<int, int> &pre : cond) {
+                ++occurrences_in_preconditions[pre.first];
+            }
+        }
+        int switch_var_id = -1;
+        int switch_var_value = 0;
+        for (int i : variable_queue) {
+            if (occurrences_in_preconditions[i] > switch_var_value) {
+                switch_var_id = i;
+                switch_var_value = occurrences_in_preconditions[i];
+            }
+        }
+
+        // Test if no further switch is necessary (or possible).
+        if (switch_var_value == 0) {
+            ++num_nodes;
+            ++num_leaf_nodes;
+            return new GeneratorLeaf(move(operator_queue));
+        }
+        variable_queue.erase(switch_var_id);
+
+        VariableProxy switch_var = variables[switch_var_id];
+        int number_of_children = switch_var.get_domain_size();
+
+        vector<list<OperatorProxy> > operators_for_val(number_of_children);
+        list<OperatorProxy> default_operators;
+        list<OperatorProxy> applicable_operators;
+
+        bool all_ops_are_immediate = true;
+        bool var_is_interesting = false;
+
+        while (!operator_queue.empty()) {
+            OperatorProxy op = operator_queue.front();
+            operator_queue.pop_front();
+            int op_id = op.get_id();
+            const auto &it = condition_sets[op_id].find(switch_var_id);
+            if (it == condition_sets[op_id].end()) {
+                if (num_unchecked_conditions[op_id] == 0) {
+                    var_is_interesting = true;
+                    applicable_operators.push_back(op);
+                } else {
+                    default_operators.push_back(op);
+                }
+            } else {
+                all_ops_are_immediate = false;
+                var_is_interesting = true;
+                operators_for_val[it->second].push_back(op);
+                --num_unchecked_conditions[op_id];
+            }
+        }
+
+        if (all_ops_are_immediate) {
+            ++num_nodes;
+            ++num_leaf_nodes;
+            return new GeneratorLeaf(move(applicable_operators));
+        } else if (var_is_interesting) {
+            vector<GeneratorBase *> generator_for_val;
+            for (list<OperatorProxy> ops : operators_for_val) {
+                generator_for_val.push_back(
+                    construct_dynamic_recursive(ops, variable_queue));
+            }
+            GeneratorBase *default_generator =
+                construct_dynamic_recursive(default_operators, variable_queue);
+            ++num_nodes;
+            ++num_switch_nodes;
+            return new GeneratorSwitch(switch_var,
+                                       move(applicable_operators),
+                                       move(generator_for_val),
+                                       default_generator);
+        } else {
+            // this switch var can be left out because no operator depends on it
+            ++switch_var_id;
+            default_operators.swap(operator_queue);
+        }
+    }
+}
+
+void SuccessorGenerator::dump_dot() {
+    ofstream f;
+    f.open ("successorgenerator.dot");
+    f << "digraph generator {" << endl;
+    root->dump_dot(f);
+    f << "}" << endl;
+    f.close();
+}
+
+void SuccessorGenerator::print_statistics() {
+    cout << "Successor generator has " << num_nodes << " nodes ["
+         << num_switch_nodes << " inner nodes, "
+         << num_leaf_nodes << " leaf nodes, "
+         << num_empty_nodes << " empty nodes]."
+         << endl;
 }
 
 void SuccessorGenerator::generate_applicable_ops(

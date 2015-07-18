@@ -19,7 +19,7 @@ int main(int argc, const char **argv) {
     }
 
     if (string(argv[1]).compare("--help") != 0)
-        read_everything(cin);
+        read_everything(cin, argv);
 
     SearchEngine *engine = 0;
 

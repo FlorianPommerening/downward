@@ -29,7 +29,7 @@ void save_plan(const std::vector<const GlobalOperator *> &plan,
                bool generates_multiple_plan_files = false);
 int calculate_plan_cost(const std::vector<const GlobalOperator *> &plan);
 
-void read_everything(std::istream &in);
+void read_everything(std::istream &in, const char **argv);
 void dump_everything();
 
 // The following six functions are deprecated. Use task_tools.h instead.

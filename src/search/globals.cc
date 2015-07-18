@@ -237,7 +237,7 @@ void read_axioms(istream &in) {
     g_axiom_evaluator = new AxiomEvaluator;
 }
 
-void read_everything(istream &in) {
+void read_everything(istream &in, const char **argv) {
     cout << "reading input... [t=" << g_timer << "]" << endl;
     read_and_verify_version(in);
     read_metric(in);
@@ -289,8 +289,17 @@ void read_everything(istream &in) {
     g_state_packer->get_bin_size_in_bytes() << endl;
 
     cout << "Building successor generator..." << flush;
-    g_successor_generator = new SuccessorGenerator(g_root_task());
+    SuccessorGeneratorVariableOrder order = SuccessorGeneratorVariableOrder::INPUT;
+    if (string(argv[1]) == "--sg-random") {
+        order = SuccessorGeneratorVariableOrder::RANDOM;
+    } else if (string(argv[1]) == "--sg-greedy") {
+        order = SuccessorGeneratorVariableOrder::GREEDY;
+    } else if (string(argv[1]) == "--sg-greedy-dynamic") {
+        order = SuccessorGeneratorVariableOrder::GREEDY_DYNAMIC;
+    }
+    g_successor_generator = new SuccessorGenerator(g_root_task(), order);
     cout << "done! [t=" << g_timer << "]" << endl;
+    g_successor_generator->print_statistics();
 
     cout << "done initalizing global data [t=" << g_timer << "]" << endl;
 }
