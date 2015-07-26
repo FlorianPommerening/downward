@@ -192,7 +192,10 @@ SearchEngine *OptionParser::parse_cmd_line(
             active = !is_unit_cost;
         } else if (arg == "--always") {
             active = true;
-        } else if (arg == "--sg-random" || arg == "--sg-greedy" || arg == "--sg-greedy-dynamic") {
+        } else if (arg == "--sg-random"
+                   || arg == "--sg-greedy"
+                   || arg == "--sg-greedy-dynamic"
+                   || arg == "--sg-domain-size") {
             // HACK: Ignore argument.
         } else if (arg == "--always") {
             active = true;

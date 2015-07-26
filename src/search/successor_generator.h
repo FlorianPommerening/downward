@@ -22,7 +22,8 @@ enum class SuccessorGeneratorVariableOrder {
     INPUT,
     RANDOM,
     GREEDY,
-    GREEDY_DYNAMIC
+    GREEDY_DYNAMIC,
+    DOMAIN_SIZE
 };
 
 class SuccessorGenerator {

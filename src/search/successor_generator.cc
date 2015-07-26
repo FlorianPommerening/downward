@@ -24,29 +24,6 @@ using namespace std;
 
 */
 
-class ByArraySorter {
-    const vector<int> &values;
-    bool invert;
-public:
-    ByArraySorter(const vector<int> &values, bool invert = false)
-        : values(values),
-          invert(invert) {
-    }
-
-    bool operator() (int i,int j) {
-        if (invert) {
-            return (values[i] > values[j]);
-        } else {
-            return (values[i] < values[j]);
-        }
-    }
-    bool operator() (const FactProxy &f1, const FactProxy &f2) {
-        int i1 = f1.get_variable().get_id();
-        int i2 = f2.get_variable().get_id();
-        return operator()(i1, i2);
-    }
-};
-
 class GeneratorBase {
 public:
     GeneratorBase() {
@@ -221,7 +198,8 @@ SuccessorGenerator::SuccessorGenerator(const shared_ptr<AbstractTask> task,
     VariablesProxy vars = task_proxy.get_variables();
     if (order == SuccessorGeneratorVariableOrder::INPUT
             || order == SuccessorGeneratorVariableOrder::RANDOM
-            || order == SuccessorGeneratorVariableOrder::GREEDY) {
+            || order == SuccessorGeneratorVariableOrder::GREEDY
+            || order == SuccessorGeneratorVariableOrder::DOMAIN_SIZE) {
         for (VariableProxy var : vars) {
             variable_order.push_back(var.get_id());
         }
@@ -236,7 +214,20 @@ SuccessorGenerator::SuccessorGenerator(const shared_ptr<AbstractTask> task,
                 }
             }
             sort(variable_order.begin(), variable_order.end(),
-                 ByArraySorter(occurrences_in_preconditions, true));
+                [&](int i, int j) {
+                    return occurrences_in_preconditions[i] > occurrences_in_preconditions[j]
+                           || (occurrences_in_preconditions[i] == occurrences_in_preconditions[j]
+                               && vars[i].get_domain_size() > vars[j].get_domain_size());
+                });
+        } else if (order == SuccessorGeneratorVariableOrder::DOMAIN_SIZE) {
+            vector<int> domain_size(vars.size(), 0);
+            for (VariableProxy var : task_proxy.get_variables()) {
+                domain_size[var.get_id()] = var.get_domain_size();
+            }
+            sort(variable_order.begin(), variable_order.end(),
+                [&](int i, int j) {
+                    return domain_size[i] > domain_size[j];
+                });
         }
         variable_order_index.resize(vars.size());
         for (int i = 0; i < (int) variable_order.size(); ++i) {
@@ -254,7 +245,10 @@ SuccessorGenerator::SuccessorGenerator(const shared_ptr<AbstractTask> task,
             }
             // Conditions must be ordered by variable id.
             sort(cond.begin(), cond.end(),
-                 ByArraySorter(variable_order_index));
+                 [&](const FactProxy &p1, const FactProxy &p2) {
+                     return variable_order_index[p1.get_variable().get_id()]
+                            < variable_order_index[p2.get_variable().get_id()];
+                 });
             all_operators.push_back(op);
             conditions.push_back(cond);
             next_condition_by_op.push_back(conditions.back().begin());
@@ -403,7 +397,9 @@ GeneratorBase *SuccessorGenerator::construct_dynamic_recursive(
         int switch_var_id = -1;
         int switch_var_value = 0;
         for (int i : variable_queue) {
-            if (occurrences_in_preconditions[i] > switch_var_value) {
+            if (occurrences_in_preconditions[i] > switch_var_value
+                || (occurrences_in_preconditions[i] == switch_var_value
+                    && variables[i].get_domain_size() > variables[switch_var_id].get_domain_size())) {
                 switch_var_id = i;
                 switch_var_value = occurrences_in_preconditions[i];
             }

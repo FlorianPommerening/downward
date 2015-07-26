@@ -296,6 +296,8 @@ void read_everything(istream &in, const char **argv) {
         order = SuccessorGeneratorVariableOrder::GREEDY;
     } else if (string(argv[1]) == "--sg-greedy-dynamic") {
         order = SuccessorGeneratorVariableOrder::GREEDY_DYNAMIC;
+    } else if (string(argv[1]) == "--sg-domain-size") {
+        order = SuccessorGeneratorVariableOrder::DOMAIN_SIZE;
     }
     g_successor_generator = new SuccessorGenerator(g_root_task(), order);
     cout << "done! [t=" << g_timer << "]" << endl;
