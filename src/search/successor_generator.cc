@@ -489,6 +489,11 @@ void SuccessorGenerator::print_statistics() {
 void SuccessorGenerator::generate_applicable_ops(
     const State &state, vector<OperatorProxy> &applicable_ops) const {
     root->generate_applicable_ops(state, applicable_ops);
+    // HACK for comparability in experiments
+    sort(applicable_ops.begin(), applicable_ops.end(),
+        [](const OperatorProxy &op1, const OperatorProxy &op2) {
+            return (op1.get_id() < op2.get_id());
+        });
 }
 
 
