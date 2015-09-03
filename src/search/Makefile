@@ -100,6 +100,11 @@ HEADERS = \
           \
           lp_internals.h \
           lp_solver.h \
+          \
+          plugin.h \
+          priority_queue.h \
+          utilities_windows.h \
+
 
 ## Each of the following "HEADERS += ..." constructs defines a
 ## "plugin" feature that can be enabled or disabled by simply
