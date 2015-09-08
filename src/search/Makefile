@@ -8,7 +8,7 @@
 DOWNWARD_BITWIDTH ?= 32
 
 ## Set DOWNWARD_USE_LP to 1 to enable linear programming stuff.
-DOWNWARD_USE_LP ?= 0
+DOWNWARD_USE_LP = 0
 
 ## Fast Downward uses the Open Solver Interface (OSI) by the
 ## COIN-OR project for access to LP solvers. Set DOWNWARD_COIN_ROOT
