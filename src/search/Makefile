@@ -267,6 +267,7 @@ endif
 LDFLAGS =
 LDFLAGS += $(BITWIDTHOPT)
 LDFLAGS += -g
+LDFLAGS += -rdynamic
 
 POSTLINKOPT =
 
