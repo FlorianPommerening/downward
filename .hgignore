@@ -5,3 +5,7 @@
 ^experiments/issue[0-9]*/.*.-microbenchmark/Makefile\.depend$
 ^misc/autodoc/downward-xmlrpc\.secret$
 ^builds/.*$
+syntax: glob
+src/search/.obj
+src/search/downward-release
+src/search/Makefile.depend
