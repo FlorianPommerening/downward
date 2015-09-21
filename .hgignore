@@ -9,3 +9,5 @@ syntax: glob
 src/search/.obj
 src/search/downward-release
 src/search/Makefile.depend
+src/preprocess/.obj
+src/VAL/*.o
