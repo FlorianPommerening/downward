@@ -1,11 +1,34 @@
 #! /bin/bash
 set -e
-rm -rf builds
-./build.py -j8
+echo $PATH
+rm -rf builds/make
+rm -rf builds/cmake
+
+## cmake via Python script:
+# ./build.py -j8
+
+## cmake called directly:
+# mkdir -p builds/cmake/
+# cd builds/cmake
+# cmake -DCMAKE_BUILD_TYPE=Release -DUSE_LP=NO ../../src
+# make VERBOSE=1 -j8 | tee ../../cmake.log
+# cd ../..
+
+## cmake compiler calls run manually:
+./cmake-manual.sh
+
 cd src
 ./build_all distclean
-./build_all -j8
 cd ..
+
+## using build_all and make:
+# cd src
+# ./build_all -j8 | tee ../make.log
+# cd ..
+
+## make compiler calls run manually:
+./make-manual.sh
+
 mkdir -p builds/make/bin
 cp -r src/translate builds/make/bin/
 cp src/preprocess/preprocess builds/make/bin/
