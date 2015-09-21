@@ -9,9 +9,9 @@ cd ..
 mkdir -p builds/make/bin
 cp -r src/translate builds/make/bin/
 cp src/preprocess/preprocess builds/make/bin/
-cp src/seach/downward-release builds/make/bin/downward
+cp src/search/downward-release builds/make/bin/downward
 mv builds/release32 builds/cmake
 if [[ "$TESTME" != "" ]]; then
-    ./fast-downward.py --build cmake benchmarks/sokoban-opt11/p09.pddl --search "astar(blind())"
-    ./fast-downward.py --build make benchmarks/sokoban-opt11/p09.pddl --search "astar(blind())"
+    ./fast-downward.py --build cmake benchmarks/sokoban-opt11-strips/p09.pddl --search "astar(blind())"
+    ./fast-downward.py --build make benchmarks/sokoban-opt11-strips/p09.pddl --search "astar(blind())"
 fi
