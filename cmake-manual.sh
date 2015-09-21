@@ -38,128 +38,134 @@ cd ..
 
 cd search
 
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/abstract_task.cc.o -c ../../../src/search/abstract_task.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/additive_heuristic.cc.o -c ../../../src/search/additive_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/axioms.cc.o -c ../../../src/search/axioms.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/blind_search_heuristic.cc.o -c ../../../src/search/blind_search_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/causal_graph.cc.o -c ../../../src/search/causal_graph.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/cea_heuristic.cc.o -c ../../../src/search/cea_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/cg_cache.cc.o -c ../../../src/search/cg_cache.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/cg_heuristic.cc.o -c ../../../src/search/cg_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/combining_evaluator.cc.o -c ../../../src/search/combining_evaluator.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/cost_adapted_task.cc.o -c ../../../src/search/cost_adapted_task.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/countdown_timer.cc.o -c ../../../src/search/countdown_timer.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/delegating_task.cc.o -c ../../../src/search/delegating_task.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/domain_transition_graph.cc.o -c ../../../src/search/domain_transition_graph.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/eager_search.cc.o -c ../../../src/search/eager_search.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/enforced_hill_climbing_search.cc.o -c ../../../src/search/enforced_hill_climbing_search.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/equivalence_relation.cc.o -c ../../../src/search/equivalence_relation.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/evaluation_context.cc.o -c ../../../src/search/evaluation_context.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/evaluation_result.cc.o -c ../../../src/search/evaluation_result.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/exact_timer.cc.o -c ../../../src/search/exact_timer.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/ff_heuristic.cc.o -c ../../../src/search/ff_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/g_evaluator.cc.o -c ../../../src/search/g_evaluator.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/global_operator.cc.o -c ../../../src/search/global_operator.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/global_state.cc.o -c ../../../src/search/global_state.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/globals.cc.o -c ../../../src/search/globals.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/goal_count_heuristic.cc.o -c ../../../src/search/goal_count_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/heuristic.cc.o -c ../../../src/search/heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/heuristic_cache.cc.o -c ../../../src/search/heuristic_cache.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/hm_heuristic.cc.o -c ../../../src/search/hm_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/int_packer.cc.o -c ../../../src/search/int_packer.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/ipc_max_heuristic.cc.o -c ../../../src/search/ipc_max_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/iterated_search.cc.o -c ../../../src/search/iterated_search.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/exploration.cc.o -c ../../../src/search/landmarks/exploration.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/h_m_landmarks.cc.o -c ../../../src/search/landmarks/h_m_landmarks.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/lama_ff_synergy.cc.o -c ../../../src/search/landmarks/lama_ff_synergy.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_cost_assignment.cc.o -c ../../../src/search/landmarks/landmark_cost_assignment.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_count_heuristic.cc.o -c ../../../src/search/landmarks/landmark_count_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_factory.cc.o -c ../../../src/search/landmarks/landmark_factory.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_factory_rpg_exhaust.cc.o -c ../../../src/search/landmarks/landmark_factory_rpg_exhaust.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_factory_rpg_sasp.cc.o -c ../../../src/search/landmarks/landmark_factory_rpg_sasp.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_factory_zhu_givan.cc.o -c ../../../src/search/landmarks/landmark_factory_zhu_givan.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_graph.cc.o -c ../../../src/search/landmarks/landmark_graph.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_graph_merged.cc.o -c ../../../src/search/landmarks/landmark_graph_merged.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/landmark_status_manager.cc.o -c ../../../src/search/landmarks/landmark_status_manager.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/landmarks/util.cc.o -c ../../../src/search/landmarks/util.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/lazy_search.cc.o -c ../../../src/search/lazy_search.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/lm_cut_heuristic.cc.o -c ../../../src/search/lm_cut_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/lp_internals.cc.o -c ../../../src/search/lp_internals.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/lp_solver.cc.o -c ../../../src/search/lp_solver.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/max_evaluator.cc.o -c ../../../src/search/max_evaluator.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/max_heuristic.cc.o -c ../../../src/search/max_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/distances.cc.o -c ../../../src/search/merge_and_shrink/distances.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/factored_transition_system.cc.o -c ../../../src/search/merge_and_shrink/factored_transition_system.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/fts_factory.cc.o -c ../../../src/search/merge_and_shrink/fts_factory.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/heuristic_representation.cc.o -c ../../../src/search/merge_and_shrink/heuristic_representation.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/label_equivalence_relation.cc.o -c ../../../src/search/merge_and_shrink/label_equivalence_relation.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/labels.cc.o -c ../../../src/search/merge_and_shrink/labels.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/merge_and_shrink_heuristic.cc.o -c ../../../src/search/merge_and_shrink/merge_and_shrink_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/merge_dfp.cc.o -c ../../../src/search/merge_and_shrink/merge_dfp.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/merge_linear.cc.o -c ../../../src/search/merge_and_shrink/merge_linear.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/merge_strategy.cc.o -c ../../../src/search/merge_and_shrink/merge_strategy.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/shrink_bisimulation.cc.o -c ../../../src/search/merge_and_shrink/shrink_bisimulation.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/shrink_bucket_based.cc.o -c ../../../src/search/merge_and_shrink/shrink_bucket_based.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/shrink_fh.cc.o -c ../../../src/search/merge_and_shrink/shrink_fh.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/shrink_random.cc.o -c ../../../src/search/merge_and_shrink/shrink_random.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/shrink_strategy.cc.o -c ../../../src/search/merge_and_shrink/shrink_strategy.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/merge_and_shrink/transition_system.cc.o -c ../../../src/search/merge_and_shrink/transition_system.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/open_lists/alternation_open_list.cc.o -c ../../../src/search/open_lists/alternation_open_list.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/open_lists/bucket_open_list.cc.o -c ../../../src/search/open_lists/bucket_open_list.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/open_lists/open_list.cc.o -c ../../../src/search/open_lists/open_list.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/open_lists/pareto_open_list.cc.o -c ../../../src/search/open_lists/pareto_open_list.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/open_lists/standard_scalar_open_list.cc.o -c ../../../src/search/open_lists/standard_scalar_open_list.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/open_lists/tiebreaking_open_list.cc.o -c ../../../src/search/open_lists/tiebreaking_open_list.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/operator_cost.cc.o -c ../../../src/search/operator_cost.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/option_parser.cc.o -c ../../../src/search/option_parser.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/option_parser_util.cc.o -c ../../../src/search/option_parser_util.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/canonical_pdbs_heuristic.cc.o -c ../../../src/search/pdbs/canonical_pdbs_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/dominance_pruner.cc.o -c ../../../src/search/pdbs/dominance_pruner.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/match_tree.cc.o -c ../../../src/search/pdbs/match_tree.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/max_cliques.cc.o -c ../../../src/search/pdbs/max_cliques.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/pattern_database.cc.o -c ../../../src/search/pdbs/pattern_database.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/pattern_generation_edelkamp.cc.o -c ../../../src/search/pdbs/pattern_generation_edelkamp.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/pattern_generation_haslum.cc.o -c ../../../src/search/pdbs/pattern_generation_haslum.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/pdb_heuristic.cc.o -c ../../../src/search/pdbs/pdb_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/util.cc.o -c ../../../src/search/pdbs/util.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pdbs/zero_one_pdbs_heuristic.cc.o -c ../../../src/search/pdbs/zero_one_pdbs_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/per_state_information.cc.o -c ../../../src/search/per_state_information.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/planner.cc.o -c ../../../src/search/planner.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/plugin.cc.o -c ../../../src/search/plugin.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/potentials/diverse_potential_heuristics.cc.o -c ../../../src/search/potentials/diverse_potential_heuristics.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/potentials/potential_function.cc.o -c ../../../src/search/potentials/potential_function.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/potentials/potential_heuristic.cc.o -c ../../../src/search/potentials/potential_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/potentials/potential_max_heuristic.cc.o -c ../../../src/search/potentials/potential_max_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/potentials/potential_optimizer.cc.o -c ../../../src/search/potentials/potential_optimizer.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/potentials/sample_based_potential_heuristics.cc.o -c ../../../src/search/potentials/sample_based_potential_heuristics.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/potentials/single_potential_heuristics.cc.o -c ../../../src/search/potentials/single_potential_heuristics.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/potentials/util.cc.o -c ../../../src/search/potentials/util.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/pref_evaluator.cc.o -c ../../../src/search/pref_evaluator.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/priority_queue.cc.o -c ../../../src/search/priority_queue.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/relaxation_heuristic.cc.o -c ../../../src/search/relaxation_heuristic.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/rng.cc.o -c ../../../src/search/rng.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/root_task.cc.o -c ../../../src/search/root_task.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/sampling.cc.o -c ../../../src/search/sampling.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/scalar_evaluator.cc.o -c ../../../src/search/scalar_evaluator.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/search_engine.cc.o -c ../../../src/search/search_engine.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/search_node_info.cc.o -c ../../../src/search/search_node_info.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/search_progress.cc.o -c ../../../src/search/search_progress.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/search_space.cc.o -c ../../../src/search/search_space.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/search_statistics.cc.o -c ../../../src/search/search_statistics.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/segmented_vector.cc.o -c ../../../src/search/segmented_vector.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/state_id.cc.o -c ../../../src/search/state_id.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/state_registry.cc.o -c ../../../src/search/state_registry.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/successor_generator.cc.o -c ../../../src/search/successor_generator.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/sum_evaluator.cc.o -c ../../../src/search/sum_evaluator.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/task_proxy.cc.o -c ../../../src/search/task_proxy.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/task_tools.cc.o -c ../../../src/search/task_tools.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/timer.cc.o -c ../../../src/search/timer.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/tracer.cc.o -c ../../../src/search/tracer.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/utilities.cc.o -c ../../../src/search/utilities.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/utilities_hash.cc.o -c ../../../src/search/utilities_hash.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/utilities_windows.cc.o -c ../../../src/search/utilities_windows.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/variable_order_finder.cc.o -c ../../../src/search/variable_order_finder.cc
-$CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext    -o CMakeFiles/downward.dir/weighted_evaluator.cc.o -c ../../../src/search/weighted_evaluator.cc
+SOURCES="
+abstract_task
+additive_heuristic
+axioms
+blind_search_heuristic
+causal_graph
+cea_heuristic
+cg_cache
+cg_heuristic
+combining_evaluator
+cost_adapted_task
+countdown_timer
+delegating_task
+domain_transition_graph
+eager_search
+enforced_hill_climbing_search
+equivalence_relation
+evaluation_context
+evaluation_result
+exact_timer
+ff_heuristic
+g_evaluator
+global_operator
+global_state
+globals
+goal_count_heuristic
+heuristic
+heuristic_cache
+hm_heuristic
+int_packer
+ipc_max_heuristic
+iterated_search
+landmarks/exploration
+landmarks/h_m_landmarks
+landmarks/lama_ff_synergy
+landmarks/landmark_cost_assignment
+landmarks/landmark_count_heuristic
+landmarks/landmark_factory
+landmarks/landmark_factory_rpg_exhaust
+landmarks/landmark_factory_rpg_sasp
+landmarks/landmark_factory_zhu_givan
+landmarks/landmark_graph
+landmarks/landmark_graph_merged
+landmarks/landmark_status_manager
+landmarks/util
+lazy_search
+lm_cut_heuristic
+lp_internals
+lp_solver
+max_evaluator
+max_heuristic
+merge_and_shrink/distances
+merge_and_shrink/factored_transition_system
+merge_and_shrink/fts_factory
+merge_and_shrink/heuristic_representation
+merge_and_shrink/label_equivalence_relation
+merge_and_shrink/labels
+merge_and_shrink/merge_and_shrink_heuristic
+merge_and_shrink/merge_dfp
+merge_and_shrink/merge_linear
+merge_and_shrink/merge_strategy
+merge_and_shrink/shrink_bisimulation
+merge_and_shrink/shrink_bucket_based
+merge_and_shrink/shrink_fh
+merge_and_shrink/shrink_random
+merge_and_shrink/shrink_strategy
+merge_and_shrink/transition_system
+open_lists/alternation_open_list
+open_lists/bucket_open_list
+open_lists/open_list
+open_lists/pareto_open_list
+open_lists/standard_scalar_open_list
+open_lists/tiebreaking_open_list
+operator_cost
+option_parser
+option_parser_util
+pdbs/canonical_pdbs_heuristic
+pdbs/dominance_pruner
+pdbs/match_tree
+pdbs/max_cliques
+pdbs/pattern_database
+pdbs/pattern_generation_edelkamp
+pdbs/pattern_generation_haslum
+pdbs/pdb_heuristic
+pdbs/util
+pdbs/zero_one_pdbs_heuristic
+per_state_information
+planner
+plugin
+potentials/diverse_potential_heuristics
+potentials/potential_function
+potentials/potential_heuristic
+potentials/potential_max_heuristic
+potentials/potential_optimizer
+potentials/sample_based_potential_heuristics
+potentials/single_potential_heuristics
+potentials/util
+pref_evaluator
+priority_queue
+relaxation_heuristic
+rng
+root_task
+sampling
+scalar_evaluator
+search_engine
+search_node_info
+search_progress
+search_space
+search_statistics
+segmented_vector
+state_id
+state_registry
+successor_generator
+sum_evaluator
+task_proxy
+task_tools
+timer
+tracer
+utilities
+utilities_hash
+utilities_windows
+variable_order_finder
+weighted_evaluator
+"
+
+for src in $SOURCES; do
+    $CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -I../../../src/search/ext -o CMakeFiles/downward.dir/$src.cc.o -c ../../../src/search/$src.cc
+done
 
 $CXX -m32 -std=c++11 -g -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer   -m32 -g CMakeFiles/downward.dir/planner.cc.o CMakeFiles/downward.dir/abstract_task.cc.o CMakeFiles/downward.dir/axioms.cc.o CMakeFiles/downward.dir/causal_graph.cc.o CMakeFiles/downward.dir/cost_adapted_task.cc.o CMakeFiles/downward.dir/countdown_timer.cc.o CMakeFiles/downward.dir/delegating_task.cc.o CMakeFiles/downward.dir/domain_transition_graph.cc.o CMakeFiles/downward.dir/equivalence_relation.cc.o CMakeFiles/downward.dir/evaluation_context.cc.o CMakeFiles/downward.dir/evaluation_result.cc.o CMakeFiles/downward.dir/exact_timer.cc.o CMakeFiles/downward.dir/global_operator.cc.o CMakeFiles/downward.dir/globals.cc.o CMakeFiles/downward.dir/global_state.cc.o CMakeFiles/downward.dir/heuristic_cache.cc.o CMakeFiles/downward.dir/heuristic.cc.o CMakeFiles/downward.dir/int_packer.cc.o CMakeFiles/downward.dir/operator_cost.cc.o CMakeFiles/downward.dir/option_parser.cc.o CMakeFiles/downward.dir/option_parser_util.cc.o CMakeFiles/downward.dir/per_state_information.cc.o CMakeFiles/downward.dir/plugin.cc.o CMakeFiles/downward.dir/priority_queue.cc.o CMakeFiles/downward.dir/rng.cc.o CMakeFiles/downward.dir/root_task.cc.o CMakeFiles/downward.dir/sampling.cc.o CMakeFiles/downward.dir/scalar_evaluator.cc.o CMakeFiles/downward.dir/search_engine.cc.o CMakeFiles/downward.dir/search_node_info.cc.o CMakeFiles/downward.dir/search_progress.cc.o CMakeFiles/downward.dir/search_space.cc.o CMakeFiles/downward.dir/search_statistics.cc.o CMakeFiles/downward.dir/segmented_vector.cc.o CMakeFiles/downward.dir/state_id.cc.o CMakeFiles/downward.dir/state_registry.cc.o CMakeFiles/downward.dir/successor_generator.cc.o CMakeFiles/downward.dir/task_proxy.cc.o CMakeFiles/downward.dir/task_tools.cc.o CMakeFiles/downward.dir/timer.cc.o CMakeFiles/downward.dir/tracer.cc.o CMakeFiles/downward.dir/utilities.cc.o CMakeFiles/downward.dir/utilities_hash.cc.o CMakeFiles/downward.dir/utilities_windows.cc.o CMakeFiles/downward.dir/variable_order_finder.cc.o CMakeFiles/downward.dir/open_lists/alternation_open_list.cc.o CMakeFiles/downward.dir/open_lists/bucket_open_list.cc.o CMakeFiles/downward.dir/open_lists/open_list.cc.o CMakeFiles/downward.dir/open_lists/pareto_open_list.cc.o CMakeFiles/downward.dir/open_lists/standard_scalar_open_list.cc.o CMakeFiles/downward.dir/open_lists/tiebreaking_open_list.cc.o CMakeFiles/downward.dir/g_evaluator.cc.o CMakeFiles/downward.dir/combining_evaluator.cc.o CMakeFiles/downward.dir/max_evaluator.cc.o CMakeFiles/downward.dir/pref_evaluator.cc.o CMakeFiles/downward.dir/weighted_evaluator.cc.o CMakeFiles/downward.dir/sum_evaluator.cc.o CMakeFiles/downward.dir/eager_search.cc.o CMakeFiles/downward.dir/lazy_search.cc.o CMakeFiles/downward.dir/enforced_hill_climbing_search.cc.o CMakeFiles/downward.dir/iterated_search.cc.o CMakeFiles/downward.dir/lp_internals.cc.o CMakeFiles/downward.dir/lp_solver.cc.o CMakeFiles/downward.dir/relaxation_heuristic.cc.o CMakeFiles/downward.dir/ipc_max_heuristic.cc.o CMakeFiles/downward.dir/additive_heuristic.cc.o CMakeFiles/downward.dir/blind_search_heuristic.cc.o CMakeFiles/downward.dir/cea_heuristic.cc.o CMakeFiles/downward.dir/cg_heuristic.cc.o CMakeFiles/downward.dir/cg_cache.cc.o CMakeFiles/downward.dir/ff_heuristic.cc.o CMakeFiles/downward.dir/goal_count_heuristic.cc.o CMakeFiles/downward.dir/hm_heuristic.cc.o CMakeFiles/downward.dir/lm_cut_heuristic.cc.o CMakeFiles/downward.dir/max_heuristic.cc.o CMakeFiles/downward.dir/merge_and_shrink/distances.cc.o CMakeFiles/downward.dir/merge_and_shrink/factored_transition_system.cc.o CMakeFiles/downward.dir/merge_and_shrink/fts_factory.cc.o CMakeFiles/downward.dir/merge_and_shrink/heuristic_representation.cc.o CMakeFiles/downward.dir/merge_and_shrink/label_equivalence_relation.cc.o CMakeFiles/downward.dir/merge_and_shrink/labels.cc.o CMakeFiles/downward.dir/merge_and_shrink/merge_and_shrink_heuristic.cc.o CMakeFiles/downward.dir/merge_and_shrink/merge_dfp.cc.o CMakeFiles/downward.dir/merge_and_shrink/merge_linear.cc.o CMakeFiles/downward.dir/merge_and_shrink/merge_strategy.cc.o CMakeFiles/downward.dir/merge_and_shrink/shrink_bisimulation.cc.o CMakeFiles/downward.dir/merge_and_shrink/shrink_bucket_based.cc.o CMakeFiles/downward.dir/merge_and_shrink/shrink_fh.cc.o CMakeFiles/downward.dir/merge_and_shrink/shrink_random.cc.o CMakeFiles/downward.dir/merge_and_shrink/shrink_strategy.cc.o CMakeFiles/downward.dir/merge_and_shrink/transition_system.cc.o CMakeFiles/downward.dir/landmarks/exploration.cc.o CMakeFiles/downward.dir/landmarks/h_m_landmarks.cc.o CMakeFiles/downward.dir/landmarks/lama_ff_synergy.cc.o CMakeFiles/downward.dir/landmarks/landmark_cost_assignment.cc.o CMakeFiles/downward.dir/landmarks/landmark_count_heuristic.cc.o CMakeFiles/downward.dir/landmarks/landmark_factory.cc.o CMakeFiles/downward.dir/landmarks/landmark_factory_rpg_exhaust.cc.o CMakeFiles/downward.dir/landmarks/landmark_factory_rpg_sasp.cc.o CMakeFiles/downward.dir/landmarks/landmark_factory_zhu_givan.cc.o CMakeFiles/downward.dir/landmarks/landmark_graph.cc.o CMakeFiles/downward.dir/landmarks/landmark_graph_merged.cc.o CMakeFiles/downward.dir/landmarks/landmark_status_manager.cc.o CMakeFiles/downward.dir/landmarks/util.cc.o CMakeFiles/downward.dir/pdbs/canonical_pdbs_heuristic.cc.o CMakeFiles/downward.dir/pdbs/dominance_pruner.cc.o CMakeFiles/downward.dir/pdbs/match_tree.cc.o CMakeFiles/downward.dir/pdbs/max_cliques.cc.o CMakeFiles/downward.dir/pdbs/pattern_database.cc.o CMakeFiles/downward.dir/pdbs/pattern_generation_edelkamp.cc.o CMakeFiles/downward.dir/pdbs/pattern_generation_haslum.cc.o CMakeFiles/downward.dir/pdbs/pdb_heuristic.cc.o CMakeFiles/downward.dir/pdbs/util.cc.o CMakeFiles/downward.dir/pdbs/zero_one_pdbs_heuristic.cc.o CMakeFiles/downward.dir/potentials/diverse_potential_heuristics.cc.o CMakeFiles/downward.dir/potentials/potential_function.cc.o CMakeFiles/downward.dir/potentials/potential_heuristic.cc.o CMakeFiles/downward.dir/potentials/potential_max_heuristic.cc.o CMakeFiles/downward.dir/potentials/potential_optimizer.cc.o CMakeFiles/downward.dir/potentials/sample_based_potential_heuristics.cc.o CMakeFiles/downward.dir/potentials/single_potential_heuristics.cc.o CMakeFiles/downward.dir/potentials/util.cc.o  -o ../bin/downward -rdynamic -lrt 
 
