@@ -1,11 +1,11 @@
 #! /bin/bash
 set -e
 echo $PATH
-rm -rf builds/make
 rm -rf builds/cmake
 
 ## cmake via Python script:
 # ./build.py -j8
+# mv builds/release32 builds/cmake
 
 ## cmake called directly:
 # mkdir -p builds/cmake/
@@ -20,20 +20,20 @@ rm -rf builds/cmake
 cd src
 ./build_all distclean
 cd ..
+rm -rf builds/make
 
 ## using build_all and make:
 # cd src
 # ./build_all -j8 | tee ../make.log
 # cd ..
+# mkdir -p builds/make/bin
+# cp -r src/translate builds/make/bin/
+# cp src/preprocess/preprocess builds/make/bin/
+# cp src/search/downward-release builds/make/bin/downward
 
 ## make compiler calls run manually:
 ./make-manual.sh
 
-mkdir -p builds/make/bin
-cp -r src/translate builds/make/bin/
-cp src/preprocess/preprocess builds/make/bin/
-cp src/search/downward-release builds/make/bin/downward
-mv builds/release32 builds/cmake
 if [[ "$TESTME" != "" ]]; then
     ./fast-downward.py --build cmake benchmarks/sokoban-opt11-strips/p09.pddl --search "astar(blind())"
     ./fast-downward.py --build make benchmarks/sokoban-opt11-strips/p09.pddl --search "astar(blind())"

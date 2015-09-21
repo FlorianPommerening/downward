@@ -2,8 +2,10 @@
 set -e
 set -x
 
+rm -rf builds/make
+
 cd src/preprocess
-rm -rf .obj
+rm -rf .obj preprocess
 mkdir .obj
 g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c planner.cc -o .obj/planner.o
 g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c causal_graph.cc -o .obj/causal_graph.o
@@ -21,7 +23,7 @@ g++  -m32 -g  -static -static-libgcc .obj/planner.o .obj/axiom.o .obj/causal_gra
 cd ../..
 
 cd src/search
-rm -rf .obj
+rm -rf .obj downward-release
 mkdir .obj
 mkdir .obj/{landmarks,pdbs,merge_and_shrink,open_lists,potentials}
 g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -Iext -O3 -DNDEBUG -fomit-frame-pointer -c planner.cc -o .obj/planner.release.o
@@ -148,3 +150,8 @@ g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -Iext -O3 -DNDEBUG -fomi
 g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -Iext -O3 -DNDEBUG -fomit-frame-pointer -c potentials/util.cc -o .obj/potentials/util.release.o
 g++  -m32 -g -rdynamic  .obj/planner.release.o .obj/abstract_task.release.o .obj/axioms.release.o .obj/causal_graph.release.o .obj/combining_evaluator.release.o .obj/cost_adapted_task.release.o .obj/countdown_timer.release.o .obj/delegating_task.release.o .obj/domain_transition_graph.release.o .obj/eager_search.release.o .obj/enforced_hill_climbing_search.release.o .obj/equivalence_relation.release.o .obj/evaluation_context.release.o .obj/evaluation_result.release.o .obj/exact_timer.release.o .obj/g_evaluator.release.o .obj/global_operator.release.o .obj/global_state.release.o .obj/globals.release.o .obj/heuristic_cache.release.o .obj/heuristic.release.o .obj/int_packer.release.o .obj/ipc_max_heuristic.release.o .obj/iterated_search.release.o .obj/lazy_search.release.o .obj/max_evaluator.release.o .obj/operator_cost.release.o .obj/option_parser.release.o .obj/option_parser_util.release.o .obj/segmented_vector.release.o .obj/per_state_information.release.o .obj/pref_evaluator.release.o .obj/relaxation_heuristic.release.o .obj/rng.release.o .obj/root_task.release.o .obj/sampling.release.o .obj/scalar_evaluator.release.o .obj/search_engine.release.o .obj/search_node_info.release.o .obj/search_progress.release.o .obj/search_space.release.o .obj/search_statistics.release.o .obj/state_id.release.o .obj/state_registry.release.o .obj/successor_generator.release.o .obj/sum_evaluator.release.o .obj/task_proxy.release.o .obj/task_tools.release.o .obj/timer.release.o .obj/tracer.release.o .obj/utilities.release.o .obj/utilities_hash.release.o .obj/variable_order_finder.release.o .obj/weighted_evaluator.release.o .obj/open_lists/alternation_open_list.release.o .obj/open_lists/bucket_open_list.release.o .obj/open_lists/open_list.release.o .obj/open_lists/pareto_open_list.release.o .obj/open_lists/standard_scalar_open_list.release.o .obj/open_lists/tiebreaking_open_list.release.o .obj/lp_internals.release.o .obj/lp_solver.release.o .obj/plugin.release.o .obj/priority_queue.release.o .obj/utilities_windows.release.o .obj/additive_heuristic.release.o .obj/blind_search_heuristic.release.o .obj/cea_heuristic.release.o .obj/cg_heuristic.release.o .obj/cg_cache.release.o .obj/ff_heuristic.release.o .obj/goal_count_heuristic.release.o .obj/hm_heuristic.release.o .obj/lm_cut_heuristic.release.o .obj/max_heuristic.release.o .obj/merge_and_shrink/distances.release.o .obj/merge_and_shrink/factored_transition_system.release.o .obj/merge_and_shrink/fts_factory.release.o .obj/merge_and_shrink/heuristic_representation.release.o .obj/merge_and_shrink/label_equivalence_relation.release.o .obj/merge_and_shrink/labels.release.o .obj/merge_and_shrink/merge_and_shrink_heuristic.release.o .obj/merge_and_shrink/merge_dfp.release.o .obj/merge_and_shrink/merge_linear.release.o .obj/merge_and_shrink/merge_strategy.release.o .obj/merge_and_shrink/shrink_bisimulation.release.o .obj/merge_and_shrink/shrink_bucket_based.release.o .obj/merge_and_shrink/shrink_fh.release.o .obj/merge_and_shrink/shrink_random.release.o .obj/merge_and_shrink/shrink_strategy.release.o .obj/merge_and_shrink/transition_system.release.o .obj/landmarks/exploration.release.o .obj/landmarks/h_m_landmarks.release.o .obj/landmarks/lama_ff_synergy.release.o .obj/landmarks/landmark_cost_assignment.release.o .obj/landmarks/landmark_count_heuristic.release.o .obj/landmarks/landmark_status_manager.release.o .obj/landmarks/landmark_graph_merged.release.o .obj/landmarks/landmark_graph.release.o .obj/landmarks/landmark_factory.release.o .obj/landmarks/landmark_factory_rpg_exhaust.release.o .obj/landmarks/landmark_factory_rpg_sasp.release.o .obj/landmarks/landmark_factory_zhu_givan.release.o .obj/landmarks/util.release.o .obj/pdbs/canonical_pdbs_heuristic.release.o .obj/pdbs/dominance_pruner.release.o .obj/pdbs/match_tree.release.o .obj/pdbs/max_cliques.release.o .obj/pdbs/pattern_database.release.o .obj/pdbs/pattern_generation_edelkamp.release.o .obj/pdbs/pattern_generation_haslum.release.o .obj/pdbs/pdb_heuristic.release.o .obj/pdbs/util.release.o .obj/pdbs/zero_one_pdbs_heuristic.release.o .obj/potentials/diverse_potential_heuristics.release.o .obj/potentials/potential_function.release.o .obj/potentials/potential_heuristic.release.o .obj/potentials/potential_max_heuristic.release.o .obj/potentials/potential_optimizer.release.o .obj/potentials/sample_based_potential_heuristics.release.o .obj/potentials/single_potential_heuristics.release.o .obj/potentials/util.release.o   -lrt -o downward-release
 cd ../..
+
+mkdir -p builds/make/bin
+cp -r src/translate builds/make/bin/
+cp src/preprocess/preprocess builds/make/bin/
+cp src/search/downward-release builds/make/bin/downward
