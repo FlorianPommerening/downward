@@ -11,3 +11,9 @@ src/search/downward-release
 src/search/Makefile.depend
 src/preprocess/.obj
 src/VAL/*.o
+*~
+src/VAL/lex.yy.cc
+src/VAL/validate
+src/preprocess/Makefile.depend
+src/preprocess/preprocess
+src/validate
