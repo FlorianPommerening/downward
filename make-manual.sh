@@ -7,18 +7,26 @@ rm -rf builds/make
 cd src/preprocess
 rm -rf .obj preprocess
 mkdir .obj
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c planner.cc -o .obj/planner.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c causal_graph.cc -o .obj/causal_graph.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c axiom.cc -o .obj/axiom.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c domain_transition_graph.cc -o .obj/domain_transition_graph.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c helper_functions.cc -o .obj/helper_functions.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c max_dag.cc -o .obj/max_dag.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c mutex_group.cc -o .obj/mutex_group.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c operator.cc -o .obj/operator.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c scc.cc -o .obj/scc.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c state.cc -o .obj/state.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c successor_generator.cc -o .obj/successor_generator.o
-g++  -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c variable.cc -o .obj/variable.o
+
+PREPROCESS_SOURCES="
+planner
+causal_graph
+axiom
+domain_transition_graph
+helper_functions
+max_dag
+mutex_group
+operator
+scc
+state
+successor_generator
+variable
+"
+
+for src in $PREPROCESS_SOURCES; do
+    g++ -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c $src.cc -o .obj/$src.o
+done
+
 g++  -m32 -g  -static -static-libgcc .obj/planner.o .obj/axiom.o .obj/causal_graph.o .obj/domain_transition_graph.o .obj/helper_functions.o .obj/max_dag.o .obj/mutex_group.o .obj/operator.o .obj/scc.o .obj/state.o .obj/successor_generator.o .obj/variable.o   -Wl,-Bstatic -lrt -o preprocess
 cd ../..
 
