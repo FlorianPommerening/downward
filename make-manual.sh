@@ -2,12 +2,14 @@
 set -e
 set -x
 
-rm -rf builds/make
-mkdir -p builds/make/bin
-mkdir -p builds/make/.obj
-mkdir -p builds/make/.obj/{landmarks,pdbs,merge_and_shrink,open_lists,potentials}
+BUILD_DIR=make
 
-cd builds/make/
+rm -rf builds/$BUILD_DIR
+mkdir -p builds/$BUILD_DIR/bin
+mkdir -p builds/$BUILD_DIR/.obj
+mkdir -p builds/$BUILD_DIR/.obj/{landmarks,pdbs,merge_and_shrink,open_lists,potentials}
+
+cd builds/$BUILD_DIR/
 
 SOURCES="
 planner
