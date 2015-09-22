@@ -267,7 +267,7 @@ potentials/util
 
 OBJECTS=()
 for f in $LINK_ORDER; do
-    OBJECTS += (.obj/$f.o)
+    OBJECTS+=(.obj/$f.o)
 done
 
 g++ -m32 -g -rdynamic ${OBJECTS[@]} -lrt -o bin/downward
