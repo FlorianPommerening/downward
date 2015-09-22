@@ -4,32 +4,6 @@ set -x
 
 rm -rf builds/make
 
-cd src/preprocess
-rm -rf .obj preprocess
-mkdir .obj
-
-PREPROCESS_SOURCES="
-planner
-causal_graph
-axiom
-domain_transition_graph
-helper_functions
-max_dag
-mutex_group
-operator
-scc
-state
-successor_generator
-variable
-"
-
-for src in $PREPROCESS_SOURCES; do
-    g++ -g -m32 -std=c++11 -Wall -Wextra -pedantic -Werror -O3 -DNDEBUG -fomit-frame-pointer -c $src.cc -o .obj/$src.o
-done
-
-g++  -m32 -g  -static -static-libgcc .obj/planner.o .obj/axiom.o .obj/causal_graph.o .obj/domain_transition_graph.o .obj/helper_functions.o .obj/max_dag.o .obj/mutex_group.o .obj/operator.o .obj/scc.o .obj/state.o .obj/successor_generator.o .obj/variable.o   -Wl,-Bstatic -lrt -o preprocess
-cd ../..
-
 cd src/search
 rm -rf .obj downward-release
 mkdir .obj
@@ -168,6 +142,4 @@ g++  -m32 -g -rdynamic  .obj/planner.release.o .obj/abstract_task.release.o .obj
 cd ../..
 
 mkdir -p builds/make/bin
-cp -r src/translate builds/make/bin/
-cp src/preprocess/preprocess builds/make/bin/
 cp src/search/downward-release builds/make/bin/downward
