@@ -8,11 +8,7 @@ mkdir -p builds/cmake/preprocess/CMakeFiles/preprocess.dir
 mkdir -p builds/cmake/search/CMakeFiles/downward.dir
 mkdir -p builds/cmake/search/CMakeFiles/downward.dir/{landmarks,pdbs,merge_and_shrink,open_lists,potentials}
 
-if [[ -e /opt/soft/apps/GCC/4.8.2/bin/g++ ]]; then
-    CXX=/opt/soft/apps/GCC/4.8.2/bin/g++
-else
-    CXX=g++
-fi
+CXX=g++
 
 cd builds/cmake
 cp -r ../../src/translate bin/
