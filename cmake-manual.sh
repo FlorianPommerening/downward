@@ -269,12 +269,6 @@ cp -r ../common/.obj .
 # "
 
 LINK_ORDER="
-open_lists/alternation_open_list
-open_lists/bucket_open_list
-open_lists/open_list
-open_lists/pareto_open_list
-open_lists/standard_scalar_open_list
-open_lists/tiebreaking_open_list
 g_evaluator
 combining_evaluator
 max_evaluator
@@ -390,6 +384,12 @@ utilities
 utilities_hash
 utilities_windows
 variable_order_finder
+open_lists/alternation_open_list
+open_lists/bucket_open_list
+open_lists/open_list
+open_lists/pareto_open_list
+open_lists/standard_scalar_open_list
+open_lists/tiebreaking_open_list
 planner
 "
 
