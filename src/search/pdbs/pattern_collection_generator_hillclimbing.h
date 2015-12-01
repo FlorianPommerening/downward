@@ -1,3 +1,4 @@
+// moved from pattern_generation_haslum.h
 #ifndef PDBS_PATTERN_GENERATION_HASLUM_H
 #define PDBS_PATTERN_GENERATION_HASLUM_H
 

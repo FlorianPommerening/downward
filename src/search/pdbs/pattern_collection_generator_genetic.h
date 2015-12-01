@@ -1,3 +1,4 @@
+// moved from pattern_generation_edelkamp.h
 #ifndef PDBS_PATTERN_GENERATION_EDELKAMP_H
 #define PDBS_PATTERN_GENERATION_EDELKAMP_H
 

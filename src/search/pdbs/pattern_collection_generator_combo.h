@@ -1,3 +1,4 @@
+// copied from util.h
 #ifndef PDBS_UTIL_H
 #define PDBS_UTIL_H
 

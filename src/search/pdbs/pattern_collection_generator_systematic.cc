@@ -1,3 +1,4 @@
+// moved from pattern_generation_systematic.cc
 #include "pattern_generation_systematic.h"
 
 #include "canonical_pdbs_heuristic.h"

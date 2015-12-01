@@ -1,3 +1,4 @@
+// moved from pattern_generation_systematic.h
 #ifndef PDBS_PATTERN_GENERATION_SYSTEMATIC_H
 #define PDBS_PATTERN_GENERATION_SYSTEMATIC_H
 

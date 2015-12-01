@@ -1,3 +1,4 @@
+// moved from pattern_generation_haslum.cc
 #include "pattern_generation_haslum.h"
 
 #include "canonical_pdbs_heuristic.h"
