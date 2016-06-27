@@ -7,7 +7,7 @@ using namespace std;
 
 namespace extra_tasks {
 ModifiedOperatorCostsTask::ModifiedOperatorCostsTask(
-    const std::shared_ptr<AbstractTask> parent,
+    const std::shared_ptr<AbstractTask> &parent,
     std::vector<int> &&costs)
     : DelegatingTask(parent),
       operator_costs(move(costs)) {

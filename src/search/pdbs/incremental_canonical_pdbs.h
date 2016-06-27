@@ -29,7 +29,7 @@ class IncrementalCanonicalPDBs {
 
     void recompute_max_additive_subsets();
 public:
-    explicit IncrementalCanonicalPDBs(const std::shared_ptr<AbstractTask> task,
+    explicit IncrementalCanonicalPDBs(const std::shared_ptr<AbstractTask> &task,
                                       const PatternCollection &intitial_patterns);
     virtual ~IncrementalCanonicalPDBs() = default;
 

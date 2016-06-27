@@ -30,13 +30,13 @@ class PatternCollectionInformation {
     bool information_is_valid() const;
 public:
     PatternCollectionInformation(
-        std::shared_ptr<AbstractTask> task,
-        std::shared_ptr<PatternCollection> patterns);
+        const std::shared_ptr<AbstractTask> &task,
+        const std::shared_ptr<PatternCollection> &patterns);
     ~PatternCollectionInformation() = default;
 
-    void set_pdbs(std::shared_ptr<PDBCollection> pdbs);
+    void set_pdbs(const std::shared_ptr<PDBCollection> &pdbs);
     void set_max_additive_subsets(
-        std::shared_ptr<MaxAdditivePDBSubsets> max_additive_subsets);
+        const std::shared_ptr<MaxAdditivePDBSubsets> &max_additive_subsets);
 
     std::shared_ptr<PatternCollection> get_patterns();
     std::shared_ptr<PDBCollection> get_pdbs();
