@@ -71,8 +71,6 @@ public:
 
 // Implements a single pattern database
 class PatternDatabase {
-    TaskProxy task_proxy;
-
     Pattern pattern;
 
     // size of the PDB
@@ -100,6 +98,7 @@ class PatternDatabase {
         std::vector<std::pair<int, int>> &pre_pairs,
         std::vector<std::pair<int, int>> &eff_pairs,
         const std::vector<std::pair<int, int>> &effects_without_pre,
+        const VariablesProxy &variables,
         std::vector<AbstractOperator> &operators);
 
     /*
@@ -111,6 +110,7 @@ class PatternDatabase {
     void build_abstract_operators(
         const OperatorProxy &op, int cost,
         const std::vector<int> &variable_to_index,
+        const VariablesProxy &variables,
         std::vector<AbstractOperator> &operators);
 
     /*
@@ -120,18 +120,7 @@ class PatternDatabase {
       specify individual operator costs for each operator for action
       cost partitioning. If left empty, default operator costs are used.
     */
-    void create_pdb(
-        const std::vector<int> &operator_costs = std::vector<int>());
-
-    /*
-      Sets the pattern for the PDB and initializes hash_multipliers and
-      num_states. operator_costs can specify individual operator costs
-      for each operator for action cost partitioning. If left empty,
-      default operator costs are used.
-    */
-    void set_pattern(
-        const Pattern &pattern,
-        const std::vector<int> &operator_costs = std::vector<int>());
+    void create_pdb(const TaskProxy &task_proxy);
 
     /*
       For a given abstract state (given as index), the according values
@@ -141,7 +130,8 @@ class PatternDatabase {
     */
     bool is_goal_state(
         const std::size_t state_index,
-        const std::vector<std::pair<int, int>> &abstract_goals) const;
+        const std::vector<std::pair<int, int>> &abstract_goals,
+        const VariablesProxy &variables) const;
 
     /*
       The given concrete state is used to calculate the index of the
@@ -163,8 +153,7 @@ public:
     PatternDatabase(
         const TaskProxy &task_proxy,
         const Pattern &pattern,
-        bool dump = false,
-        const std::vector<int> &operator_costs = std::vector<int>());
+        bool dump = false);
     ~PatternDatabase() = default;
 
     int get_value(const State &state) const;

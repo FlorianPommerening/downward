@@ -3,14 +3,17 @@
 
 #include "types.h"
 
+#include <memory>
+
 class State;
-class TaskProxy;
+class AbstractTask;
 
 namespace pdbs {
 class ZeroOnePDBs {
     PDBCollection pattern_databases;
 public:
-    ZeroOnePDBs(TaskProxy task_proxy, const PatternCollection &patterns);
+    ZeroOnePDBs(const std::shared_ptr<AbstractTask> &task,
+                const PatternCollection &patterns);
     ~ZeroOnePDBs() = default;
 
     int get_value(const State &state) const;

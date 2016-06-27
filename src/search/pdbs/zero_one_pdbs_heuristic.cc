@@ -16,8 +16,7 @@ ZeroOnePDBs get_zero_one_pdbs_from_options(
         pattern_generator->generate(task);
     shared_ptr<PatternCollection> patterns =
         pattern_collection_info.get_patterns();
-    TaskProxy task_proxy(*task);
-    return ZeroOnePDBs(task_proxy, *patterns);
+    return ZeroOnePDBs(task, *patterns);
 }
 
 ZeroOnePDBsHeuristic::ZeroOnePDBsHeuristic(
