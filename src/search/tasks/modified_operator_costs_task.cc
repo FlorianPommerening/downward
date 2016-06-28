@@ -7,10 +7,10 @@ using namespace std;
 
 namespace extra_tasks {
 ModifiedOperatorCostsTask::ModifiedOperatorCostsTask(
-    const std::shared_ptr<AbstractTask> &parent,
-    std::vector<int> &&costs)
+    const shared_ptr<AbstractTask> &parent,
+    const vector<int> &costs)
     : DelegatingTask(parent),
-      operator_costs(move(costs)) {
+      operator_costs(costs) {
     assert(static_cast<int>(operator_costs.size()) == get_num_operators());
 }
 

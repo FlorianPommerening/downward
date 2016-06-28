@@ -27,9 +27,8 @@ ZeroOnePDBs::ZeroOnePDBs(const shared_ptr<AbstractTask> &task,
 
     pattern_databases.reserve(patterns.size());
     for (const Pattern &pattern : patterns) {
-        vector<int> pdb_operator_costs(remaining_operator_costs);
         extra_tasks::ModifiedOperatorCostsTask pdb_task(
-                task, move(pdb_operator_costs));
+            task, remaining_operator_costs);
         TaskProxy pdb_task_proxy(pdb_task);
         shared_ptr<PatternDatabase> pdb = make_shared<PatternDatabase>(
             pdb_task_proxy, pattern, false);
