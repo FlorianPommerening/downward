@@ -63,10 +63,10 @@ bool MatchTree::Node::is_leaf_node() const {
     return var_id == LEAF_NODE;
 }
 
-MatchTree::MatchTree(const TaskProxy &task_proxy,
+MatchTree::MatchTree(const shared_ptr<AbstractTask> &task,
                      const Pattern &pattern,
                      const vector<size_t> &hash_multipliers)
-    : task_proxy(task_proxy),
+    : task(task),
       pattern(pattern),
       hash_multipliers(hash_multipliers),
       root(nullptr) {
@@ -93,6 +93,7 @@ void MatchTree::insert_recursive(
         const pair<int, int> &var_val = regression_preconditions[pre_index];
         int pattern_var_id = var_val.first;
         int var_id = pattern[pattern_var_id];
+        TaskProxy task_proxy(*task);
         VariableProxy var = task_proxy.get_variables()[var_id];
         int var_domain_size = var.get_domain_size();
 
@@ -183,8 +184,10 @@ void MatchTree::dump_recursive(Node *node) const {
     cout << "node->var_id = " << node->var_id << endl;
     cout << "Number of applicable operators at this node: "
          << node->applicable_operators.size() << endl;
+    TaskProxy task_proxy(*task);
+    VariablesProxy variables = task_proxy.get_variables();
     for (const AbstractOperator *op : node->applicable_operators) {
-        op->dump(pattern, task_proxy);
+        op->dump(pattern, variables);
     }
     if (node->is_leaf_node()) {
         cout << "leaf node." << endl;

@@ -73,7 +73,7 @@ void PatternCollectionGeneratorHillclimbing::generate_candidate_patterns(
 }
 
 size_t PatternCollectionGeneratorHillclimbing::generate_pdbs_for_candidates(
-    const TaskProxy &task_proxy, set<Pattern> &generated_patterns,
+    const shared_ptr<AbstractTask> &task, set<Pattern> &generated_patterns,
     PatternCollection &new_candidates, PDBCollection &candidate_pdbs) const {
     /*
       For the new candidate patterns check whether they already have been
@@ -84,7 +84,7 @@ size_t PatternCollectionGeneratorHillclimbing::generate_pdbs_for_candidates(
     for (const Pattern &new_candidate : new_candidates) {
         if (generated_patterns.count(new_candidate) == 0) {
             candidate_pdbs.push_back(
-                make_shared<PatternDatabase>(task_proxy, new_candidate));
+                make_shared<PatternDatabase>(task, new_candidate));
             max_pdb_size = max(max_pdb_size,
                                candidate_pdbs.back()->get_size());
             generated_patterns.insert(new_candidate);
@@ -212,7 +212,7 @@ bool PatternCollectionGeneratorHillclimbing::is_heuristic_improved(
 }
 
 void PatternCollectionGeneratorHillclimbing::hill_climbing(
-    const TaskProxy &task_proxy,
+    const shared_ptr<AbstractTask> &task,
     const SuccessorGenerator &successor_generator,
     double average_operator_cost,
     PatternCollection &initial_candidate_patterns) {
@@ -226,6 +226,7 @@ void PatternCollectionGeneratorHillclimbing::hill_climbing(
     PDBCollection candidate_pdbs;
     int num_iterations = 0;
     size_t max_pdb_size = 0;
+    TaskProxy task_proxy(*task);
     State initial_state = task_proxy.get_initial_state();
     try {
         while (true) {
@@ -242,7 +243,7 @@ void PatternCollectionGeneratorHillclimbing::hill_climbing(
             }
 
             size_t new_max_pdb_size = generate_pdbs_for_candidates(
-                task_proxy, generated_patterns, new_candidates, candidate_pdbs);
+                task, generated_patterns, new_candidates, candidate_pdbs);
             max_pdb_size = max(max_pdb_size, new_max_pdb_size);
 
             vector<State> samples;
@@ -336,7 +337,7 @@ PatternCollectionInformation PatternCollectionGeneratorHillclimbing::generate(
                (contains the new_candidates after each call to
                generate_candidate_patterns) */
             hill_climbing(
-                task_proxy, successor_generator, average_operator_cost,
+                task, successor_generator, average_operator_cost,
                 initial_candidate_patterns);
         cout << "Pattern generation (Haslum et al.) time: " << timer << endl;
     }

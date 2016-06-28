@@ -27,11 +27,11 @@ ZeroOnePDBs::ZeroOnePDBs(const shared_ptr<AbstractTask> &task,
 
     pattern_databases.reserve(patterns.size());
     for (const Pattern &pattern : patterns) {
-        extra_tasks::ModifiedOperatorCostsTask pdb_task(
-            task, remaining_operator_costs);
-        TaskProxy pdb_task_proxy(pdb_task);
+        shared_ptr<extra_tasks::ModifiedOperatorCostsTask> pdb_task =
+            make_shared<extra_tasks::ModifiedOperatorCostsTask>(
+                task, remaining_operator_costs);
         shared_ptr<PatternDatabase> pdb = make_shared<PatternDatabase>(
-            pdb_task_proxy, pattern, false);
+            pdb_task, pattern, false);
 
         /* Set cost of relevant operators to 0 for further iterations
            (action cost partitioning). */

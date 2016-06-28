@@ -14,7 +14,6 @@ namespace pdbs {
 IncrementalCanonicalPDBs::IncrementalCanonicalPDBs(
     const shared_ptr<AbstractTask> &task, const PatternCollection &intitial_patterns)
     : task(task),
-      task_proxy(*task),
       patterns(make_shared<PatternCollection>(intitial_patterns.begin(),
                                               intitial_patterns.end())),
       pattern_databases(make_shared<PDBCollection>()),
@@ -24,13 +23,14 @@ IncrementalCanonicalPDBs::IncrementalCanonicalPDBs(
     pattern_databases->reserve(patterns->size());
     for (const Pattern &pattern : *patterns)
         add_pdb_for_pattern(pattern);
+    TaskProxy task_proxy(*task);
     are_additive = compute_additive_vars(task_proxy);
     recompute_max_additive_subsets();
     cout << "PDB collection construction time: " << timer << endl;
 }
 
 void IncrementalCanonicalPDBs::add_pdb_for_pattern(const Pattern &pattern) {
-    pattern_databases->emplace_back(new PatternDatabase(task_proxy, pattern));
+    pattern_databases->emplace_back(new PatternDatabase(task, pattern));
     size += pattern_databases->back()->get_size();
 }
 

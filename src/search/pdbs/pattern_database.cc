@@ -54,22 +54,23 @@ AbstractOperator::~AbstractOperator() {
 }
 
 void AbstractOperator::dump(const Pattern &pattern,
-                            const TaskProxy &task_proxy) const {
+                            const VariablesProxy &variables) const {
     cout << "AbstractOperator:" << endl;
     cout << "Regression preconditions:" << endl;
     for (size_t i = 0; i < regression_preconditions.size(); ++i) {
         int var_id = regression_preconditions[i].first;
         int val = regression_preconditions[i].second;
         cout << "Variable: " << var_id << " (True name: "
-             << task_proxy.get_variables()[pattern[var_id]].get_name()
+             << variables[pattern[var_id]].get_name()
              << ", Index: " << i << ") Value: " << val << endl;
     }
     cout << "Hash effect:" << hash_effect << endl;
 }
 
 PatternDatabase::PatternDatabase(
-    const TaskProxy &task_proxy, const Pattern &pattern, bool dump)
+    const std::shared_ptr<AbstractTask> &task, const Pattern &pattern, bool dump)
     : pattern(pattern) {
+    TaskProxy task_proxy(*task);
     verify_no_axioms(task_proxy);
     verify_no_conditional_effects(task_proxy);
     assert(utils::is_sorted_unique(pattern));
@@ -89,7 +90,7 @@ PatternDatabase::PatternDatabase(
             utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
         }
     }
-    create_pdb(task_proxy);
+    create_pdb(task);
     if (dump)
         cout << "PDB construction time: " << timer << endl;
 }
@@ -183,7 +184,8 @@ void PatternDatabase::build_abstract_operators(
                  variables, operators);
 }
 
-void PatternDatabase::create_pdb(const TaskProxy &task_proxy) {
+void PatternDatabase::create_pdb(const std::shared_ptr<AbstractTask> &task) {
+    TaskProxy task_proxy(*task);
     VariablesProxy variables = task_proxy.get_variables();
     vector<int> variable_to_index(variables.size(), -1);
     for (size_t i = 0; i < pattern.size(); ++i) {
@@ -198,7 +200,7 @@ void PatternDatabase::create_pdb(const TaskProxy &task_proxy) {
     }
 
     // build the match tree
-    MatchTree match_tree(task_proxy, pattern, hash_multipliers);
+    MatchTree match_tree(task, pattern, hash_multipliers);
     for (const AbstractOperator &op : operators) {
         match_tree.insert(op);
     }
