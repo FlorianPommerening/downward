@@ -193,9 +193,8 @@ void PatternDatabase::create_pdb(const TaskProxy &task_proxy) {
     // compute all abstract operators
     vector<AbstractOperator> operators;
     for (OperatorProxy op : task_proxy.get_operators()) {
-        int op_cost = op.get_cost();
         build_abstract_operators(
-            op, op_cost, variable_to_index, variables, operators);
+            op, op.get_cost(), variable_to_index, variables, operators);
     }
 
     // build the match tree

@@ -13,9 +13,9 @@ using namespace std;
 namespace pdbs {
 CanonicalPDBs::CanonicalPDBs(
     const shared_ptr<PDBCollection> &pattern_databases,
-    const shared_ptr<MaxAdditivePDBSubsets> &max_additive_subsets_,
+    const shared_ptr<MaxAdditivePDBSubsets> &max_additive_subsets,
     bool dominance_pruning)
-    : max_additive_subsets(max_additive_subsets_) {
+    : max_additive_subsets(max_additive_subsets) {
     assert(max_additive_subsets);
     if (dominance_pruning) {
         max_additive_subsets = prune_dominated_subsets(
