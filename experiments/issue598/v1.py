@@ -56,6 +56,8 @@ def main(revisions=None):
                     outfile="{}-{}-{}.png".format(exp.name, attribute, config.nick)
                 )
 
+    exp.add_fetcher(name='parse-again', parsers=['pdb-parser.py'])
+
     exp()
 
 main(revisions=['issue598-v1-base', 'issue598-v1'])
