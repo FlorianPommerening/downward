@@ -136,7 +136,6 @@ void StubbornSets::prune_operators(
     }
     if (remaining_ops.size() != ops.size()) {
         ops.swap(remaining_ops);
-        sort(ops.begin(), ops.end());
     }
 
     num_pruned_successors_generated += ops.size();
