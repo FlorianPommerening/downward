@@ -10,7 +10,6 @@
 class GeneratorBase;
 class GlobalOperator;
 class GlobalState;
-class State;
 
 /*
   NOTE that the task proxy passed to the constructor is stored internally.
