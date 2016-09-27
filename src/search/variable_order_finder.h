@@ -17,6 +17,11 @@ enum VariableOrderType {
 
 extern void dump_variable_order_type(VariableOrderType variable_order_type);
 
+/*
+  NOTE that the task proxy passed to the constructor is stored internally.
+       It is the responsibility of the owner that the task lives at least as
+       long as the variable order finder does.
+*/
 class VariableOrderFinder {
     TaskProxy task_proxy;
     const VariableOrderType variable_order_type;
