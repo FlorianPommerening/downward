@@ -57,7 +57,7 @@ class PatternCollectionGeneratorHillclimbing : public PatternCollectionGenerator
       not been generated already.
     */
     std::size_t generate_pdbs_for_candidates(
-        const std::shared_ptr<AbstractTask> &task,
+        const TaskProxy &task_proxy,
         std::set<Pattern> &generated_patterns,
         PatternCollection &new_candidates,
         PDBCollection &candidate_pdbs) const;
@@ -113,7 +113,7 @@ class PatternCollectionGeneratorHillclimbing : public PatternCollectionGenerator
       adapt CanonicalPDBsHeuristic accordingly.
     */
     void hill_climbing(
-        const std::shared_ptr<AbstractTask> &task,
+        const TaskProxy &task_proxy,
         const SuccessorGenerator &successor_generator,
         double average_operator_costs,
         PatternCollection &initial_candidate_patterns);
