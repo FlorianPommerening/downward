@@ -7,11 +7,9 @@
 #include <memory>
 #include <vector>
 
-class AbstractTask;
 class GeneratorBase;
 class GlobalOperator;
 class GlobalState;
-class OperatorProxy;
 class State;
 
 class SuccessorGenerator {
