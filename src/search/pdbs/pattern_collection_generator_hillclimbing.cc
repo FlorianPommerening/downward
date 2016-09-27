@@ -303,7 +303,7 @@ void PatternCollectionGeneratorHillclimbing::hill_climbing(
 PatternCollectionInformation PatternCollectionGeneratorHillclimbing::generate(
     const shared_ptr<AbstractTask> &task) {
     TaskProxy task_proxy(*task);
-    SuccessorGenerator successor_generator(task);
+    SuccessorGenerator successor_generator(task_proxy);
 
     utils::Timer timer;
     double average_operator_cost = get_average_operator_cost(task_proxy);
