@@ -316,7 +316,7 @@ PatternCollectionInformation PatternCollectionGeneratorHillclimbing::generate(
         initial_pattern_collection.emplace_back(1, goal_var_id);
     }
     current_pdbs = utils::make_unique_ptr<IncrementalCanonicalPDBs>(
-        task, initial_pattern_collection);
+        task_proxy, initial_pattern_collection);
 
     State initial_state = task_proxy.get_initial_state();
     if (!current_pdbs->is_dead_end(initial_state)) {

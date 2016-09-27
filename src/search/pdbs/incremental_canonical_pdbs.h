@@ -11,7 +11,7 @@
 
 namespace pdbs {
 class IncrementalCanonicalPDBs {
-    const std::shared_ptr<AbstractTask> task;
+    TaskProxy task_proxy;
 
     std::shared_ptr<PatternCollection> patterns;
     std::shared_ptr<PDBCollection> pattern_databases;
@@ -28,7 +28,7 @@ class IncrementalCanonicalPDBs {
 
     void recompute_max_additive_subsets();
 public:
-    IncrementalCanonicalPDBs(const std::shared_ptr<AbstractTask> &task,
+    IncrementalCanonicalPDBs(const TaskProxy &task_proxy,
                              const PatternCollection &intitial_patterns);
     virtual ~IncrementalCanonicalPDBs() = default;
 
