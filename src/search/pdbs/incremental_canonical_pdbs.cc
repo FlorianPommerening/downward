@@ -30,7 +30,8 @@ IncrementalCanonicalPDBs::IncrementalCanonicalPDBs(
 }
 
 void IncrementalCanonicalPDBs::add_pdb_for_pattern(const Pattern &pattern) {
-    pattern_databases->push_back(make_shared<PatternDatabase>(task, pattern));
+    TaskProxy task_proxy(*task);
+    pattern_databases->push_back(make_shared<PatternDatabase>(task_proxy, pattern));
     size += pattern_databases->back()->get_size();
 }
 

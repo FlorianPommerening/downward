@@ -68,9 +68,8 @@ void AbstractOperator::dump(const Pattern &pattern,
 }
 
 PatternDatabase::PatternDatabase(
-    const std::shared_ptr<AbstractTask> &task, const Pattern &pattern, bool dump)
+    const TaskProxy &task_proxy, const Pattern &pattern, bool dump)
     : pattern(pattern) {
-    TaskProxy task_proxy(*task);
     verify_no_axioms(task_proxy);
     verify_no_conditional_effects(task_proxy);
     assert(utils::is_sorted_unique(pattern));
@@ -90,7 +89,7 @@ PatternDatabase::PatternDatabase(
             utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
         }
     }
-    create_pdb(task);
+    create_pdb(task_proxy);
     if (dump)
         cout << "PDB construction time: " << timer << endl;
 }
@@ -184,8 +183,7 @@ void PatternDatabase::build_abstract_operators(
                  variables, operators);
 }
 
-void PatternDatabase::create_pdb(const shared_ptr<AbstractTask> &task) {
-    TaskProxy task_proxy(*task);
+void PatternDatabase::create_pdb(const TaskProxy &task_proxy) {
     VariablesProxy variables = task_proxy.get_variables();
     vector<int> variable_to_index(variables.size(), -1);
     for (size_t i = 0; i < pattern.size(); ++i) {

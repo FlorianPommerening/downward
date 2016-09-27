@@ -120,7 +120,7 @@ class PatternDatabase {
       specify individual operator costs for each operator for action
       cost partitioning. If left empty, default operator costs are used.
     */
-    void create_pdb(const std::shared_ptr<AbstractTask> &task);
+    void create_pdb(const TaskProxy &task_proxy);
 
     /*
       For a given abstract state (given as index), the according values
@@ -151,7 +151,7 @@ public:
        empty, default operator costs are used.
     */
     PatternDatabase(
-        const std::shared_ptr<AbstractTask> &task,
+        const TaskProxy &task_proxy,
         const Pattern &pattern,
         bool dump = false);
     ~PatternDatabase() = default;
