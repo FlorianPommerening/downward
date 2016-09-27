@@ -200,7 +200,7 @@ void PatternDatabase::create_pdb(const shared_ptr<AbstractTask> &task) {
     }
 
     // build the match tree
-    MatchTree match_tree(task, pattern, hash_multipliers);
+    MatchTree match_tree(task_proxy, pattern, hash_multipliers);
     for (const AbstractOperator &op : operators) {
         match_tree.insert(op);
     }

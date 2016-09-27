@@ -11,9 +11,14 @@
 namespace pdbs {
 class AbstractOperator;
 
-// Successor Generator for abstract operators.
+/*
+  Successor Generator for abstract operators.
+  NOTE that the task proxy passed to the constructor is stored internally.
+       It is the responsibility of the owner that the task lives at least as
+       long as the match tree does.
+*/
 class MatchTree {
-    std::shared_ptr<AbstractTask> task;
+    TaskProxy task_proxy;
     struct Node;
     // See PatternDatabase for documentation on pattern and hash_multipliers.
     Pattern pattern;
@@ -28,7 +33,7 @@ class MatchTree {
     void dump_recursive(Node *node) const;
 public:
     // Initialize an empty match tree.
-    MatchTree(const std::shared_ptr<AbstractTask> &task,
+    MatchTree(const TaskProxy &task_proxy,
               const Pattern &pattern,
               const std::vector<size_t> &hash_multipliers);
     ~MatchTree();
