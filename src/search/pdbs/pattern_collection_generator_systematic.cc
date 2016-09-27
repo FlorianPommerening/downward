@@ -268,7 +268,7 @@ PatternCollectionInformation PatternCollectionGeneratorSystematic::generate(
     } else {
         build_patterns_naive(task_proxy);
     }
-    return PatternCollectionInformation(task, patterns);
+    return PatternCollectionInformation(task_proxy, patterns);
 }
 
 static shared_ptr<PatternCollectionGenerator> _parse(OptionParser &parser) {

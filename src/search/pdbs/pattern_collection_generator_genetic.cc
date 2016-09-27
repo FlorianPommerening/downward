@@ -278,7 +278,8 @@ PatternCollectionInformation PatternCollectionGeneratorGenetic::generate(
     genetic_algorithm(task);
     cout << "Pattern generation (Edelkamp) time: " << timer << endl;
     assert(best_patterns);
-    return PatternCollectionInformation(task, best_patterns);
+    TaskProxy task_proxy(*task);
+    return PatternCollectionInformation(task_proxy, best_patterns);
 }
 
 static shared_ptr<PatternCollectionGenerator> _parse(OptionParser &parser) {

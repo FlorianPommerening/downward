@@ -36,7 +36,7 @@ PatternCollectionInformation PatternCollectionGeneratorCombo::generate(
             patterns->emplace_back(1, goal_var_id);
     }
     cout << "Combo pattern collection: " << *patterns << endl;
-    return PatternCollectionInformation(task, patterns);
+    return PatternCollectionInformation(task_proxy, patterns);
 }
 
 static shared_ptr<PatternCollectionGenerator> _parse(OptionParser &parser) {

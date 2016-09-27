@@ -18,7 +18,7 @@ namespace pdbs {
   (consumers of pattern collections like heuristics).
 */
 class PatternCollectionInformation {
-    std::shared_ptr<AbstractTask> task;
+    TaskProxy task_proxy;
     std::shared_ptr<PatternCollection> patterns;
     std::shared_ptr<PDBCollection> pdbs;
     std::shared_ptr<MaxAdditivePDBSubsets> max_additive_subsets;
@@ -29,7 +29,7 @@ class PatternCollectionInformation {
     bool information_is_valid() const;
 public:
     PatternCollectionInformation(
-        const std::shared_ptr<AbstractTask> &task,
+        const TaskProxy &task_proxy,
         const std::shared_ptr<PatternCollection> &patterns);
     ~PatternCollectionInformation() = default;
 
