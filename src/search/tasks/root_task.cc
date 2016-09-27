@@ -27,7 +27,7 @@ int RootTask::get_num_variables() const {
     return g_variable_domain.size();
 }
 
-const string &RootTask::get_variable_name(int var) const {
+string RootTask::get_variable_name(int var) const {
     return g_variable_name[var];
 }
 
@@ -43,7 +43,7 @@ int RootTask::get_variable_default_axiom_value(int var) const {
     return g_default_axiom_values[var];
 }
 
-const string &RootTask::get_fact_name(const FactPair &fact) const {
+string RootTask::get_fact_name(const FactPair &fact) const {
     return g_fact_names[fact.var][fact.value];
 }
 
@@ -55,7 +55,7 @@ int RootTask::get_operator_cost(int index, bool is_axiom) const {
     return get_operator_or_axiom(index, is_axiom).get_cost();
 }
 
-const string &RootTask::get_operator_name(int index, bool is_axiom) const {
+string RootTask::get_operator_name(int index, bool is_axiom) const {
     return get_operator_or_axiom(index, is_axiom).get_name();
 }
 
@@ -115,9 +115,8 @@ FactPair RootTask::get_goal_fact(int index) const {
 
 vector<int> RootTask::get_initial_state_values() const {
     // TODO: think about a better way to do this.
-    static StateRegistry state_registry(*g_state_packer,
-                                        *g_axiom_evaluator,
-                                        g_initial_state_data);
+    static StateRegistry state_registry(
+        *g_root_task(), *g_state_packer, *g_axiom_evaluator, g_initial_state_data);
     return state_registry.get_initial_state().get_values();
 }
 
