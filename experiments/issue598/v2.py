@@ -57,6 +57,19 @@ def main(revisions=None):
                 )
 
     exp.add_fetcher(name='parse-again', parsers=['pdb-parser.py'])
+    exp.add_comparison_table_step(attributes=["pdb_generation_time"])
+
+    for attribute in ["pdb_generation_time"]:
+        for config in configs:
+            exp.add_report(
+                RelativeScatterPlotReport(
+                    attributes=[attribute],
+                    filter_config=["{}-{}".format(rev, config.nick) for rev in revisions],
+                    get_category=lambda run1, run2: run1.get("domain"),
+                ),
+                outfile="{}-{}-{}.png".format(exp.name, attribute, config.nick)
+            )
+
 
     exp()
 
