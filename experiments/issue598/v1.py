@@ -57,6 +57,7 @@ def main(revisions=None):
                 )
 
     exp.add_fetcher(name='parse-again', parsers=['pdb-parser.py'])
+    exp.add_comparison_table_step(attributes=["pdb_generation_time"])
 
     exp()
 
