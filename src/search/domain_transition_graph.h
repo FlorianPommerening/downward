@@ -1,25 +1,62 @@
 #ifndef DOMAIN_TRANSITION_GRAPH_H
 #define DOMAIN_TRANSITION_GRAPH_H
 
+#include "task_proxy.h"
+
 #include <cassert>
-#include <iostream>
-#include <map>
+#include <unordered_map>
 #include <vector>
-using namespace std;
 
+namespace cg_heuristic {
 class CGHeuristic;
-class State;
-class Operator;
+}
 
-class ValueNode;
-class ValueTransition;
-class ValueTransitionLabel;
+struct LocalAssignment;
+struct ValueNode;
+struct ValueTransition;
+struct ValueTransitionLabel;
 class DomainTransitionGraph;
 
 // Note: We do not use references but pointers to refer to the "parents" of
 // transitions and nodes. This is because these structures could not be
 // put into vectors otherwise.
 
+class DTGFactory {
+    const TaskProxy &task_proxy;
+    bool collect_transition_side_effects;
+    std::function<bool(int, int)> pruning_condition;
+
+    std::vector<std::unordered_map<std::pair<int, int>, int>> transition_index;
+    std::vector<std::unordered_map<int, int>> global_to_local_var;
+
+    void allocate_graphs_and_nodes(std::vector<DomainTransitionGraph *> &dtgs);
+    void initialize_index_structures(int num_dtgs);
+    void create_transitions(std::vector<DomainTransitionGraph *> &dtgs);
+    void process_effect(const EffectProxy &eff, const OperatorProxy &op,
+                        std::vector<DomainTransitionGraph *> &dtgs);
+    void update_transition_condition(const FactProxy &fact,
+                                     DomainTransitionGraph *dtg,
+                                     std::vector<LocalAssignment> &condition);
+    void extend_global_to_local_mapping_if_necessary(
+        DomainTransitionGraph *dtg, int global_var);
+    void revert_new_local_vars(DomainTransitionGraph *dtg,
+                               unsigned int first_local_var);
+    ValueTransition *get_transition(int origin, int target,
+                                    DomainTransitionGraph *dtg);
+    void simplify_transitions(std::vector<DomainTransitionGraph *> &dtgs);
+    void simplify_labels(std::vector<ValueTransitionLabel> &labels);
+    void collect_all_side_effects(std::vector<DomainTransitionGraph *> &dtgs);
+    void collect_side_effects(DomainTransitionGraph *dtg,
+                              std::vector<ValueTransitionLabel> &labels);
+    OperatorProxy get_op_for_label(const ValueTransitionLabel &label);
+
+public:
+    DTGFactory(const TaskProxy &task_proxy,
+               bool collect_transition_side_effects,
+               const std::function<bool(int, int)> &pruning_condition);
+
+    std::vector<DomainTransitionGraph *> build_dtgs();
+};
 
 struct LocalAssignment {
     short local_var;
@@ -34,45 +71,40 @@ struct LocalAssignment {
 };
 
 struct ValueTransitionLabel {
-    Operator *op;
-    vector<LocalAssignment> precond;
-    vector<LocalAssignment> effect;
+    int op_id;
+    bool is_axiom;
+    std::vector<LocalAssignment> precond;
+    std::vector<LocalAssignment> effect;
 
-    ValueTransitionLabel(Operator *theOp, const vector<LocalAssignment> &precond_,
-                         const vector<LocalAssignment> &effect_)
-        : op(theOp), precond(precond_), effect(effect_) {}
-    void dump() const;
+    ValueTransitionLabel(int op_id, bool axiom,
+                         const std::vector<LocalAssignment> &precond,
+                         const std::vector<LocalAssignment> &effect)
+        : op_id(op_id), is_axiom(axiom), precond(precond), effect(effect) {}
 };
 
 struct ValueTransition {
     ValueNode *target;
-    vector<ValueTransitionLabel> labels;
-    vector<ValueTransitionLabel> cea_labels; // labels for cea heuristic
+    std::vector<ValueTransitionLabel> labels;
 
     ValueTransition(ValueNode *targ)
         : target(targ) {}
 
-    void simplify();
-    void dump() const;
-private:
-    void simplify_labels(vector<ValueTransitionLabel> &label_vec);
+    void simplify(const TaskProxy &task_proxy);
 };
 
 struct ValueNode {
     DomainTransitionGraph *parent_graph;
     int value;
-    vector<ValueTransition> transitions;
+    std::vector<ValueTransition> transitions;
 
-    vector<int> distances;             // cg; empty vector if not yet requested
-    vector<ValueTransitionLabel *> helpful_transitions;
-    // cg; empty vector if not requested
-    vector<int> children_state;        // cg
-    ValueNode *reached_from;           // cg
-    ValueTransitionLabel *reached_by;  // cg
+    std::vector<int> distances;
+    std::vector<ValueTransitionLabel *> helpful_transitions;
+    std::vector<int> children_state;
+    ValueNode *reached_from;
+    ValueTransitionLabel *reached_by;
 
     ValueNode(DomainTransitionGraph *parent, int val)
         : parent_graph(parent), value(val), reached_from(0), reached_by(0) {}
-    void dump() const;
 };
 
 namespace cea_heuristic {
@@ -80,35 +112,22 @@ class ContextEnhancedAdditiveHeuristic;
 }
 
 class DomainTransitionGraph {
-    friend class CGHeuristic;
+    friend class cg_heuristic::CGHeuristic;
     friend class cea_heuristic::ContextEnhancedAdditiveHeuristic;
-    friend class ValueNode;
-    friend class ValueTransition;
-    friend class LocalAssignment;
+    friend class DTGFactory;
 
     int var;
-    bool is_axiom;
-    vector<ValueNode> nodes;
+    std::vector<ValueNode> nodes;
 
-    int last_helpful_transition_extraction_time; // cg heuristic; "dirty bit"
+    int last_helpful_transition_extraction_time;
 
-    vector<int> local_to_global_child;
+    std::vector<int> local_to_global_child;
     // used for mapping variables in conditions to their global index
     // (only needed for initializing child_state for the start node?)
-    vector<int> cea_parents;
-    // Same as local_to_global_child, but for cea heuristic.
 
     DomainTransitionGraph(const DomainTransitionGraph &other); // copying forbidden
 public:
     DomainTransitionGraph(int var_index, int node_count);
-    void read_data(istream &in);
-
-    void dump() const;
-
-    void get_successors(int value, vector<int> &result) const;
-    // Build vector of values v' such that there is a transition from value to v'.
-
-    static void read_all(istream &in);
 };
 
 #endif

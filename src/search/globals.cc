@@ -2,29 +2,30 @@
 
 #include "axioms.h"
 #include "causal_graph.h"
-#include "domain_transition_graph.h"
+#include "global_operator.h"
+#include "global_state.h"
 #include "heuristic.h"
-#include "legacy_causal_graph.h"
-#include "operator.h"
-#include "rng.h"
-#include "state.h"
+#include "int_packer.h"
 #include "successor_generator.h"
-#include "timer.h"
-#include "utilities.h"
+
+#include "tasks/root_task.h"
+
+#include "utils/logging.h"
+#include "utils/rng.h"
+#include "utils/system.h"
+#include "utils/timer.h"
 
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <limits>
 #include <set>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
+
 using namespace std;
-
-#include <ext/hash_map>
-using namespace __gnu_cxx;
-
+using utils::ExitCode;
 
 static const int PRE_FILE_VERSION = 3;
 
@@ -35,10 +36,10 @@ static const int PRE_FILE_VERSION = 3;
 //       are_mutex, which is at least better than exposing the data
 //       structure globally.)
 
-static vector<vector<set<pair<int, int> > > > g_inconsistent_facts;
+static vector<vector<set<FactPair>>> g_inconsistent_facts;
 
-bool test_goal(const State &state) {
-    for (int i = 0; i < g_goal.size(); i++) {
+bool test_goal(const GlobalState &state) {
+    for (size_t i = 0; i < g_goal.size(); ++i) {
         if (state[g_goal[i].first] != g_goal[i].second) {
             return false;
         }
@@ -46,49 +47,41 @@ bool test_goal(const State &state) {
     return true;
 }
 
-int calculate_plan_cost(const vector<const Operator *> &plan) {
+int calculate_plan_cost(const vector<const GlobalOperator *> &plan) {
     // TODO: Refactor: this is only used by save_plan (see below)
     //       and the SearchEngine classes and hence should maybe
     //       be moved into the SearchEngine (along with save_plan).
     int plan_cost = 0;
-    for (int i = 0; i < plan.size(); i++) {
+    for (size_t i = 0; i < plan.size(); ++i) {
         plan_cost += plan[i]->get_cost();
     }
     return plan_cost;
 }
 
-void save_plan(const vector<const Operator *> &plan, int iter) {
+void save_plan(const vector<const GlobalOperator *> &plan,
+               bool generates_multiple_plan_files) {
     // TODO: Refactor: this is only used by the SearchEngine classes
     //       and hence should maybe be moved into the SearchEngine.
-    ofstream outfile;
-    if (iter == 0) {
-        outfile.open(g_plan_filename.c_str(), ios::out);
+    ostringstream filename;
+    filename << g_plan_filename;
+    int plan_number = g_num_previously_generated_plans + 1;
+    if (generates_multiple_plan_files || g_is_part_of_anytime_portfolio) {
+        filename << "." << plan_number;
     } else {
-        ostringstream out;
-        out << g_plan_filename << "." << iter;
-        outfile.open(out.str().c_str(), ios::out);
+        assert(plan_number == 1);
     }
-    for (int i = 0; i < plan.size(); i++) {
+    ofstream outfile(filename.str());
+    for (size_t i = 0; i < plan.size(); ++i) {
         cout << plan[i]->get_name() << " (" << plan[i]->get_cost() << ")" << endl;
         outfile << "(" << plan[i]->get_name() << ")" << endl;
     }
-    outfile.close();
     int plan_cost = calculate_plan_cost(plan);
-    ofstream statusfile;
-    statusfile.open("plan_numbers_and_cost", ios::out | ios::app);
-    statusfile << iter << " " << plan_cost << endl;
-    statusfile.close();
+    outfile << "; cost = " << plan_cost << " ("
+            << (is_unit_cost() ? "unit cost" : "general cost") << ")" << endl;
+    outfile.close();
     cout << "Plan length: " << plan.size() << " step(s)." << endl;
     cout << "Plan cost: " << plan_cost << endl;
-}
-
-bool peek_magic(istream &in, string magic) {
-    string word;
-    in >> word;
-    bool result = (word == magic);
-    for (int i = word.size() - 1; i >= 0; i--)
-        in.putback(word[i]);
-    return result;
+    ++g_num_previously_generated_plans;
 }
 
 void check_magic(istream &in, string magic) {
@@ -102,7 +95,7 @@ void check_magic(istream &in, string magic) {
                  << "on a preprocessor file from " << endl
                  << "an older version." << endl;
         }
-        exit_with(EXIT_INPUT_ERROR);
+        utils::exit_with(ExitCode::INPUT_ERROR);
     }
 }
 
@@ -115,7 +108,7 @@ void read_and_verify_version(istream &in) {
         cerr << "Expected preprocessor file version " << PRE_FILE_VERSION
              << ", got " << version << "." << endl;
         cerr << "Exiting." << endl;
-        exit_with(EXIT_INPUT_ERROR);
+        utils::exit_with(ExitCode::INPUT_ERROR);
     }
 }
 
@@ -128,7 +121,7 @@ void read_metric(istream &in) {
 void read_variables(istream &in) {
     int count;
     in >> count;
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; ++i) {
         check_magic(in, "begin_variable");
         string name;
         in >> name;
@@ -139,17 +132,10 @@ void read_variables(istream &in) {
         int range;
         in >> range;
         g_variable_domain.push_back(range);
-        if (range > numeric_limits<state_var_t>::max()) {
-            cerr << "This should not have happened!" << endl;
-            cerr << "Are you using the downward script, or are you using "
-                 << "downward-1 directly?" << endl;
-            exit_with(EXIT_INPUT_ERROR);
-        }
-
         in >> ws;
         vector<string> fact_names(range);
-        for (size_t i = 0; i < fact_names.size(); i++)
-            getline(in, fact_names[i]);
+        for (size_t j = 0; j < fact_names.size(); ++j)
+            getline(in, fact_names[j]);
         g_fact_names.push_back(fact_names);
         check_magic(in, "end_variable");
     }
@@ -169,36 +155,33 @@ void read_mutexes(istream &in) {
        If we ever change this representation, this is something to be
        aware of. */
 
-    for (size_t i = 0; i < num_mutex_groups; ++i) {
+    for (int i = 0; i < num_mutex_groups; ++i) {
         check_magic(in, "begin_mutex_group");
         int num_facts;
         in >> num_facts;
-        vector<pair<int, int> > invariant_group;
+        vector<FactPair> invariant_group;
         invariant_group.reserve(num_facts);
-        for (size_t j = 0; j < num_facts; ++j) {
-            int var, val;
-            in >> var >> val;
-            invariant_group.push_back(make_pair(var, val));
+        for (int j = 0; j < num_facts; ++j) {
+            int var;
+            int value;
+            in >> var >> value;
+            invariant_group.emplace_back(var, value);
         }
         check_magic(in, "end_mutex_group");
-        for (size_t j = 0; j < invariant_group.size(); ++j) {
-            const pair<int, int> &fact1 = invariant_group[j];
-            int var1 = fact1.first, val1 = fact1.second;
-            for (size_t k = 0; k < invariant_group.size(); ++k) {
-                const pair<int, int> &fact2 = invariant_group[k];
-                int var2 = fact2.first;
-                if (var1 != var2) {
+        for (const FactPair &fact1 : invariant_group) {
+            for (const FactPair &fact2 : invariant_group) {
+                if (fact1.var != fact2.var) {
                     /* The "different variable" test makes sure we
                        don't mark a fact as mutex with itself
                        (important for correctness) and don't include
                        redundant mutexes (important to conserve
-                       memory). Note that the preprocessor removes
-                       mutex groups that contain *only* redundant
-                       mutexes, but it can of course generate mutex
-                       groups which lead to *some* redundant mutexes,
-                       where some but not all facts talk about the
-                       same variable. */
-                    g_inconsistent_facts[var1][val1].insert(fact2);
+                       memory). Note that the translator (at least
+                       with default settings) removes mutex groups
+                       that contain *only* redundant mutexes, but it
+                       can of course generate mutex groups which lead
+                       to *some* redundant mutexes, where some but not
+                       all facts talk about the same variable. */
+                    g_inconsistent_facts[fact1.var][fact1.value].insert(fact2);
                 }
             }
         }
@@ -209,7 +192,11 @@ void read_goal(istream &in) {
     check_magic(in, "begin_goal");
     int count;
     in >> count;
-    for (int i = 0; i < count; i++) {
+    if (count < 1) {
+        cerr << "Task has no goal condition!" << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
+    for (int i = 0; i < count; ++i) {
         int var, val;
         in >> var >> val;
         g_goal.push_back(make_pair(var, val));
@@ -219,7 +206,7 @@ void read_goal(istream &in) {
 
 void dump_goal() {
     cout << "Goal Conditions:" << endl;
-    for (int i = 0; i < g_goal.size(); i++)
+    for (size_t i = 0; i < g_goal.size(); ++i)
         cout << "  " << g_variable_name[g_goal[i].first] << ": "
              << g_goal[i].second << endl;
 }
@@ -227,38 +214,64 @@ void dump_goal() {
 void read_operators(istream &in) {
     int count;
     in >> count;
-    for (int i = 0; i < count; i++)
-        g_operators.push_back(Operator(in, false));
+    for (int i = 0; i < count; ++i)
+        g_operators.push_back(GlobalOperator(in, false));
 }
 
 void read_axioms(istream &in) {
     int count;
     in >> count;
-    for (int i = 0; i < count; i++)
-        g_axioms.push_back(Operator(in, true));
+    for (int i = 0; i < count; ++i)
+        g_axioms.push_back(GlobalOperator(in, true));
 
-    g_axiom_evaluator = new AxiomEvaluator;
-    g_axiom_evaluator->evaluate(*g_initial_state);
+    g_axiom_evaluator = new AxiomEvaluator(TaskProxy(*g_root_task()));
 }
 
 void read_everything(istream &in) {
+    cout << "reading input... [t=" << utils::g_timer << "]" << endl;
     read_and_verify_version(in);
     read_metric(in);
     read_variables(in);
     read_mutexes(in);
-    g_initial_state = new State(in);
+    g_initial_state_data.resize(g_variable_domain.size());
+    check_magic(in, "begin_state");
+    for (size_t i = 0; i < g_variable_domain.size(); ++i) {
+        in >> g_initial_state_data[i];
+    }
+    check_magic(in, "end_state");
+    g_default_axiom_values = g_initial_state_data;
+
     read_goal(in);
     read_operators(in);
     read_axioms(in);
-    check_magic(in, "begin_SG");
-    g_successor_generator = read_successor_generator(in);
-    check_magic(in, "end_SG");
-    DomainTransitionGraph::read_all(in);
-    g_legacy_causal_graph = new LegacyCausalGraph(in);
 
-    // NOTE: causal graph is computed from the problem specification,
-    // so must be built after the problem has been read in.
-    g_causal_graph = new CausalGraph;
+    /* TODO: We should be stricter here and verify that we
+       have reached the end of "in". */
+
+    cout << "done reading input! [t=" << utils::g_timer << "]" << endl;
+
+    cout << "packing state variables..." << flush;
+    assert(!g_variable_domain.empty());
+    g_state_packer = new IntPacker(g_variable_domain);
+    cout << "done! [t=" << utils::g_timer << "]" << endl;
+
+    int num_vars = g_variable_domain.size();
+    int num_facts = 0;
+    for (int var = 0; var < num_vars; ++var)
+        num_facts += g_variable_domain[var];
+
+    cout << "Variables: " << num_vars << endl;
+    cout << "FactPairs: " << num_facts << endl;
+    cout << "Bytes per state: "
+         << g_state_packer->get_num_bins() * sizeof(IntPacker::Bin)
+         << endl;
+
+    cout << "Building successor generator..." << flush;
+    TaskProxy task_proxy(*g_root_task());
+    g_successor_generator = new SuccessorGenerator(task_proxy);
+    cout << "done! [t=" << utils::g_timer << "]" << endl;
+
+    cout << "done initalizing global data [t=" << utils::g_timer << "]" << endl;
 }
 
 void dump_everything() {
@@ -267,57 +280,79 @@ void dump_everything() {
     cout << "Max Action Cost: " << g_max_action_cost << endl;
     // TODO: Dump the actual fact names.
     cout << "Variables (" << g_variable_name.size() << "):" << endl;
-    for (int i = 0; i < g_variable_name.size(); i++)
+    for (size_t i = 0; i < g_variable_name.size(); ++i)
         cout << "  " << g_variable_name[i]
              << " (range " << g_variable_domain[i] << ")" << endl;
+    State initial_state = TaskProxy(*g_root_task()).get_initial_state();
     cout << "Initial State (PDDL):" << endl;
-    g_initial_state->dump_pddl();
+    initial_state.dump_pddl();
     cout << "Initial State (FDR):" << endl;
-    g_initial_state->dump_fdr();
+    initial_state.dump_fdr();
     dump_goal();
     /*
-    cout << "Successor Generator:" << endl;
-    g_successor_generator->dump();
-    for(int i = 0; i < g_variable_domain.size(); i++)
+    for(int i = 0; i < g_variable_domain.size(); ++i)
       g_transition_graphs[i]->dump();
     */
 }
 
-void verify_no_axioms_no_cond_effects() {
-    if (!g_axioms.empty()) {
+bool is_unit_cost() {
+    return g_min_action_cost == 1 && g_max_action_cost == 1;
+}
+
+bool has_axioms() {
+    return !g_axioms.empty();
+}
+
+void verify_no_axioms() {
+    if (has_axioms()) {
         cerr << "Heuristic does not support axioms!" << endl << "Terminating."
              << endl;
-        exit_with(EXIT_UNSUPPORTED);
-    }
-
-    for (int i = 0; i < g_operators.size(); i++) {
-        const vector<PrePost> &pre_post = g_operators[i].get_pre_post();
-        for (int j = 0; j < pre_post.size(); j++) {
-            const vector<Prevail> &cond = pre_post[j].cond;
-            if (cond.empty())
-                continue;
-            // Accept conditions that are redundant, but nothing else.
-            // In a better world, these would never be included in the
-            // input in the first place.
-            int var = pre_post[j].var;
-            int pre = pre_post[j].pre;
-            int post = pre_post[j].post;
-            if (pre == -1 && cond.size() == 1 && cond[0].var == var
-                && cond[0].prev != post && g_variable_domain[var] == 2)
-                continue;
-
-            cerr << "Heuristic does not support conditional effects "
-                 << "(operator " << g_operators[i].get_name() << ")" << endl
-                 << "Terminating." << endl;
-            exit_with(EXIT_UNSUPPORTED);
-        }
+        utils::exit_with(ExitCode::UNSUPPORTED);
     }
 }
 
-bool are_mutex(const pair<int, int> &a, const pair<int, int> &b) {
-    if (a.first == b.first) // same variable: mutex iff different value
-        return a.second != b.second;
-    return bool(g_inconsistent_facts[a.first][a.second].count(b));
+static int get_first_conditional_effects_op_id() {
+    for (size_t i = 0; i < g_operators.size(); ++i) {
+        const vector<GlobalEffect> &effects = g_operators[i].get_effects();
+        for (size_t j = 0; j < effects.size(); ++j) {
+            const vector<GlobalCondition> &cond = effects[j].conditions;
+            if (!cond.empty())
+                return i;
+        }
+    }
+    return -1;
+}
+
+bool has_conditional_effects() {
+    return get_first_conditional_effects_op_id() != -1;
+}
+
+void verify_no_conditional_effects() {
+    int op_id = get_first_conditional_effects_op_id();
+    if (op_id != -1) {
+        cerr << "Heuristic does not support conditional effects "
+             << "(operator " << g_operators[op_id].get_name() << ")" << endl
+             << "Terminating." << endl;
+        utils::exit_with(ExitCode::UNSUPPORTED);
+    }
+}
+
+void verify_no_axioms_no_conditional_effects() {
+    verify_no_axioms();
+    verify_no_conditional_effects();
+}
+
+bool are_mutex(const FactPair &a, const FactPair &b) {
+    if (a.var == b.var) {
+        // Same variable: mutex iff different value.
+        return a.value != b.value;
+    }
+    return bool(g_inconsistent_facts[a.var][a.value].count(b));
+}
+
+const shared_ptr<AbstractTask> g_root_task() {
+    static shared_ptr<AbstractTask> root_task = make_shared<tasks::RootTask>();
+    return root_task;
 }
 
 bool g_use_metric;
@@ -325,19 +360,19 @@ int g_min_action_cost = numeric_limits<int>::max();
 int g_max_action_cost = 0;
 vector<string> g_variable_name;
 vector<int> g_variable_domain;
-vector<vector<string> > g_fact_names;
+vector<vector<string>> g_fact_names;
 vector<int> g_axiom_layers;
 vector<int> g_default_axiom_values;
-State *g_initial_state;
-vector<pair<int, int> > g_goal;
-vector<Operator> g_operators;
-vector<Operator> g_axioms;
+IntPacker *g_state_packer;
+vector<int> g_initial_state_data;
+vector<pair<int, int>> g_goal;
+vector<GlobalOperator> g_operators;
+vector<GlobalOperator> g_axioms;
 AxiomEvaluator *g_axiom_evaluator;
 SuccessorGenerator *g_successor_generator;
-vector<DomainTransitionGraph *> g_transition_graphs;
-CausalGraph *g_causal_graph;
-LegacyCausalGraph *g_legacy_causal_graph;
 
-Timer g_timer;
 string g_plan_filename = "sas_plan";
-RandomNumberGenerator g_rng(2011); // Use an arbitrary default seed.
+int g_num_previously_generated_plans = 0;
+bool g_is_part_of_anytime_portfolio = false;
+
+utils::Log g_log;

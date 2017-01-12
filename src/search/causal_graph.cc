@@ -1,16 +1,35 @@
 #include "causal_graph.h"
 
-#include "operator.h"
-#include "utilities.h"
+#include "global_operator.h"
+#include "globals.h"
+#include "task_proxy.h"
+
+#include "utils/logging.h"
+#include "utils/memory.h"
+#include "utils/timer.h"
 
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-#include <tr1/unordered_set>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
-using namespace std::tr1;
 
+/*
+  We only want to create one causal graph per task, so they are cached globally.
+
+  TODO: We need to rethink the memory management here. Objects in this cache are
+  never reclaimed (before termination of the program). Also, currently every
+  heuristic that uses one would receive its own causal graph object even if it
+  uses an unmodified task because it will create its own copy of
+  CostAdaptedTask.
+  We have the same problems for other objects that are associated with tasks
+  (causal graphs, successor generators and axiom evlauators, DTGs, ...) and can
+  maybe deal with all of them in the same way.
+*/
+static unordered_map<const AbstractTask *,
+                     unique_ptr<CausalGraph>> causal_graph_cache;
 
 /*
   An IntRelationBuilder constructs an IntRelation by adding one pair
@@ -68,7 +87,7 @@ void IntRelationBuilder::compute_relation(IntRelation &result) const {
     int range = get_range();
     result.clear();
     result.resize(range);
-    for (size_t i = 0; i < range; ++i) {
+    for (int i = 0; i < range; ++i) {
         result[i].assign(int_sets[i].begin(), int_sets[i].end());
         sort(result[i].begin(), result[i].end());
     }
@@ -112,53 +131,53 @@ struct CausalGraphBuilder {
         pred_builder.add_pair(v, u);
     }
 
-    void handle_operator(const Operator &op) {
-        const vector<Prevail> &prevail = op.get_prevail();
-        const vector<PrePost> &pre_post = op.get_pre_post();
+    void handle_operator(const OperatorProxy &op) {
+        EffectsProxy effects = op.get_effects();
 
-        // Handle pre->eff links from prevail conditions.
-        for (size_t i = 0; i < prevail.size(); ++i) {
-            int pre_var = prevail[i].var;
-            for (size_t j = 0; j < pre_post.size(); ++j) {
-                int eff_var = pre_post[j].var;
-                if (pre_var != eff_var)
-                    handle_pre_eff_arc(pre_var, eff_var);
+        // Handle pre->eff links from preconditions.
+        for (FactProxy pre : op.get_preconditions()) {
+            int pre_var_id = pre.get_variable().get_id();
+            for (EffectProxy eff : effects) {
+                int eff_var_id = eff.get_fact().get_variable().get_id();
+                if (pre_var_id != eff_var_id)
+                    handle_pre_eff_arc(pre_var_id, eff_var_id);
             }
         }
 
-        // Handle pre->eff links from preconditions inside PrePost.
-        for (size_t i = 0; i < pre_post.size(); ++i) {
-            if (pre_post[i].pre == -1)
-                continue;
-            int pre_var = pre_post[i].var;
-            for (size_t j = 0; j < pre_post.size(); ++j) {
-                int eff_var = pre_post[j].var;
-                if (pre_var != eff_var)
-                    handle_pre_eff_arc(pre_var, eff_var);
+        // Handle pre->eff links from effect conditions.
+        for (EffectProxy eff : effects) {
+            VariableProxy eff_var = eff.get_fact().get_variable();
+            int eff_var_id = eff_var.get_id();
+            for (FactProxy pre : eff.get_conditions()) {
+                int pre_var_id = pre.get_variable().get_id();
+                if (pre_var_id != eff_var_id)
+                    handle_pre_eff_arc(pre_var_id, eff_var_id);
             }
         }
 
         // Handle eff->eff links.
-        for (size_t i = 0; i < pre_post.size(); ++i) {
-            int eff1_var = pre_post[i].var;
-            for (size_t j = i + 1; j < pre_post.size(); ++j) {
-                int eff2_var = pre_post[j].var;
-                if (eff1_var != eff2_var)
-                    handle_eff_eff_edge(eff1_var, eff2_var);
+        for (size_t i = 0; i < effects.size(); ++i) {
+            int eff1_var_id = effects[i].get_fact().get_variable().get_id();
+            for (size_t j = i + 1; j < effects.size(); ++j) {
+                int eff2_var_id = effects[j].get_fact().get_variable().get_id();
+                if (eff1_var_id != eff2_var_id)
+                    handle_eff_eff_edge(eff1_var_id, eff2_var_id);
             }
         }
     }
 };
 
+CausalGraph::CausalGraph(const TaskProxy &task_proxy) {
+    utils::Timer timer;
+    cout << "building causal graph..." << flush;
+    int num_variables = task_proxy.get_variables().size();
+    CausalGraphBuilder cg_builder(num_variables);
 
-CausalGraph::CausalGraph() {
-    CausalGraphBuilder cg_builder(g_variable_domain.size());
+    for (OperatorProxy op : task_proxy.get_operators())
+        cg_builder.handle_operator(op);
 
-    for (size_t i = 0; i < g_operators.size(); ++i)
-        cg_builder.handle_operator(g_operators[i]);
-
-    for (size_t i = 0; i < g_axioms.size(); ++i)
-        cg_builder.handle_operator(g_axioms[i]);
+    for (OperatorProxy op : task_proxy.get_axioms())
+        cg_builder.handle_operator(op);
 
     cg_builder.pre_eff_builder.compute_relation(pre_to_eff);
     cg_builder.eff_pre_builder.compute_relation(eff_to_pre);
@@ -167,21 +186,28 @@ CausalGraph::CausalGraph() {
     cg_builder.pred_builder.compute_relation(predecessors);
     cg_builder.succ_builder.compute_relation(successors);
 
-    // dump();
+    // dump(task_proxy);
+    cout << "done! [t=" << timer << "]" << endl;
 }
 
-
-CausalGraph::~CausalGraph() {
-}
-
-
-void CausalGraph::dump() const {
+void CausalGraph::dump(const TaskProxy &task_proxy) const {
     cout << "Causal graph: " << endl;
-    for (size_t var = 0; var < g_variable_domain.size(); ++var)
-        cout << "#" << var << " [" << g_variable_name[var] << "]:" << endl
-             << "    pre->eff arcs: " << pre_to_eff[var] << endl
-             << "    eff->pre arcs: " << eff_to_pre[var] << endl
-             << "    eff->eff arcs: " << eff_to_eff[var] << endl
-             << "    successors: " << successors[var] << endl
-             << "    predecessors: " << predecessors[var] << endl;
+    for (VariableProxy var : task_proxy.get_variables()) {
+        int var_id = var.get_id();
+        cout << "#" << var_id << " [" << var.get_name() << "]:" << endl
+             << "    pre->eff arcs: " << pre_to_eff[var_id] << endl
+             << "    eff->pre arcs: " << eff_to_pre[var_id] << endl
+             << "    eff->eff arcs: " << eff_to_eff[var_id] << endl
+             << "    successors: " << successors[var_id] << endl
+             << "    predecessors: " << predecessors[var_id] << endl;
+    }
+}
+
+const CausalGraph &get_causal_graph(const AbstractTask *task) {
+    if (causal_graph_cache.count(task) == 0) {
+        TaskProxy task_proxy(*task);
+        causal_graph_cache.insert(
+            make_pair(task, utils::make_unique_ptr<CausalGraph>(task_proxy)));
+    }
+    return *causal_graph_cache[task];
 }

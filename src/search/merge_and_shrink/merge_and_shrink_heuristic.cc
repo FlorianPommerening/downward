@@ -1,254 +1,506 @@
 #include "merge_and_shrink_heuristic.h"
 
-#include "abstraction.h"
-#include "shrink_fh.h"
-#include "variable_order_finder.h"
+#include "distances.h"
+#include "factored_transition_system.h"
+#include "fts_factory.h"
+#include "label_reduction.h"
+#include "labels.h"
+#include "merge_and_shrink_representation.h"
+#include "merge_strategy.h"
+#include "merge_strategy_factory.h"
+#include "shrink_strategy.h"
+#include "transition_system.h"
+#include "types.h"
+#include "utils.h"
 
-#include "../globals.h"
-#include "../operator.h"
 #include "../option_parser.h"
 #include "../plugin.h"
-#include "../state.h"
-#include "../timer.h"
+#include "../task_tools.h"
+
+#include "../utils/markup.h"
+#include "../utils/math.h"
+#include "../utils/memory.h"
+#include "../utils/system.h"
+#include "../utils/timer.h"
 
 #include <cassert>
-#include <limits>
+#include <iostream>
+#include <string>
+#include <utility>
 #include <vector>
-using namespace std;
 
+using namespace std;
+using utils::ExitCode;
+
+namespace merge_and_shrink {
+static void print_time(const utils::Timer &timer, string text) {
+    cout << "t=" << timer << " (" << text << ")" << endl;
+}
 
 MergeAndShrinkHeuristic::MergeAndShrinkHeuristic(const Options &opts)
     : Heuristic(opts),
-      abstraction_count(opts.get<int>("count")),
-      merge_strategy(MergeStrategy(opts.get_enum("merge_strategy"))),
-      shrink_strategy(opts.get<ShrinkStrategy *>("shrink_strategy")),
-      use_label_reduction(opts.get<bool>("reduce_labels")),
-      use_expensive_statistics(opts.get<bool>("expensive_statistics")) {
+      merge_strategy_factory(opts.get<shared_ptr<MergeStrategyFactory>>("merge_strategy")),
+      shrink_strategy(opts.get<shared_ptr<ShrinkStrategy>>("shrink_strategy")),
+      label_reduction(nullptr),
+      max_states(opts.get<int>("max_states")),
+      max_states_before_merge(opts.get<int>("max_states_before_merge")),
+      shrink_threshold_before_merge(opts.get<int>("threshold_before_merge")),
+      verbosity(static_cast<Verbosity>(opts.get_enum("verbosity"))),
+      starting_peak_memory(-1),
+      mas_representation(nullptr) {
+    assert(max_states_before_merge > 0);
+    assert(max_states >= max_states_before_merge);
+    assert(shrink_threshold_before_merge <= max_states_before_merge);
+
+    if (opts.contains("label_reduction")) {
+        label_reduction = opts.get<shared_ptr<LabelReduction>>("label_reduction");
+        label_reduction->initialize(task_proxy);
+    }
+
+    utils::Timer timer;
+    cout << "Initializing merge-and-shrink heuristic..." << endl;
+    starting_peak_memory = utils::get_peak_memory_in_kb();
+    verify_no_axioms(task_proxy);
+    dump_options();
+    warn_on_unusual_options();
+    cout << endl;
+
+    build(timer);
+    const bool final = true;
+    report_peak_memory_delta(final);
+    cout << "Done initializing merge-and-shrink heuristic [" << timer << "]"
+         << endl;
+    cout << endl;
 }
 
-MergeAndShrinkHeuristic::~MergeAndShrinkHeuristic() {
+void MergeAndShrinkHeuristic::report_peak_memory_delta(bool final) const {
+    if (final)
+        cout << "Final";
+    else
+        cout << "Current";
+    cout << " peak memory increase of merge-and-shrink computation: "
+         << utils::get_peak_memory_in_kb() - starting_peak_memory << " KB"
+         << endl;
 }
 
 void MergeAndShrinkHeuristic::dump_options() const {
-    cout << "Merge strategy: ";
-    switch (merge_strategy) {
-    case MERGE_LINEAR_CG_GOAL_LEVEL:
-        cout << "linear CG/GOAL, tie breaking on level (main)";
-        break;
-    case MERGE_LINEAR_CG_GOAL_RANDOM:
-        cout << "linear CG/GOAL, tie breaking random";
-        break;
-    case MERGE_LINEAR_GOAL_CG_LEVEL:
-        cout << "linear GOAL/CG, tie breaking on level";
-        break;
-    case MERGE_LINEAR_RANDOM:
-        cout << "linear random";
-        break;
-    case MERGE_DFP:
-        cout << "Draeger/Finkbeiner/Podelski" << endl;
-        cerr << "DFP merge strategy not implemented." << endl;
-        exit_with(EXIT_UNSUPPORTED);
-        break;
-    case MERGE_LINEAR_LEVEL:
-        cout << "linear by level";
-        break;
-    case MERGE_LINEAR_REVERSE_LEVEL:
-        cout << "linear by reverse level";
-        break;
-    default:
-        ABORT("Unknown merge strategy.");
+    if (merge_strategy_factory) { // deleted after merge strategy extraction
+        merge_strategy_factory->dump_options();
+        cout << endl;
+    }
+
+    cout << "Options related to size limits and shrinking: " << endl;
+    cout << "Transition system size limit: " << max_states << endl
+         << "Transition system size limit right before merge: "
+         << max_states_before_merge << endl;
+    cout << "Threshold to trigger shrinking right before merge: "
+         << shrink_threshold_before_merge << endl;
+    cout << endl;
+
+    shrink_strategy->dump_options();
+    cout << endl;
+
+    if (label_reduction) {
+        label_reduction->dump_options();
+    } else {
+        cout << "Label reduction disabled" << endl;
     }
     cout << endl;
-    shrink_strategy->dump_options();
-    cout << "Number of abstractions to maximize over: "
-         << abstraction_count << endl;
-    cout << "Label reduction: "
-         << (use_label_reduction ? "enabled" : "disabled") << endl
-         << "Expensive statistics: "
-         << (use_expensive_statistics ? "enabled" : "disabled") << endl;
+
+    cout << "Verbosity: ";
+    switch (verbosity) {
+    case Verbosity::SILENT:
+        cout << "silent";
+        break;
+    case Verbosity::NORMAL:
+        cout << "normal";
+        break;
+    case Verbosity::VERBOSE:
+        cout << "verbose";
+        break;
+    }
+    cout << endl;
 }
 
 void MergeAndShrinkHeuristic::warn_on_unusual_options() const {
-    if (use_expensive_statistics) {
-        string dashes(79, '=');
+    string dashes(79, '=');
+    if (!label_reduction) {
         cerr << dashes << endl
-             << ("WARNING! You have enabled extra statistics for "
-            "merge-and-shrink heuristics.\n"
-            "These statistics require a lot of time and memory.\n"
-            "When last tested (around revision 3011), enabling the "
-            "extra statistics\nincreased heuristic generation time by "
-            "76%. This figure may be significantly\nworse with more "
-            "recent code or for particular domains and instances.\n"
-            "You have been warned. Don't use this for benchmarking!")
-        << endl << dashes << endl;
-    }
-}
-
-Abstraction *MergeAndShrinkHeuristic::build_abstraction(bool is_first) {
-    // TODO: We're leaking memory here in various ways. Fix this.
-    //       Don't forget that build_atomic_abstractions also
-    //       allocates memory.
-
-    vector<Abstraction *> atomic_abstractions;
-    Abstraction::build_atomic_abstractions(
-        is_unit_cost_problem(), get_cost_type(), atomic_abstractions);
-
-    cout << "Shrinking atomic abstractions..." << endl;
-    for (size_t i = 0; i < atomic_abstractions.size(); ++i) {
-        atomic_abstractions[i]->compute_distances();
-        if (!atomic_abstractions[i]->is_solvable())
-            return atomic_abstractions[i];
-        shrink_strategy->shrink_atomic(*atomic_abstractions[i]);
-    }
-
-    cout << "Merging abstractions..." << endl;
-
-    VariableOrderFinder order(merge_strategy, is_first);
-
-    int var_no = order.next();
-    cout << "First variable: #" << var_no << endl;
-    Abstraction *abstraction = atomic_abstractions[var_no];
-    abstraction->statistics(use_expensive_statistics);
-
-    while (!order.done()) {
-        int var_no = order.next();
-        cout << "Next variable: #" << var_no << endl;
-        Abstraction *other_abstraction = atomic_abstractions[var_no];
-
-        // TODO: When using nonlinear merge strategies, make sure not
-        // to normalize multiple parts of a composite. See issue68.
-        if (shrink_strategy->reduce_labels_before_shrinking()) {
-            abstraction->normalize(use_label_reduction);
-            other_abstraction->normalize(false);
+             << "WARNING! You did not enable label reduction. This may "
+            "drastically reduce the performance of merge-and-shrink!"
+             << endl << dashes << endl;
+    } else if (label_reduction->reduce_before_merging() && label_reduction->reduce_before_shrinking()) {
+        cerr << dashes << endl
+             << "WARNING! You set label reduction to be applied twice in "
+            "each merge-and-shrink iteration, both before shrinking and\n"
+            "merging. This double computation effort does not pay off "
+            "for most configurations!"
+             << endl << dashes << endl;
+    } else {
+        if (label_reduction->reduce_before_shrinking() &&
+            (shrink_strategy->get_name() == "f-preserving"
+             || shrink_strategy->get_name() == "random")) {
+            cerr << dashes << endl
+                 << "WARNING! Bucket-based shrink strategies such as "
+                "f-preserving random perform best if used with label\n"
+                "reduction before merging, not before shrinking!"
+                 << endl << dashes << endl;
         }
-
-        abstraction->compute_distances();
-        if (!abstraction->is_solvable())
-            return abstraction;
-
-        other_abstraction->compute_distances();
-        shrink_strategy->shrink_before_merge(*abstraction, *other_abstraction);
-        // TODO: Make shrink_before_merge return a pair of bools
-        //       that tells us whether they have actually changed,
-        //       and use that to decide whether to dump statistics?
-        // (The old code would print statistics on abstraction iff it was
-        // shrunk. This is not so easy any more since this method is not
-        // in control, and the shrink strategy doesn't know whether we want
-        // expensive statistics. As a temporary aid, we just print the
-        // statistics always now, whether or not we shrunk.)
-        abstraction->statistics(use_expensive_statistics);
-        other_abstraction->statistics(use_expensive_statistics);
-
-        abstraction->normalize(use_label_reduction);
-        abstraction->statistics(use_expensive_statistics);
-
-        // Don't label-reduce the atomic abstraction -- see issue68.
-        other_abstraction->normalize(false);
-        other_abstraction->statistics(use_expensive_statistics);
-
-        Abstraction *new_abstraction = new CompositeAbstraction(
-            is_unit_cost_problem(), get_cost_type(),
-            abstraction, other_abstraction);
-
-        abstraction->release_memory();
-        other_abstraction->release_memory();
-
-        abstraction = new_abstraction;
-        abstraction->statistics(use_expensive_statistics);
-    }
-
-    abstraction->compute_distances();
-    if (!abstraction->is_solvable())
-        return abstraction;
-
-    ShrinkStrategy *def_shrink = ShrinkFH::create_default(abstraction->size());
-    def_shrink->shrink(*abstraction, abstraction->size(), true);
-    abstraction->compute_distances();
-
-    abstraction->statistics(use_expensive_statistics);
-    abstraction->release_memory();
-    return abstraction;
-}
-
-void MergeAndShrinkHeuristic::initialize() {
-    Timer timer;
-    cout << "Initializing merge-and-shrink heuristic..." << endl;
-    dump_options();
-    warn_on_unusual_options();
-
-    verify_no_axioms_no_cond_effects();
-    int peak_memory = 0;
-
-    for (int i = 0; i < abstraction_count; i++) {
-        cout << "Building abstraction #" << (i + 1) << "..." << endl;
-        Abstraction *abstraction = build_abstraction(i == 0);
-        peak_memory = max(peak_memory, abstraction->get_peak_memory_estimate());
-        abstractions.push_back(abstraction);
-        if (!abstractions.back()->is_solvable()) {
-            cout << "Abstract problem is unsolvable!" << endl;
-            if (i + 1 < abstraction_count)
-                cout << "Skipping remaining abstractions." << endl;
-            break;
+        if (label_reduction->reduce_before_merging() &&
+            shrink_strategy->get_name() == "bisimulation") {
+            cerr << dashes << endl
+                 << "WARNING! Shrinking based on bisimulation performs best "
+                "if used with label reduction before shrinking, not\n"
+                "before merging!"
+                 << endl << dashes << endl;
         }
     }
-
-    cout << "Done initializing merge-and-shrink heuristic [" << timer << "]"
-         << endl << "initial h value: " << compute_heuristic(
-        *g_initial_state) << endl;
-    cout << "Estimated peak memory for abstraction: " << peak_memory << " bytes" << endl;
 }
 
-int MergeAndShrinkHeuristic::compute_heuristic(const State &state) {
-    int cost = 0;
-    for (int i = 0; i < abstractions.size(); i++) {
-        int abs_cost = abstractions[i]->get_cost(state);
-        if (abs_cost == -1)
-            return DEAD_END;
-        cost = max(cost, abs_cost);
+pair<bool, bool> MergeAndShrinkHeuristic::shrink_before_merge(
+    FactoredTransitionSystem &fts, int index1, int index2) {
+    /*
+      Compute the size limit for both transition systems as imposed by
+      max_states and max_states_before_merge.
+    */
+    pair<int, int> new_sizes = compute_shrink_sizes(
+        fts.get_ts(index1).get_size(),
+        fts.get_ts(index2).get_size(),
+        max_states_before_merge,
+        max_states);
+
+    /*
+      For both transition systems, possibly compute and apply an
+      abstraction.
+      TODO: we could better use the given limit by increasing the size limit
+      for the second shrinking if the first shrinking was larger than
+      required.
+    */
+    bool shrunk1 = shrink_transition_system(
+        fts,
+        index1,
+        new_sizes.first,
+        shrink_threshold_before_merge,
+        *shrink_strategy,
+        verbosity);
+    bool shrunk2 = shrink_transition_system(
+        fts,
+        index2,
+        new_sizes.second,
+        shrink_threshold_before_merge,
+        *shrink_strategy,
+        verbosity);
+    return make_pair(shrunk1, shrunk2);
+}
+
+void MergeAndShrinkHeuristic::build(const utils::Timer &timer) {
+    const bool finalize_if_unsolvable = true;
+    FactoredTransitionSystem fts =
+        create_factored_transition_system(
+            task_proxy,
+            verbosity,
+            finalize_if_unsolvable);
+    print_time(timer, "after computation of atomic transition systems");
+    cout << endl;
+
+    if (fts.is_solvable()) { // All atomic transition system are solvable.
+        unique_ptr<MergeStrategy> merge_strategy =
+            merge_strategy_factory->compute_merge_strategy(task_proxy, fts);
+        merge_strategy_factory = nullptr;
+
+        while (fts.is_solvable() && fts.get_num_active_entries() > 1) {
+            // Choose next transition systems to merge
+            pair<int, int> merge_indices = merge_strategy->get_next();
+            int merge_index1 = merge_indices.first;
+            int merge_index2 = merge_indices.second;
+            assert(merge_index1 != merge_index2);
+            if (verbosity >= Verbosity::NORMAL) {
+                cout << "Next pair of indices: ("
+                     << merge_index1 << ", " << merge_index2 << ")" << endl;
+                if (verbosity >= Verbosity::VERBOSE) {
+                    fts.statistics(merge_index1);
+                    fts.statistics(merge_index2);
+                }
+                print_time(timer, "after computation of next merge");
+            }
+
+            // Label reduction (before shrinking)
+            if (label_reduction && label_reduction->reduce_before_shrinking()) {
+                bool reduced =
+                    label_reduction->reduce(merge_indices, fts, verbosity);
+                if (verbosity >= Verbosity::NORMAL && reduced) {
+                    print_time(timer, "after label reduction");
+                }
+            }
+
+            // Shrinking
+            pair<bool, bool> shrunk = shrink_before_merge(
+                fts, merge_index1, merge_index2);
+            if (verbosity >= Verbosity::NORMAL &&
+                (shrunk.first || shrunk.second)) {
+                if (verbosity >= Verbosity::VERBOSE) {
+                    if (shrunk.first) {
+                        fts.statistics(merge_index1);
+                    }
+                    if (shrunk.second) {
+                        fts.statistics(merge_index2);
+                    }
+                }
+                print_time(timer, "after shrinking");
+            }
+
+            // Label reduction (before merging)
+            if (label_reduction && label_reduction->reduce_before_merging()) {
+                bool reduced =
+                    label_reduction->reduce(merge_indices, fts, verbosity);
+                if (verbosity >= Verbosity::NORMAL && reduced) {
+                    print_time(timer, "after label reduction");
+                }
+            }
+
+            // Merging
+            int merged_index = fts.merge(
+                merge_index1, merge_index2, verbosity, finalize_if_unsolvable);
+            /*
+              NOTE: both the shrinking strategy classes and the construction of
+              the composite require input transition systems to be solvable.
+            */
+            if (!fts.is_solvable()) {
+                break;
+            }
+            if (verbosity >= Verbosity::NORMAL) {
+                if (verbosity >= Verbosity::VERBOSE) {
+                    fts.statistics(merged_index);
+                }
+                print_time(timer, "after merging");
+                if (verbosity >= Verbosity::VERBOSE) {
+                    report_peak_memory_delta();
+                }
+                cout << endl;
+            }
+        }
     }
+
+    pair<unique_ptr<MergeAndShrinkRepresentation>, unique_ptr<Distances>>
+    final_entry = fts.get_final_entry();
+    mas_representation = move(final_entry.first);
+    mas_representation->set_distances(*final_entry.second);
+    shrink_strategy = nullptr;
+    label_reduction = nullptr;
+}
+
+int MergeAndShrinkHeuristic::compute_heuristic(const GlobalState &global_state) {
+    State state = convert_global_state(global_state);
+    int cost = mas_representation->get_value(state);
+    if (cost == PRUNED_STATE)
+        return DEAD_END;
     return cost;
 }
 
-static ScalarEvaluator *_parse(OptionParser &parser) {
-    // TODO: better documentation what each parameter does
-    parser.add_option<int>("count", 1, "nr of abstractions to build");
-    vector<string> merge_strategies;
-    //TODO: it's a bit dangerous that the merge strategies here
-    // have to be specified exactly in the same order
-    // as in the enum definition. Try to find a way around this,
-    // or at least raise an error when the order is wrong.
-    merge_strategies.push_back("MERGE_LINEAR_CG_GOAL_LEVEL");
-    merge_strategies.push_back("MERGE_LINEAR_CG_GOAL_RANDOM");
-    merge_strategies.push_back("MERGE_LINEAR_GOAL_CG_LEVEL");
-    merge_strategies.push_back("MERGE_LINEAR_RANDOM");
-    merge_strategies.push_back("MERGE_DFP");
-    merge_strategies.push_back("MERGE_LINEAR_LEVEL");
-    merge_strategies.push_back("MERGE_LINEAR_REVERSE_LEVEL");
-    parser.add_enum_option("merge_strategy", merge_strategies,
-                           "MERGE_LINEAR_CG_GOAL_LEVEL",
-                           "merge strategy");
+void MergeAndShrinkHeuristic::add_shrink_limit_options_to_parser(OptionParser &parser) {
+    parser.add_option<int>(
+        "max_states",
+        "maximum transition system size allowed at any time point.",
+        "-1",
+        Bounds("-1", "infinity"));
+    parser.add_option<int>(
+        "max_states_before_merge",
+        "maximum transition system size allowed for two transition systems "
+        "before being merged to form the synchronized product.",
+        "-1",
+        Bounds("-1", "infinity"));
+    parser.add_option<int>(
+        "threshold_before_merge",
+        "If a transition system, before being merged, surpasses this soft "
+        "transition system size limit, the shrink strategy is called to "
+        "possibly shrink the transition system.",
+        "-1",
+        Bounds("-1", "infinity"));
+}
 
-    // TODO: Default shrink strategy should only be created
-    // when it's actually used.
-    ShrinkStrategy *def_shrink = ShrinkFH::create_default(50000);
+void MergeAndShrinkHeuristic::handle_shrink_limit_options_defaults(Options &opts) {
+    int max_states = opts.get<int>("max_states");
+    int max_states_before_merge = opts.get<int>("max_states_before_merge");
+    int threshold = opts.get<int>("threshold_before_merge");
 
-    parser.add_option<ShrinkStrategy *>("shrink_strategy", def_shrink, "shrink strategy");
-    // TODO: Rename option name to "use_label_reduction" to be
-    //       consistent with the papers?
-    parser.add_option<bool>("reduce_labels", true, "enable label reduction");
-    parser.add_option<bool>("expensive_statistics", false, "show statistics on \"unique unlabeled edges\" (WARNING: "
-                            "these are *very* slow -- check the warning in the output)");
+    // If none of the two state limits has been set: set default limit.
+    if (max_states == -1 && max_states_before_merge == -1) {
+        max_states = 50000;
+    }
+
+    // If exactly one of the max_states options has been set, set the other
+    // so that it imposes no further limits.
+    if (max_states_before_merge == -1) {
+        max_states_before_merge = max_states;
+    } else if (max_states == -1) {
+        int n = max_states_before_merge;
+        if (utils::is_product_within_limit(n, n, INF)) {
+            max_states = n * n;
+        } else {
+            max_states = INF;
+        }
+    }
+
+    if (max_states_before_merge > max_states) {
+        cerr << "warning: max_states_before_merge exceeds max_states, "
+             << "correcting." << endl;
+        max_states_before_merge = max_states;
+    }
+
+    if (max_states < 1) {
+        cerr << "error: transition system size must be at least 1" << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
+
+    if (max_states_before_merge < 1) {
+        cerr << "error: transition system size before merge must be at least 1"
+             << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
+
+    if (threshold == -1) {
+        threshold = max_states;
+    }
+    if (threshold < 1) {
+        cerr << "error: threshold must be at least 1" << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
+    if (threshold > max_states) {
+        cerr << "warning: threshold exceeds max_states, correcting" << endl;
+        threshold = max_states;
+    }
+
+    opts.set<int>("max_states", max_states);
+    opts.set<int>("max_states_before_merge", max_states_before_merge);
+    opts.set<int>("threshold_before_merge", threshold);
+}
+
+static Heuristic *_parse(OptionParser &parser) {
+    parser.document_synopsis(
+        "Merge-and-shrink heuristic",
+        "This heuristic implements the algorithm described in the following "
+        "paper:" + utils::format_paper_reference(
+            {"Silvan Sievers", "Martin Wehrle", "Malte Helmert"},
+            "Generalized Label Reduction for Merge-and-Shrink Heuristics",
+            "http://ai.cs.unibas.ch/papers/sievers-et-al-aaai2014.pdf",
+            "Proceedings of the 28th AAAI Conference on Artificial"
+            " Intelligence (AAAI 2014)",
+            "2358-2366",
+            "AAAI Press 2014") + "\n" +
+        "For a more exhaustive description of merge-and-shrink, see the journal "
+        "paper" + utils::format_paper_reference(
+            {"Malte Helmert", "Patrik Haslum", "Joerg Hoffmann", "Raz Nissim"},
+            "Merge-and-Shrink Abstraction: A Method for Generating Lower Bounds"
+            " in Factored State Spaces",
+            "http://ai.cs.unibas.ch/papers/helmert-et-al-jacm2014.pdf",
+            "Journal of the ACM 61 (3)",
+            "16:1-63",
+            "2014") + "\n" +
+        "Please note that the journal paper describes the \"old\" theory of "
+        "label reduction, which has been superseded by the above conference "
+        "paper and is no longer implemented in Fast Downward.\n\n"
+        "The following paper describes how to improve the DFP merge strategy "
+        "with tie-breaking, and presents two new merge strategies (dyn-MIASM "
+        "and SCC-DFP):" + utils::format_paper_reference(
+            {"Silvan Sievers", "Martin Wehrle", "Malte Helmert"},
+            "An Analysis of Merge Strategies for Merge-and-Shrink Heuristics",
+            "http://ai.cs.unibas.ch/papers/sievers-et-al-icaps2016.pdf",
+            "Proceedings of the 26th International Conference on Automated "
+            "Planning and Scheduling (ICAPS 2016)",
+            "294-298",
+            "AAAI Press 2016") + "\n" +
+        "Note that the two new merge strategies have not yet been integrated "
+        "into the official code base of Fast Downward. They are available on "
+        "request.");
+    parser.document_language_support("action costs", "supported");
+    parser.document_language_support("conditional effects", "supported (but see note)");
+    parser.document_language_support("axioms", "not supported");
+    parser.document_property("admissible", "yes");
+    parser.document_property("consistent", "yes");
+    parser.document_property("safe", "yes");
+    parser.document_property("preferred operators", "no");
+    parser.document_note(
+        "Note",
+        "Conditional effects are supported directly. Note, however, that "
+        "for tasks that are not factored (in the sense of the JACM 2014 "
+        "merge-and-shrink paper), the atomic transition systems on which "
+        "merge-and-shrink heuristics are based are nondeterministic, "
+        "which can lead to poor heuristics even when only perfect shrinking "
+        "is performed.");
+    parser.document_note(
+        "Note",
+        "A currently recommended good configuration uses bisimulation "
+        "based shrinking, DFP merging, and the appropriate label "
+        "reduction setting (max_states has been altered to be between "
+        "10000 and 200000 in the literature):\n"
+        "{{{\nmerge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),"
+        "merge_strategy=merge_stateless(merge_selector=score_based_filtering("
+        "scoring_functions=[goal_relevance,dfp,total_order])),"
+        "label_reduction=exact(before_shrinking=true,"
+        "before_merging=false),max_states=50000,threshold_before_merge=1)\n}}}\n"
+        "Note that for versions of Fast Downward prior to 2016-08-19, the "
+        "syntax differs. See the recommendation in the file "
+        "merge_and_shrink_heuristic.cc for an example configuration.");
+
+    // Merge strategy option.
+    parser.add_option<shared_ptr<MergeStrategyFactory>>(
+        "merge_strategy",
+        "See detailed documentation for merge strategies. "
+        "We currently recommend DFP, which can be achieved using "
+        "{{{merge_stateless(merge_selector=score_based_filtering("
+        "scoring_functions=[goal_relevance,dfp,total_order]))}}}");
+
+    // Shrink strategy option.
+    parser.add_option<shared_ptr<ShrinkStrategy>>(
+        "shrink_strategy",
+        "See detailed documentation for shrink strategies. "
+        "We currently recommend shrink_bisimulation.");
+
+    // Label reduction option.
+    parser.add_option<shared_ptr<LabelReduction>>(
+        "label_reduction",
+        "See detailed documentation for labels. There is currently only "
+        "one 'option' to use label_reduction. Also note the interaction "
+        "with shrink strategies.",
+        OptionParser::NONE);
+
+    MergeAndShrinkHeuristic::add_shrink_limit_options_to_parser(parser);
     Heuristic::add_options_to_parser(parser);
+
+    vector<string> verbosity_levels;
+    vector<string> verbosity_level_docs;
+    verbosity_levels.push_back("silent");
+    verbosity_level_docs.push_back(
+        "silent: no output during construction, only starting and final "
+        "statistics");
+    verbosity_levels.push_back("normal");
+    verbosity_level_docs.push_back(
+        "normal: basic output during construction, starting and final "
+        "statistics");
+    verbosity_levels.push_back("verbose");
+    verbosity_level_docs.push_back(
+        "verbose: full output during construction, starting and final "
+        "statistics");
+    parser.add_enum_option(
+        "verbosity",
+        verbosity_levels,
+        "Option to specify the level of verbosity.",
+        "verbose",
+        verbosity_level_docs);
+
     Options opts = parser.parse();
-    if (parser.help_mode())
-        return 0;
+    if (parser.help_mode()) {
+        return nullptr;
+    }
+
+    MergeAndShrinkHeuristic::handle_shrink_limit_options_defaults(opts);
 
     if (parser.dry_run()) {
-        return 0;
+        return nullptr;
     } else {
-        MergeAndShrinkHeuristic *result = new MergeAndShrinkHeuristic(opts);
-        return result;
+        return new MergeAndShrinkHeuristic(opts);
     }
 }
 
-static Plugin<ScalarEvaluator> _plugin("merge_and_shrink", _parse);
+static Plugin<Heuristic> _plugin("merge_and_shrink", _parse);
+}

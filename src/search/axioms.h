@@ -1,9 +1,13 @@
 #ifndef AXIOMS_H
 #define AXIOMS_H
 
+#include "global_state.h"
+#include "task_proxy.h"
+
+#include <memory>
 #include <vector>
 
-class State;
+class IntPacker;
 
 class AxiomEvaluator {
     struct AxiomRule;
@@ -28,12 +32,32 @@ class AxiomEvaluator {
             : var_no(var), literal(lit) {}
     };
 
-    std::vector<std::vector<AxiomLiteral> > axiom_literals;
+    bool task_has_axioms;
+
+    std::vector<std::vector<AxiomLiteral>> axiom_literals;
     std::vector<AxiomRule> rules;
-    std::vector<std::vector<NegationByFailureInfo> > nbf_info_by_layer;
+    std::vector<std::vector<NegationByFailureInfo>> nbf_info_by_layer;
+    /*
+      default_values stores the default (negation by failure) values
+      for all derived variables, i.e., the value that a derived
+      variable holds by default if no derivation rule triggers.
+
+      This is indexed by variable number and set to -1 for non-derived
+      variables, so can also be used to test if a variable is derived.
+
+      We have our own copy of the data to avoid going through the task
+      interface in the time-critical evaluate method.
+    */
+    std::vector<int> default_values;
+
+    /*
+      The queue is an instance variable rather than a local variable
+      to reduce reallocation effort. See issue420.
+    */
+    std::vector<AxiomLiteral *> queue;
 public:
-    AxiomEvaluator();
-    void evaluate(State &state);
+    explicit AxiomEvaluator(const TaskProxy &task_proxy);
+    void evaluate(PackedStateBin *buffer, const IntPacker &state_packer);
 };
 
 #endif
