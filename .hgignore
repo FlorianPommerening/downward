@@ -8,3 +8,5 @@
 ^misc/autodoc/downward-xmlrpc\.secret$
 ^builds/
 ^src/CMakeLists.txt.user$
+syntax: glob
+experiments/planning-domain-bounds/data
