@@ -11,7 +11,7 @@ def handle_upper_bound(pid, plan_path):
 def handle_lower_bound(pid, opt, description):
     p = api.get_problem(pid)
     lb = p.get("lower_bound", 0)
-    if lb == "null" or int(lb) < opt:
+    if lb is None or lb == "null" or int(lb) < opt:
         api.update_problem_stat(pid, "lower_bound", opt, description)
 
 def handle_bounds(bounds_filename, description):
@@ -20,7 +20,7 @@ def handle_bounds(bounds_filename, description):
             try:
                 pid, plan_path, opt = line.split(",")
                 handle_upper_bound(int(pid), os.path.join(plan_path.strip(), "sas_plan"))
-                handle_lower_bound(int(pid), opt, description)
+                handle_lower_bound(int(pid), int(opt.strip()), description)
             except object as e:
                 print "Could not parse line '{}'".format(line)
                 print e

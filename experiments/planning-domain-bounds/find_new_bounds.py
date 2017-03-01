@@ -51,7 +51,7 @@ def handle_new_bound(run, p, bounds_file, exp_name):
     pid = p["problem_id"]
     plan_path = os.path.join("data", exp_name, run["run_dir"])
     cost = run["cost"]
-    bounds_file.write("{}, {}, {}\n".format(pid, plan_path, cost))
+    bounds_file.write("{}, {}, {}\n".format(pid, plan_path, int(cost)))
 
 
 def main(bounds_filename, missing_filename, exp_name):
