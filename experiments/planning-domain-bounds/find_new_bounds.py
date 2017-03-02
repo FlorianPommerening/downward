@@ -15,7 +15,8 @@ def get_problem(pid):
 
 def handle_runs(runs, bounds_file, missing_file, exp_name):
     missing_bounds = {}
-    for run_id, run in runs.items():
+    for i, (run_id, run) in enumerate(runs.items()):
+        print "Handling run {} of {}".format(i, len(runs))
         handle_run(run_id, run, bounds_file, missing_bounds, exp_name)
 
     missing_file.write("open_bounds = [\n")
@@ -63,4 +64,4 @@ def main(bounds_filename, missing_filename, exp_name):
 
 
 if __name__ == "__main__":
-    main("new_bounds_v2", "missing_suite_v2.py", "planning-domain-bounds-v2")
+    main("new_bounds_v3", "missing_suite_v3.py", "planning-domain-bounds-v3")
