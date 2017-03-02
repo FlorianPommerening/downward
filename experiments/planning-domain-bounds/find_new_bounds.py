@@ -64,4 +64,8 @@ def main(bounds_filename, missing_filename, exp_name):
 
 
 if __name__ == "__main__":
-    main("new_bounds_v3", "missing_suite_v3.py", "planning-domain-bounds-v3")
+    version = 4
+    main(
+        "new_bounds_v%d" % version,
+        "missing_suite_v%d.py" % version,
+        "planning-domain-bounds-v%d" % version)
