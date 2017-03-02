@@ -446,7 +446,6 @@ open_bounds = [
     "storage:p28.pddl",
     "storage:p29.pddl",
     "storage:p30.pddl",
-    "tetris-opt14-strips:p03-10.pddl",
     "tidybot-opt11-strips:p15.pddl",
     "tidybot-opt11-strips:p19.pddl",
     "tidybot-opt14-strips:p01.pddl",
