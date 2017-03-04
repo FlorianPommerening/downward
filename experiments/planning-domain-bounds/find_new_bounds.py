@@ -28,13 +28,6 @@ def handle_runs(runs, bounds_file, missing_file, exp_name):
 def handle_run(run_id, run, bounds_file, missing_bounds, exp_name):
     domain = run["domain"]
     problem = run["problem"]
-    pid = downward_to_planning_domains.get(domain, {}).get(problem)
-    if pid is None:
-        return
-    p = get_problem(pid)
-
-    lb = p["lower_bound"] or 0
-    ub = p["upper_bound"] or float("inf")
 
     opt = run.get("cost")
     if opt is None:
@@ -42,6 +35,14 @@ def handle_run(run_id, run, bounds_file, missing_bounds, exp_name):
         if key not in missing_bounds:
             missing_bounds[key] = True
         return
+
+    pid = downward_to_planning_domains.get(domain, {}).get(problem)
+    if pid is None:
+        return
+    p = get_problem(pid)
+
+    lb = p["lower_bound"] or 0
+    ub = p["upper_bound"] or float("inf")
 
     assert lb <= opt <= ub
     if lb < opt or opt < ub:
@@ -64,7 +65,7 @@ def main(bounds_filename, missing_filename, exp_name):
 
 
 if __name__ == "__main__":
-    version = 4
+    version = 5
     main(
         "new_bounds_v%d" % version,
         "missing_suite_v%d.py" % version,
