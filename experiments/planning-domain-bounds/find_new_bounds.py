@@ -65,7 +65,7 @@ def main(bounds_filename, missing_filename, exp_name):
 
 
 if __name__ == "__main__":
-    version = 5
+    version = 6
     main(
         "new_bounds_v%d" % version,
         "missing_suite_v%d.py" % version,
