@@ -35,7 +35,7 @@ class ApiProblem(object):
 
 class ApiExperiment(FastDownwardExperiment):
     def _get_tasks(self):
-        return [p for p in self.api_suite]
+        return [ApiProblem(p) for p in self.api_suite]
 
     def set_api_suite(self, api_suite):
         self.api_suite = api_suite
@@ -49,7 +49,7 @@ REVISION = '08bff46b616b'
 
 if is_test_run():
     ENVIRONMENT = LocalEnvironment(processes=1)
-    SUITE = [ApiProblem(api.get_problem(210))]
+    SUITE = [api.get_problem(210)]
 else:
     ENVIRONMENT = MaiaEnvironment(priority=-100, email="florian.pommerening@unibas.ch")
     SUITE = []
