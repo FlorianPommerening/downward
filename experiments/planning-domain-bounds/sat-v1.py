@@ -15,9 +15,17 @@ class ApiProblem(object):
         problem = api.localize(problem)
         self.benchmarks_dir = ''
         self.domain = problem['domain']
+        if not self.domain.endswith('.pddl'):
+            self.domain += '.pddl'
         self.problem = problem['problem']
+        if not self.problem.endswith('.pddl'):
+            self.problem += '.pddl'
         self.problem_file = problem['problem_path']
+        if not self.problem_file.endswith('.pddl'):
+            self.problem_file += '.pddl'
         self.domain_file = problem['domain_path']
+        if not self.domain_file.endswith('.pddl'):
+            self.domain_file += '.pddl'
         self.api_problem_id = problem['problem_id']
 
     def __str__(self):
