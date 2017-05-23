@@ -17,7 +17,7 @@ def submit_plans(experiment_name):
     for run in runs.values():
         pid = run['api_problem_id']
         run_dir = run['run_dir']
-        last_plan = len(run.get('cost_all', 0))
+        last_plan = len(run.get('cost_all', []))
         if last_plan:
             last_plan_path = os.path.join(data_dir, run_dir, 'sas_plan.%d' % last_plan)
             print pid, last_plan_path

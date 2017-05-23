@@ -32,5 +32,6 @@ exp = IssueExperiment(
     environment=ENVIRONMENT,
 )
 exp.add_suite(BENCHMARKS_DIR, SUITE)
+exp.add_fetcher(name='parse-again', parsers=['custom-parser.py'])
 
 exp()
