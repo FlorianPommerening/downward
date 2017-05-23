@@ -3,7 +3,7 @@ import re
 from lab.parser import Parser
 
 def last_f_value(content, props):
-    f_values = [int(f) for f in re.findall(r'f = (\d+) \[\d+ evaluated, \d+ expanded, t=.+s, \d+ KB]', content)]
+    f_values = [int(f) for f in re.findall(r'f = (\d+) \[\d+ evaluated, \d+ expanded,.* t=.+s, \d+ KB]', content)]
     props['f_values'] = f_values
     if f_values:
         props['last_f_value'] = max(f_values)
