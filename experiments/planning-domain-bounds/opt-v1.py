@@ -48,4 +48,6 @@ exp.add_algorithm(
         "--search-memory-limit", "3800M"
     ])
 
+exp.add_fetcher(name='parse-again', parsers=['custom-parser.py'])
+
 exp.run_steps()
