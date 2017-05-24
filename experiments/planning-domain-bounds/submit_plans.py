@@ -21,7 +21,10 @@ def submit_plans(experiment_name):
         if last_plan:
             last_plan_path = os.path.join(data_dir, run_dir, 'sas_plan.%d' % last_plan)
             print pid, last_plan_path
-            submit_plan(int(pid), last_plan_path)
+            try:
+                submit_plan(int(pid), last_plan_path)
+            except:
+                print "Failed to submit", pid, last_plan_path
 
 
 if __name__ == "__main__":
