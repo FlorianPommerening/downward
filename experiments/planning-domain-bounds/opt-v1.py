@@ -3,6 +3,7 @@
 import os
 
 from downward.experiment import FastDownwardExperiment
+from downward.reports.absolute import AbsoluteReport
 from downward.suites import Problem
 from lab.environments import LocalEnvironment, MaiaEnvironment
 
@@ -49,5 +50,7 @@ exp.add_algorithm(
     ])
 
 exp.add_fetcher(name='parse-again', parsers=['custom-parser.py'])
+
+exp.add_report(AbsoluteReport(attributes=['coverage', 'cost', 'error', 'api_*', 'run_dir']))
 
 exp.run_steps()
