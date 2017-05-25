@@ -23,7 +23,7 @@ def submit_lower_bound(pid, lb, description):
     if api_lb is None or api_lb == "null" or int(api_lb) < lb:
         for _ in range(10):
             try:
-#                api.update_problem_stat(pid, "lower_bound", lb, description)
+                api.update_problem_stat(pid, "lower_bound", lb, description)
                 break
             except:
                 print "Failed to update bound %d for problem %d. Retrying in 5 seconds" % (lb, pid)
@@ -36,8 +36,7 @@ def submit_upper_bound(pid, exp_name, run):
         plan = f.read()
     for _ in range(10):
         try:
-            with open(plan_path) as f:
-#                api.submit_plan(pid, plan)
+            api.submit_plan(pid, plan)
             break
         except:
             print "Failed to submit plan from '%s' for problem %d. Retrying in 5 seconds" % (plan_path, pid)
@@ -63,17 +62,16 @@ def handle_run(run_id, run, exp_name, description):
 
     assert last_f_value <= ub
     assert opt is None or lb <= opt <= ub
-    print lb, last_f_value, opt, ub
     if lb is None or lb == "null" or lb < last_f_value:
         NUM_NEW_BOUNDS += 1
         if opt is not None:
             NUM_CLOSED_BOUNDS += 1
-            submit_lower_bound(pid, lb, description)
+            submit_lower_bound(pid, int(opt), description)
             submit_upper_bound(pid, exp_name, run)
         else:
             if last_f_value == ub:
                 NUM_CLOSED_BOUNDS += 1
-            submit_lower_bound(pid, lb, description + "/explored f-layer")
+            submit_lower_bound(pid, int(last_f_value), description + "/explored f-layer")
 
 
 def main(exp_name, description):
