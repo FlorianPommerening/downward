@@ -51,6 +51,6 @@ exp.add_algorithm(
 
 exp.add_fetcher(name='parse-again', parsers=['custom-parser.py'])
 
-exp.add_report(AbsoluteReport(attributes=['coverage', 'cost', 'error', 'api_*', 'run_dir']))
+exp.add_report(AbsoluteReport(attributes=['coverage', 'cost', 'error', 'api_*', 'run_dir', 'last_f_value']))
 
 exp.run_steps()

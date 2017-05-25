@@ -1,30 +1,47 @@
 #!/usr/bin/env python
 
-import json, sys, time
+import json, os, sys, time
 
 import planning_domains_api as api
-from id_translation import downward_to_planning_domains
 
 NUM_NEW_BOUNDS = 0
 NUM_CLOSED_BOUNDS = 0
-
-problem_cache = {}
-def get_problem(pid):
-    if pid not in problem_cache:
-        for _ in range(10):
-            try:
-                problem_cache[pid] = api.get_problem(pid)
-                break
-            except:
-                print "Failed to get problem %d. Retrying in 5 seconds" % pid
-                time.sleep(5)
-    return problem_cache[pid]
 
 
 def handle_runs(runs, exp_name, description):
     for i, (run_id, run) in enumerate(runs.items()):
         print "Handling run {} of {}".format(i, len(runs))
         handle_run(run_id, run, exp_name, description)
+
+
+def submit_lower_bound(pid, lb, description):
+    p = api.get_problem(pid)
+    api_lb = p.get("lower_bound", 0)
+    api_ub = p.get("upper_bound", float('inf'))
+    assert api_lb is None or api_lb == "null" or int(api_lb) <= lb
+    assert api_ub is None or api_ub == "null" or lb <= float(api_ub)
+    if api_lb is None or api_lb == "null" or int(api_lb) < lb:
+        for _ in range(10):
+            try:
+#                api.update_problem_stat(pid, "lower_bound", lb, description)
+                break
+            except:
+                print "Failed to update bound %d for problem %d. Retrying in 5 seconds" % (lb, pid)
+                time.sleep(5)
+
+
+def submit_upper_bound(pid, exp_name, run):
+    plan_path = os.path.join('data', exp_name, run['run_dir'], 'sas_plan')
+    with open(plan_path) as f:
+        plan = f.read()
+    for _ in range(10):
+        try:
+            with open(plan_path) as f:
+#                api.submit_plan(pid, plan)
+            break
+        except:
+            print "Failed to submit plan from '%s' for problem %d. Retrying in 5 seconds" % (plan_path, pid)
+            time.sleep(5)
 
 
 def handle_run(run_id, run, exp_name, description):
@@ -40,32 +57,23 @@ def handle_run(run_id, run, exp_name, description):
         return
     assert opt is None or last_f_value == opt, (domain, problem, opt, last_f_value)
 
-    pid = downward_to_planning_domains.get(domain, {}).get(problem)
-    if pid is None:
-        return
-    p = get_problem(pid)
+    pid = run['api_problem_id']
+    lb = int(run["api_lower_bound"] or 0)
+    ub = float(run["api_upper_bound"] or "inf")
 
-    lb = p["lower_bound"] or 0
-    ub = p["upper_bound"] or float("inf")
-
-    assert last_f_value <= float(ub)
-    print lb, ub, opt, last_f_value
-    if lb is None or lb == "null" or int(lb) < last_f_value:
+    assert last_f_value <= ub
+    assert opt is None or lb <= opt <= ub
+    print lb, last_f_value, opt, ub
+    if lb is None or lb == "null" or lb < last_f_value:
         NUM_NEW_BOUNDS += 1
-        if last_f_value == float(ub) or last_f_value == opt:
+        if opt is not None:
             NUM_CLOSED_BOUNDS += 1
-        if last_f_value == opt:
-            problem_description = description
+            submit_lower_bound(pid, lb, description)
+            submit_upper_bound(pid, exp_name, run)
         else:
-            problem_description = description + "/explored f-layer"
-        print problem_description
-        for _ in range(10):
-            try:
-#                api.update_problem_stat(pid, "lower_bound", last_f_value, problem_description)
-                break
-            except:
-                print "Failed to update bound %d for problem %d. Retrying in 5 seconds" % (last_f_value, pid)
-                time.sleep(5)
+            if last_f_value == ub:
+                NUM_CLOSED_BOUNDS += 1
+            submit_lower_bound(pid, lb, description + "/explored f-layer")
 
 
 def main(exp_name, description):
@@ -80,6 +88,6 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print "Usage: ./submit_bounds.py <version> <description>"
         sys.exit(1)
-    version = int(sys.argv[1])
+    version = sys.argv[1]
     description = sys.argv[2]
-    main("planning-domain-bounds-v%d" % version, description)
+    main("planning-domain-bounds-%s" % version, description)
