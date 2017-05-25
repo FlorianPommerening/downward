@@ -49,17 +49,19 @@ def handle_run(run_id, run, exp_name, description):
     ub = p["upper_bound"] or float("inf")
 
     assert last_f_value <= float(ub)
+    print lb, ub, opt, last_f_value
     if lb is None or lb == "null" or int(lb) < last_f_value:
         NUM_NEW_BOUNDS += 1
-        if last_f_value == float(ub):
+        if last_f_value == float(ub) or last_f_value == opt:
             NUM_CLOSED_BOUNDS += 1
-            if last_f_value == opt:
-                print "New bound based on plan"
-            else:
-                print "New bound based on f-layer"
+        if last_f_value == opt:
+            problem_description = description
+        else:
+            problem_description = description + "/explored f-layer"
+        print problem_description
         for _ in range(10):
             try:
-#                api.update_problem_stat(pid, "lower_bound", last_f_value, description)
+#                api.update_problem_stat(pid, "lower_bound", last_f_value, problem_description)
                 break
             except:
                 print "Failed to update bound %d for problem %d. Retrying in 5 seconds" % (last_f_value, pid)
