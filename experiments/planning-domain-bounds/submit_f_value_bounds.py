@@ -53,9 +53,13 @@ def handle_run(run_id, run, exp_name, description):
         NUM_NEW_BOUNDS += 1
         if last_f_value == float(ub):
             NUM_CLOSED_BOUNDS += 1
+            if last_f_value == opt:
+                print "New bound based on plan"
+            else:
+                print "New bound based on f-layer"
         for _ in range(10):
             try:
-                api.update_problem_stat(pid, "lower_bound", last_f_value, description)
+#                api.update_problem_stat(pid, "lower_bound", last_f_value, description)
                 break
             except:
                 print "Failed to update bound %d for problem %d. Retrying in 5 seconds" % (last_f_value, pid)
