@@ -62,7 +62,7 @@ exp.add_algorithm(
     'astar-ipdb',
     get_repo_base(),
     REVISION,
-    ['--search', 'ipdb(max_time=3600, cache_estimates=false)'],
+    ['--search', 'astar(ipdb(max_time=3600, cache_estimates=false))'],
     driver_options=[
         "--search-time-limit", "6h",
         "--search-memory-limit", "3800M"
