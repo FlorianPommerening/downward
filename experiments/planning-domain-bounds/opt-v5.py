@@ -34,6 +34,7 @@ BAD_DOMAINS = [
     26,  # cavediving
     115, # citycar
     117, # citycar
+    125, # fridge
     99,  # miconic
     114, # miconic
     92,  # optical-telegraphs
