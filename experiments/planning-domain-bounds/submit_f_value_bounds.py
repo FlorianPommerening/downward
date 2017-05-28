@@ -18,7 +18,6 @@ def submit_lower_bound(pid, lb, description):
     p = api.get_problem(pid)
     api_lb = p.get("lower_bound", 0)
     api_ub = p.get("upper_bound", float('inf'))
-    assert api_lb is None or api_lb == "null" or int(api_lb) <= lb
     assert api_ub is None or api_ub == "null" or lb <= float(api_ub)
     if api_lb is None or api_lb == "null" or int(api_lb) < lb:
         for _ in range(10):
