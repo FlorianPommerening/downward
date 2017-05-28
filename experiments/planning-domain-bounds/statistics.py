@@ -18,11 +18,24 @@ def get_ub(p):
 
 all_problems = api.simple_query('/classical/problems')
 
+missing_lb_problems = [p for p in all_problems if get_lb(p) == 0]
+missing_ub_problems = [p for p in all_problems if get_ub(p) == float('inf')]
+open_bounds_problems = [p for p in all_problems if get_lb(p) < get_ub(p)]
 
 print "Number of problems:", len(all_problems)
-print "Problems without lower bound:", len([p for p in all_problems if get_lb(p) == 0])
-print "Problems without upper bound:", len([p for p in all_problems if get_ub(p) == float('inf')])
-print "Problems with open bounds:", len([p for p in all_problems if get_lb(p) < get_ub(p)])
+print "Problems without lower bound:", len(missing_lb_problems)
+print "Problems without upper bound:", len(missing_ub_problems)
+print "Problems with open bounds:", len(open_bounds_problems)
+
+print "Domains with missing lower bounds"
+missing_lb_domains = Counter([p["domain"] for p in missing_lb_problems])
+for domain, num_problems in missing_lb_domains.most_common():
+    print "   ", num_problems, domain
+
+print "Domains with missing upper bounds"
+missing_ub_domains = Counter([p["domain"] for p in missing_ub_problems])
+for domain, num_problems in missing_ub_domains.most_common():
+    print "   ", num_problems, domain
 
 
 print "Lower bound contributors:"
