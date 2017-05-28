@@ -62,13 +62,16 @@ def handle_run(run_id, run, exp_name, description):
 
     assert last_f_value <= ub
     assert opt is None or lb <= opt <= ub
-    if lb is None or lb == "null" or lb < last_f_value:
+    if opt is not None:
         NUM_NEW_BOUNDS += 1
-        if opt is not None:
-            NUM_CLOSED_BOUNDS += 1
+        NUM_CLOSED_BOUNDS += 1
+        if lb < opt:
             submit_lower_bound(pid, int(opt), description)
+        if opt < up:
             submit_upper_bound(pid, exp_name, run)
-        else:
+    else:
+        if lb < last_f_value:
+            NUM_NEW_BOUNDS += 1
             if last_f_value == ub:
                 NUM_CLOSED_BOUNDS += 1
             submit_lower_bound(pid, int(last_f_value), description + "/explored f-layer")
