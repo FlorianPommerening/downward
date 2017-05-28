@@ -66,7 +66,7 @@ def handle_run(run_id, run, exp_name, description):
         NUM_CLOSED_BOUNDS += 1
         if lb < opt:
             submit_lower_bound(pid, int(opt), description)
-        if opt < up:
+        if opt < ub:
             submit_upper_bound(pid, exp_name, run)
     else:
         if lb < last_f_value:
