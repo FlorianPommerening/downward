@@ -60,7 +60,9 @@ for nick_template, config_template in CONFIGS_TEMPLATES.items():
             ("dynamic", "--sg-greedy-dynamic"),
             ("domainsize", "--sg-domain-size"),
         ]:
-        CONFIGS[nick_template % sg_nick] = ([sg_config] + config_template)
+        if sg_config:
+            config_template = [sg_config] + config_template
+        CONFIGS[nick_template % sg_nick] = (config_template)
 
 exp = common_setup.IssueExperiment(
     revisions=SEARCH_REVS,
