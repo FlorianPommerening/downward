@@ -5,7 +5,7 @@
 #include "../task_proxy.h"
 
 #include "../tasks/modified_operator_costs_task.h"
-
+#include "../task_utils/task_properties.h"
 #include "../utils/logging.h"
 
 #include <iostream>
@@ -19,15 +19,9 @@ namespace pdbs {
 ZeroOnePDBs::ZeroOnePDBs(const shared_ptr<AbstractTask> &task,
                          const PatternCollection &patterns) {
     TaskProxy task_proxy(*task);
-    vector<int> original_operator_costs;
-    OperatorsProxy operators = task_proxy.get_operators();
-    original_operator_costs.reserve(operators.size());
-    for (OperatorProxy op : operators)
-        original_operator_costs.push_back(op.get_cost());
     extra_tasks::ModifiedOperatorCostsTask pdb_task(
-            task, original_operator_costs);
+            task, task_properties::get_operator_costs(task_proxy));
     TaskProxy pdb_task_proxy(pdb_task);
-
     vector<int> &remaining_operator_costs = pdb_task.get_operator_costs();
 
     pattern_databases.reserve(patterns.size());
@@ -37,7 +31,7 @@ ZeroOnePDBs::ZeroOnePDBs(const shared_ptr<AbstractTask> &task,
 
         /* Set cost of relevant operators to 0 for further iterations
            (action cost partitioning). */
-        for (OperatorProxy op : operators) {
+        for (OperatorProxy op : pdb_task_proxy.get_operators()) {
             if (pdb->is_operator_relevant(op))
                 remaining_operator_costs[op.get_id()] = 0;
         }
