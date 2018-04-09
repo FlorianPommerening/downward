@@ -20,11 +20,19 @@ MergeStrategyFactoryPrecomputed::MergeStrategyFactoryPrecomputed(
 }
 
 unique_ptr<MergeStrategy> MergeStrategyFactoryPrecomputed::compute_merge_strategy(
-    const shared_ptr<AbstractTask> &task,
-    FactoredTransitionSystem &fts) {
+    const TaskProxy &task_proxy,
+    const FactoredTransitionSystem &fts) {
     unique_ptr<MergeTree> merge_tree =
-        merge_tree_factory->compute_merge_tree(task);
+        merge_tree_factory->compute_merge_tree(task_proxy);
     return utils::make_unique_ptr<MergeStrategyPrecomputed>(fts, move(merge_tree));
+}
+
+bool MergeStrategyFactoryPrecomputed::requires_init_distances() const {
+    return merge_tree_factory->requires_init_distances();
+}
+
+bool MergeStrategyFactoryPrecomputed::requires_goal_distances() const {
+    return merge_tree_factory->requires_goal_distances();
 }
 
 string MergeStrategyFactoryPrecomputed::name() const {

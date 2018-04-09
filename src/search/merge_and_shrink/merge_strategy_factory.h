@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-class AbstractTask;
+class TaskProxy;
 
 namespace merge_and_shrink {
 class FactoredTransitionSystem;
@@ -19,8 +19,10 @@ public:
     virtual ~MergeStrategyFactory() = default;
     void dump_options() const;
     virtual std::unique_ptr<MergeStrategy> compute_merge_strategy(
-        const std::shared_ptr<AbstractTask> &task,
-        FactoredTransitionSystem &fts) = 0;
+        const TaskProxy &task_proxy,
+        const FactoredTransitionSystem &fts) = 0;
+    virtual bool requires_init_distances() const = 0;
+    virtual bool requires_goal_distances() const = 0;
 };
 }
 

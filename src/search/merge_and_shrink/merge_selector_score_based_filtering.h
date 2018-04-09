@@ -5,6 +5,7 @@
 
 #include "merge_scoring_function.h"
 
+#include <memory>
 #include <vector>
 
 namespace options {
@@ -28,9 +29,11 @@ public:
     explicit MergeSelectorScoreBasedFiltering(
         std::vector<std::shared_ptr<MergeScoringFunction>> scoring_functions);
     virtual std::pair<int, int> select_merge(
-        FactoredTransitionSystem &fts,
+        const FactoredTransitionSystem &fts,
         const std::vector<int> &indices_subset = std::vector<int>()) const override;
-    virtual void initialize(const std::shared_ptr<AbstractTask> &task) override;
+    virtual void initialize(const TaskProxy &task_proxy) override;
+    virtual bool requires_init_distances() const override;
+    virtual bool requires_goal_distances() const override;
 };
 }
 

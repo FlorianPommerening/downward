@@ -18,8 +18,10 @@ public:
     explicit MergeStrategyFactoryPrecomputed(options::Options &options);
     virtual ~MergeStrategyFactoryPrecomputed() override = default;
     virtual std::unique_ptr<MergeStrategy> compute_merge_strategy(
-        const std::shared_ptr<AbstractTask> &task,
-        FactoredTransitionSystem &fts) override;
+        const TaskProxy &task_proxy,
+        const FactoredTransitionSystem &fts) override;
+    virtual bool requires_init_distances() const override;
+    virtual bool requires_goal_distances() const override;
 };
 }
 

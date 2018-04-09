@@ -2,9 +2,8 @@
 
 #include "match_tree.h"
 
-#include "../priority_queue.h"
-#include "../task_tools.h"
-
+#include "../algorithms/priority_queues.h"
+#include "../task_utils/task_properties.h"
 #include "../utils/collections.h"
 #include "../utils/logging.h"
 #include "../utils/math.h"
@@ -70,8 +69,8 @@ void AbstractOperator::dump(const Pattern &pattern,
 PatternDatabase::PatternDatabase(
     const TaskProxy &task_proxy, const Pattern &pattern, bool dump)
     : pattern(pattern) {
-    verify_no_axioms(task_proxy);
-    verify_no_conditional_effects(task_proxy);
+    task_properties::verify_no_axioms(task_proxy);
+    task_properties::verify_no_conditional_effects(task_proxy);
     assert(utils::is_sorted_unique(pattern));
 
     utils::Timer timer;
@@ -215,7 +214,7 @@ void PatternDatabase::create_pdb(const TaskProxy &task_proxy) {
 
     distances.reserve(num_states);
     // first implicit entry: priority, second entry: index for an abstract state
-    AdaptiveQueue<size_t> pq;
+    priority_queues::AdaptiveQueue<size_t> pq;
 
     // initialize queue
     for (size_t state_index = 0; state_index < num_states; ++state_index) {

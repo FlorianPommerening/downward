@@ -18,7 +18,10 @@ class FactoredTransitionSystem;
 enum class Verbosity;
 
 extern FactoredTransitionSystem create_factored_transition_system(
-    const TaskProxy &task_proxy, Verbosity verbosity);
+    const TaskProxy &task_proxy,
+    const bool compute_init_distances,
+    const bool compute_goal_distances,
+    Verbosity verbosity);
 }
 
 #endif

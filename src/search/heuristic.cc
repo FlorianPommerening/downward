@@ -2,13 +2,12 @@
 
 #include "evaluation_context.h"
 #include "evaluation_result.h"
-#include "global_operator.h"
-#include "globals.h"
 #include "option_parser.h"
-#include "operator_cost.h"
 #include "plugin.h"
 
+#include "task_utils/task_properties.h"
 #include "tasks/cost_adapted_task.h"
+#include "tasks/root_task.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -17,60 +16,32 @@
 using namespace std;
 
 Heuristic::Heuristic(const Options &opts)
-    : description(opts.get_unparsed_config()),
+    : Evaluator(opts.get_unparsed_config(), true, true, true),
       heuristic_cache(HEntry(NO_VALUE, true)), //TODO: is true really a good idea here?
       cache_h_values(opts.get<bool>("cache_estimates")),
-      task(get_task_from_options(opts)),
-      task_proxy(*task),
-      cost_type(OperatorCost(opts.get_enum("cost_type"))) {
+      task(opts.get<shared_ptr<AbstractTask>>("transform")),
+      task_proxy(*task) {
 }
 
 Heuristic::~Heuristic() {
 }
 
-void Heuristic::set_preferred(const GlobalOperator *op) {
-    preferred_operators.insert(op);
-}
-
 void Heuristic::set_preferred(const OperatorProxy &op) {
-    set_preferred(op.get_global_operator());
-}
-
-bool Heuristic::notify_state_transition(
-    const GlobalState & /*parent_state*/,
-    const GlobalOperator & /*op*/,
-    const GlobalState & /*state*/) {
-    return false;
-}
-
-int Heuristic::get_adjusted_cost(const GlobalOperator &op) const {
-    return get_adjusted_action_cost(op, cost_type);
+    preferred_operators.insert(op.get_global_operator_id());
 }
 
 State Heuristic::convert_global_state(const GlobalState &global_state) const {
-    State state(*g_root_task(), global_state.get_values());
+    State state(*tasks::g_root_task, global_state.get_values());
     return task_proxy.convert_ancestor_state(state);
 }
 
 void Heuristic::add_options_to_parser(OptionParser &parser) {
-    ::add_cost_type_option_to_parser(parser);
-    // TODO: When the cost_type option is gone, use "no_transform" as default.
     parser.add_option<shared_ptr<AbstractTask>>(
         "transform",
-        "Optional task transformation for the heuristic. "
-        "Currently only adapt_costs is available.",
-        OptionParser::NONE);
+        "Optional task transformation for the heuristic."
+        " Currently, adapt_costs() and no_transform() are available.",
+        "no_transform()");
     parser.add_option<bool>("cache_estimates", "cache heuristic estimates", "true");
-}
-
-// This solution to get default values seems nonoptimal.
-// This is currently only used by the LAMA/FF synergy.
-Options Heuristic::default_options() {
-    Options opts = Options();
-    opts.set<shared_ptr<AbstractTask>>("transform", g_root_task());
-    opts.set<int>("cost_type", NORMAL);
-    opts.set<bool>("cache_estimates", false);
-    return opts;
 }
 
 EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
@@ -110,9 +81,12 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
     }
 
 #ifndef NDEBUG
+    TaskProxy global_task_proxy = TaskProxy(*tasks::g_root_task);
+    State global_state(*tasks::g_root_task, state.get_values());
+    OperatorsProxy global_operators = global_task_proxy.get_operators();
     if (heuristic != EvaluationResult::INFTY) {
-        for (const GlobalOperator *op : preferred_operators)
-            assert(op->is_applicable(state));
+        for (OperatorID op_id : preferred_operators)
+            assert(task_properties::is_applicable(global_operators[op_id], global_state));
     }
 #endif
 
@@ -121,10 +95,6 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
     assert(preferred_operators.empty());
 
     return result;
-}
-
-string Heuristic::get_description() const {
-    return description;
 }
 
 

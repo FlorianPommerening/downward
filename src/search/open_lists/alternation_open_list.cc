@@ -1,7 +1,6 @@
 #include "alternation_open_list.h"
 
-#include "open_list.h"
-
+#include "../open_list.h"
 #include "../option_parser.h"
 #include "../plugin.h"
 
@@ -15,7 +14,7 @@
 using namespace std;
 using utils::ExitCode;
 
-
+namespace alternation_open_list {
 template<class Entry>
 class AlternationOpenList : public OpenList<Entry> {
     vector<unique_ptr<OpenList<Entry>>> open_lists;
@@ -34,7 +33,8 @@ public:
     virtual bool empty() const override;
     virtual void clear() override;
     virtual void boost_preferred() override;
-    virtual void get_involved_heuristics(set<Heuristic *> &hset) override;
+    virtual void get_path_dependent_evaluators(
+        set<Evaluator *> &evals) override;
     virtual bool is_dead_end(
         EvaluationContext &eval_context) const override;
     virtual bool is_reliable_dead_end(
@@ -103,10 +103,10 @@ void AlternationOpenList<Entry>::boost_preferred() {
 }
 
 template<class Entry>
-void AlternationOpenList<Entry>::get_involved_heuristics(
-    set<Heuristic *> &hset) {
+void AlternationOpenList<Entry>::get_path_dependent_evaluators(
+    set<Evaluator *> &evals) {
     for (const auto &sublist : open_lists)
-        sublist->get_involved_heuristics(hset);
+        sublist->get_path_dependent_evaluators(evals);
 }
 
 template<class Entry>
@@ -167,3 +167,4 @@ static shared_ptr<OpenListFactory> _parse(OptionParser &parser) {
 }
 
 static PluginShared<OpenListFactory> _plugin("alt", _parse);
+}

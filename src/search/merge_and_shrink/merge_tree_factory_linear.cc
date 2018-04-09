@@ -21,14 +21,13 @@ using namespace std;
 namespace merge_and_shrink {
 MergeTreeFactoryLinear::MergeTreeFactoryLinear(const options::Options &options)
     : MergeTreeFactory(options),
-      variable_order_type(static_cast<VariableOrderType>(
+      variable_order_type(static_cast<variable_order_finder::VariableOrderType>(
                               options.get_enum("variable_order"))) {
 }
 
 unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(
-    const shared_ptr<AbstractTask> &task) {
-    TaskProxy task_proxy(*task);
-    VariableOrderFinder vof(task_proxy, variable_order_type);
+    const TaskProxy &task_proxy) {
+    variable_order_finder::VariableOrderFinder vof(task_proxy, variable_order_type);
     MergeTreeNode *root = new MergeTreeNode(vof.next());
     while (!vof.done()) {
         MergeTreeNode *right_child = new MergeTreeNode(vof.next());
@@ -39,22 +38,22 @@ unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(
 }
 
 unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(
-    const shared_ptr<AbstractTask> &task,
-    FactoredTransitionSystem &fts,
+    const TaskProxy &task_proxy,
+    const FactoredTransitionSystem &fts,
     const vector<int> &indices_subset) {
     /*
       Compute a mapping from state variables to transition system indices
-      that contain those variables. Also set all indices not contained
+      that contain those variables. Also set all indices not contained in
       indices_subset to "used".
     */
-    TaskProxy task_proxy(*task);
     int num_vars = task_proxy.get_variables().size();
     int num_ts = fts.get_size();
     vector<int> var_to_ts_index(num_vars, -1);
     vector<bool> used_ts_indices(num_ts, true);
     for (int ts_index : fts) {
         bool use_ts_index =
-            find(indices_subset.begin(), indices_subset.end(), ts_index) != indices_subset.end();
+            find(indices_subset.begin(), indices_subset.end(),
+                 ts_index) != indices_subset.end();
         if (use_ts_index) {
             used_ts_indices[ts_index] = false;
         }
@@ -71,7 +70,7 @@ unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(
      skipping all indices not in indices_subset, because these have been set
      to "used" above.
     */
-    VariableOrderFinder vof(task_proxy, variable_order_type);
+    variable_order_finder::VariableOrderFinder vof(task_proxy, variable_order_type);
 
     int next_var = vof.next();
     int ts_index = var_to_ts_index[next_var];
