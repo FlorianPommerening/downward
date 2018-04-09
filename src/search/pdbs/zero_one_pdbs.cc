@@ -19,17 +19,19 @@ namespace pdbs {
 ZeroOnePDBs::ZeroOnePDBs(const shared_ptr<AbstractTask> &task,
                          const PatternCollection &patterns) {
     TaskProxy task_proxy(*task);
-    vector<int> remaining_operator_costs;
+    vector<int> original_operator_costs;
     OperatorsProxy operators = task_proxy.get_operators();
-    remaining_operator_costs.reserve(operators.size());
+    original_operator_costs.reserve(operators.size());
     for (OperatorProxy op : operators)
-        remaining_operator_costs.push_back(op.get_cost());
+        original_operator_costs.push_back(op.get_cost());
+    extra_tasks::ModifiedOperatorCostsTask pdb_task(
+            task, original_operator_costs);
+    TaskProxy pdb_task_proxy(pdb_task);
+
+    vector<int> &remaining_operator_costs = pdb_task.get_operator_costs();
 
     pattern_databases.reserve(patterns.size());
     for (const Pattern &pattern : patterns) {
-        extra_tasks::ModifiedOperatorCostsTask pdb_task(
-                task, remaining_operator_costs);
-        TaskProxy pdb_task_proxy(pdb_task);
         shared_ptr<PatternDatabase> pdb = make_shared<PatternDatabase>(
             pdb_task_proxy, pattern, false);
 
