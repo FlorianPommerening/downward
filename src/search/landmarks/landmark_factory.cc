@@ -188,7 +188,7 @@ void LandmarkFactory::add_operator_and_propositions_to_list(const OperatorProxy 
                                                             vector<unordered_map<FactPair, int>> &lvl_op) const {
     int op_or_axiom_id = get_operator_or_axiom_id(op);
     for (EffectProxy effect : op.get_effects()) {
-        lvl_op[op_or_axiom_id].emplace(effect.get_fact().get_pair(), numeric_limits<int>::max());
+        lvl_op[op_or_axiom_id][effect.get_fact().get_pair()] = numeric_limits<int>::max();
     }
 }
 
@@ -283,12 +283,11 @@ bool LandmarkFactory::effect_always_happens(const VariablesProxy &variables,
             }
         } else {
             // We have not seen this effect before, making new effect entry
-            vector<FactPair> &vec = effect_conditions_by_variable.emplace(
-                var_id, make_pair(
-                    value, vector<FactPair> ())).first->second.second;
+            vector<FactPair> vec;
             for (FactProxy effect_condition : effect_conditions) {
                 vec.push_back(effect_condition.get_pair());
             }
+            effect_conditions_by_variable[var_id] = make_pair(value, vec);
         }
     }
 
@@ -305,8 +304,9 @@ bool LandmarkFactory::effect_always_happens(const VariablesProxy &variables,
                 unique_conds.find(cond.var)->second.insert(
                     cond.value);
             } else {
-                set<int> &the_set = unique_conds.emplace(cond.var, set<int>()).first->second;
+                set<int> the_set;
                 the_set.insert(cond.value);
+                unique_conds[cond.var] = the_set;
             }
         }
         // Check for each condition variable whether the number of values it takes on is
