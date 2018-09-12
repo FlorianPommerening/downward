@@ -20,6 +20,24 @@ macro(fast_downward_set_compiler_flags)
         set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -fomit-frame-pointer")
         set(CMAKE_CXX_FLAGS_DEBUG "-O3")
         set(CMAKE_CXX_FLAGS_PROFILE "-O3 -pg")
+    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+        include(CheckCXXCompilerFlag)
+        check_cxx_compiler_flag( "-std=c++11" CXX11_FOUND )
+        if(CXX11_FOUND)
+             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        else()
+            message(FATAL_ERROR "${CMAKE_CXX_COMPILER} does not support C++11, please use a different compiler")
+        endif()
+
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd809")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd811")
+
+        ## Configuration-specific flags
+        set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -fomit-frame-pointer")
+        set(CMAKE_CXX_FLAGS_DEBUG "-O3")
+        set(CMAKE_CXX_FLAGS_PROFILE "-O3 -pg")
     elseif(MSVC)
         # We force linking to be static because the dynamically linked code is
         # about 10% slower on Linux (see issue67). On Windows this is a compiler
