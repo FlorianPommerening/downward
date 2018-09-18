@@ -29,8 +29,7 @@ State GlobalState::unpack() const {
     vector<int> values(num_variables);
     for (int var = 0; var < num_variables; ++var)
         values[var] = (*this)[var];
-    TaskProxy task_proxy = registry->get_task_proxy();
-    return task_proxy.create_state(move(values));
+    return State(registry->get_task(), move(values));
 }
 
 void GlobalState::dump_pddl() const {
