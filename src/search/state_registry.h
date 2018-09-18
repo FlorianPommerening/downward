@@ -169,7 +169,7 @@ public:
     explicit StateRegistry(const TaskProxy &task_proxy);
     ~StateRegistry();
 
-    const TaskProxy &get_task_proxy() const {
+    TaskProxy get_task_proxy() const {
         return task_proxy;
     }
 
