@@ -7,8 +7,9 @@
 
 using namespace std;
 
-StateRegistry::StateRegistry(const TaskProxy &task_proxy)
-    : task_proxy(task_proxy),
+StateRegistry::StateRegistry(const AbstractTask &task)
+    : task(task),
+      task_proxy(task),
       state_packer(task_properties::g_state_packers[task_proxy]),
       axiom_evaluator(g_axiom_evaluators[task_proxy]),
       num_variables(task_proxy.get_variables().size()),
