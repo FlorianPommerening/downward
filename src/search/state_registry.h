@@ -166,7 +166,7 @@ class StateRegistry : public subscriber::SubscriberService<StateRegistry> {
     StateID insert_id_or_pop_state();
     int get_bins_per_state() const;
 public:
-    explicit StateRegistry(const AbstractTask &task);
+    explicit StateRegistry(const TaskProxy &task_proxy);
     ~StateRegistry();
 
     TaskProxy get_task_proxy() const {
