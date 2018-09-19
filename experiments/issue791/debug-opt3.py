@@ -10,7 +10,7 @@ from common_setup import IssueConfig, IssueExperiment
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
-REVISIONS = ["issue791-debugbase", "issue791-debug4", "issue791-debug5"]
+REVISIONS = ["issue791-debugbase", "issue791-debug4", "issue791-debug5", "issue791-debug6"]
 CONFIGS = [
     IssueConfig(
         'blind-release', ['--search', 'astar(blind())'],
