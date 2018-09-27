@@ -59,6 +59,12 @@ static shared_ptr<OpenListFactory> create_ehc_open_list_factory(
     }
 }
 
+const GlobalState get_initial_state(StateRegistry &state_registry, const TaskProxy &task_proxy) {
+    State unpacked_initial_state = task_proxy.get_initial_state();
+    state_registry.register_state(unpacked_initial_state);
+    return state_registry.lookup_state(unpacked_initial_state.get_id());
+}
+
 
 EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
     const Options &opts)
@@ -66,7 +72,7 @@ EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
       evaluator(opts.get<shared_ptr<Evaluator>>("h")),
       preferred_operator_evaluators(opts.get_list<shared_ptr<Evaluator>>("preferred")),
       preferred_usage(PreferredUsage(opts.get_enum("preferred_usage"))),
-      current_eval_context(state_registry.get_initial_state(), &statistics),
+      current_eval_context(get_initial_state(state_registry, task_proxy), &statistics),
       current_phase_start_g(-1),
       num_ehc_phases(0),
       last_num_expanded(-1) {
@@ -75,7 +81,7 @@ EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
     }
     evaluator->get_path_dependent_evaluators(path_dependent_evaluators);
 
-    const GlobalState &initial_state = state_registry.get_initial_state();
+    const GlobalState initial_state = get_initial_state(state_registry, task_proxy);
     for (Evaluator *evaluator : path_dependent_evaluators) {
         evaluator->notify_initial_state(initial_state);
     }
@@ -205,7 +211,12 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         if (parent_node.get_real_g() + last_op.get_cost() >= bound)
             continue;
 
-        GlobalState state = state_registry.get_successor_state(parent_state, last_op);
+        State unpacked_parent_state = parent_state.unpack();
+        State unpacked_state = unpacked_parent_state.get_successor(last_op);
+        state_registry.register_state(unpacked_state);
+        StateID state_id = unpacked_state.get_id();
+
+        GlobalState state = state_registry.lookup_state(state_id);
         statistics.inc_generated();
 
         SearchNode node = search_space.get_node(state);

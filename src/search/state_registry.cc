@@ -45,41 +45,29 @@ GlobalState StateRegistry::lookup_state(StateID id) const {
     return GlobalState(state_data_pool[id.value], *this, id);
 }
 
-const GlobalState &StateRegistry::get_initial_state() {
-    if (cached_initial_state == 0) {
-        PackedStateBin *buffer = new PackedStateBin[get_bins_per_state()];
-        // Avoid garbage values in half-full bins.
-        fill_n(buffer, get_bins_per_state(), 0);
-
-        State initial_state = task_proxy.get_initial_state();
-        for (size_t i = 0; i < initial_state.size(); ++i) {
-            state_packer.set(buffer, i, initial_state[i].get_value());
-        }
-        state_data_pool.push_back(buffer);
-        // buffer is copied by push_back
-        delete[] buffer;
-        StateID id = insert_id_or_pop_state();
-        cached_initial_state = new GlobalState(lookup_state(id));
+void StateRegistry::register_state(State &state) {
+    if (state.get_registry()) {
+        cerr << "Tried to register an already registered state." << endl;
+        utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
     }
-    return *cached_initial_state;
-}
-
-//TODO it would be nice to move the actual state creation (and operator application)
-//     out of the StateRegistry. This could for example be done by global functions
-//     operating on state buffers (PackedStateBin *).
-GlobalState StateRegistry::get_successor_state(const GlobalState &predecessor, const OperatorProxy &op) {
-    assert(!op.is_axiom());
-    state_data_pool.push_back(predecessor.get_packed_buffer());
-    PackedStateBin *buffer = state_data_pool[state_data_pool.size() - 1];
-    for (EffectProxy effect : op.get_effects()) {
-        if (does_fire(effect, predecessor)) {
-            FactPair effect_pair = effect.get_fact().get_pair();
-            state_packer.set(buffer, effect_pair.var, effect_pair.value);
-        }
+    if (state.get_task().get_id() != task_proxy.get_id()) {
+        cerr << "Tried to register a state from an incompatible task." << endl;
+        utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
     }
-    axiom_evaluator.evaluate(buffer, state_packer);
+
+    PackedStateBin *buffer = new PackedStateBin[get_bins_per_state()];
+    // Avoid garbage values in half-full bins.
+    fill_n(buffer, get_bins_per_state(), 0);
+
+    for (size_t i = 0; i < state.size(); ++i) {
+        state_packer.set(buffer, i, state[i].get_value());
+    }
+    state_data_pool.push_back(buffer);
+    // buffer is copied by push_back
+    delete[] buffer;
+
     StateID id = insert_id_or_pop_state();
-    return lookup_state(id);
+    state.set_registry(this, id);
 }
 
 int StateRegistry::get_bins_per_state() const {

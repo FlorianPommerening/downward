@@ -188,17 +188,13 @@ public:
     GlobalState lookup_state(StateID id) const;
 
     /*
-      Returns a reference to the initial state and registers it if this was not
-      done before. The result is cached internally so subsequent calls are cheap.
+      Register the state if this was not done before. Calling this with a state
+      that is already registered in a different state registry is an error.
+      If the state is already registered in this registry, it reamins unchanged,
+      otherwise it will be registered and subsequent calls to state.get_id()
+      will return the state's ID.
     */
-    const GlobalState &get_initial_state();
-
-    /*
-      Returns the state that results from applying op to predecessor and
-      registers it if this was not done before. This is an expensive operation
-      as it includes duplicate checking.
-    */
-    GlobalState get_successor_state(const GlobalState &predecessor, const OperatorProxy &op);
+    void register_state(State &state);
 
     /*
       Returns the number of states registered so far.

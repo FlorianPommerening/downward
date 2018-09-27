@@ -27,6 +27,7 @@ public:
     }
 
     static const StateID no_state;
+    static const StateID unregistered_state;
 
     bool operator==(const StateID &other) const {
         return value == other.value;

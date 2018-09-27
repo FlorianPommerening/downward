@@ -564,24 +564,31 @@ bool does_fire(const EffectProxy &effect, const GlobalState &state);
 class State {
     const AbstractTask *task;
     std::vector<int> values;
+    StateID id;
+    StateRegistry *registry;
 public:
     using ItemType = FactProxy;
     State(const AbstractTask &task, std::vector<int> &&values)
-        : task(&task), values(std::move(values)) {
+        : task(&task), values(std::move(values)), id(StateID::no_state), registry(nullptr) {
         assert(static_cast<int>(size()) == this->task->get_num_variables());
     }
     ~State() = default;
     State(const State &) = default;
 
     State(State &&other)
-        : task(other.task), values(std::move(other.values)) {
+        : task(other.task), values(std::move(other.values)), id(other.id), registry(other.registry) {
         other.task = nullptr;
     }
 
     State &operator=(State &&other) {
         if (this != &other) {
             values = std::move(other.values);
+            task = other.task;
             other.task = nullptr;
+            id = other.id;
+            other.id = StateID::no_state;
+            registry = other.registry;
+            other.registry = nullptr;
         }
         return *this;
     }
@@ -600,6 +607,12 @@ public:
         return hasher(values);
     }
 
+    void set_registry(StateRegistry *registry_, StateID id_) {
+        assert(registry == nullptr);
+        registry = registry_;
+        id = id_;
+    }
+
     std::size_t size() const {
         return values.size();
     }
@@ -614,6 +627,15 @@ public:
     }
 
     inline TaskProxy get_task() const;
+
+    StateID get_id() const {
+        assert(id != StateID::unregistered_state);
+        return id;
+    }
+
+    StateRegistry *get_registry() const {
+        return registry;
+    }
 
     const std::vector<int> &get_values() const {
         return values;

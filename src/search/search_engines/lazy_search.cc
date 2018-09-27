@@ -16,6 +16,12 @@
 using namespace std;
 
 namespace lazy_search {
+const GlobalState get_initial_state(StateRegistry &state_registry, const TaskProxy &task_proxy) {
+    State unpacked_initial_state = task_proxy.get_initial_state();
+    state_registry.register_state(unpacked_initial_state);
+    return state_registry.lookup_state(unpacked_initial_state.get_id());
+}
+
 LazySearch::LazySearch(const Options &opts)
     : SearchEngine(opts),
       open_list(opts.get<shared_ptr<OpenListFactory>>("open")->
@@ -24,7 +30,7 @@ LazySearch::LazySearch(const Options &opts)
       randomize_successors(opts.get<bool>("randomize_successors")),
       preferred_successors_first(opts.get<bool>("preferred_successors_first")),
       rng(utils::parse_rng_from_options(opts)),
-      current_state(state_registry.get_initial_state()),
+      current_state(get_initial_state(state_registry, task_proxy)),
       current_predecessor_id(StateID::no_state),
       current_operator_id(OperatorID::no_operator),
       current_g(0),
@@ -55,7 +61,7 @@ void LazySearch::initialize() {
     }
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
-    const GlobalState &initial_state = state_registry.get_initial_state();
+    GlobalState initial_state = get_initial_state(state_registry, task_proxy);
     for (Evaluator *evaluator : path_dependent_evaluators) {
         evaluator->notify_initial_state(initial_state);
     }
@@ -127,7 +133,12 @@ SearchStatus LazySearch::fetch_next_state() {
     GlobalState current_predecessor = state_registry.lookup_state(current_predecessor_id);
     OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
     assert(task_properties::is_applicable(current_operator, current_predecessor.unpack()));
-    current_state = state_registry.get_successor_state(current_predecessor, current_operator);
+
+    State unpacked_current_predecessor = current_predecessor.unpack();
+    State unpacked_successor = unpacked_current_predecessor.get_successor(current_operator);
+    state_registry.register_state(unpacked_successor);
+    StateID succ_id = unpacked_successor.get_id();
+    current_state = state_registry.lookup_state(succ_id);
 
     SearchNode pred_node = search_space.get_node(current_predecessor);
     current_g = pred_node.get_g() + get_adjusted_cost(current_operator);
