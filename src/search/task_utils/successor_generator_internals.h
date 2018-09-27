@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <vector>
 
-class GlobalState;
 class State;
 
 namespace successor_generator {

@@ -558,7 +558,6 @@ public:
 
 
 bool does_fire(const EffectProxy &effect, const State &state);
-bool does_fire(const EffectProxy &effect, const GlobalState &state);
 
 
 class State {
@@ -757,14 +756,4 @@ inline bool does_fire(const EffectProxy &effect, const State &state) {
     }
     return true;
 }
-
-inline bool does_fire(const EffectProxy &effect, const GlobalState &state) {
-    for (FactProxy condition : effect.get_conditions()) {
-        FactPair condition_pair = condition.get_pair();
-        if (state[condition_pair.var] != condition_pair.value)
-            return false;
-    }
-    return true;
-}
-
 #endif

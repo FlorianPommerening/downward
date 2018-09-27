@@ -6,7 +6,6 @@
 #include <memory>
 #include <vector>
 
-class GlobalState;
 class OperatorID;
 class State;
 class TaskProxy;
