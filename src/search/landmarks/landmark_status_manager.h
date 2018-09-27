@@ -17,14 +17,14 @@ class LandmarkStatusManager {
 public:
     explicit LandmarkStatusManager(LandmarkGraph &graph);
 
-    BitsetView get_reached_landmarks(const GlobalState &state);
+    BitsetView get_reached_landmarks(const State &state);
 
-    bool update_lm_status(const GlobalState &state);
+    bool update_lm_status(const State &state);
 
-    void set_landmarks_for_initial_state(const GlobalState &initial_state);
-    bool update_reached_lms(const GlobalState &parent_state,
+    void set_landmarks_for_initial_state(const State &initial_state);
+    bool update_reached_lms(const State &parent_state,
                             OperatorID op_id,
-                            const GlobalState &state);
+                            const State &state);
 };
 }
 

@@ -61,9 +61,10 @@ void LazySearch::initialize() {
     }
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
-    GlobalState initial_state = get_initial_state(state_registry, task_proxy);
+    State unpacked_initial_state = task_proxy.get_initial_state();
+    state_registry.register_state(unpacked_initial_state);
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(initial_state);
+        evaluator->notify_initial_state(unpacked_initial_state);
     }
 }
 
@@ -176,7 +177,7 @@ SearchStatus LazySearch::step() {
             GlobalState parent_state = state_registry.lookup_state(current_predecessor_id);
             for (Evaluator *evaluator : path_dependent_evaluators)
                 evaluator->notify_state_transition(
-                    parent_state, current_operator_id, current_state);
+                    parent_state.unpack(), current_operator_id, current_state.unpack());
         }
         statistics.inc_evaluated_states();
         if (!open_list->is_dead_end(current_eval_context)) {

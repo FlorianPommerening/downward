@@ -14,12 +14,12 @@ LandmarkStatusManager::LandmarkStatusManager(LandmarkGraph &graph)
       lm_graph(graph) {
 }
 
-BitsetView LandmarkStatusManager::get_reached_landmarks(const GlobalState &state) {
+BitsetView LandmarkStatusManager::get_reached_landmarks(const State &state) {
     return reached_lms[state];
 }
 
 void LandmarkStatusManager::set_landmarks_for_initial_state(
-    const GlobalState &initial_state) {
+    const State &initial_state) {
     BitsetView reached = get_reached_landmarks(initial_state);
     // This is necessary since the default is "true for all" (see comment above).
     reached.reset();
@@ -39,7 +39,7 @@ void LandmarkStatusManager::set_landmarks_for_initial_state(
         if (node_p->conjunctive) {
             bool lm_true = true;
             for (const FactPair &fact : node_p->facts) {
-                if (initial_state[fact.var] != fact.value) {
+                if (initial_state[fact.var].get_value() != fact.value) {
                     lm_true = false;
                     break;
                 }
@@ -50,7 +50,7 @@ void LandmarkStatusManager::set_landmarks_for_initial_state(
             }
         } else {
             for (const FactPair &fact : node_p->facts) {
-                if (initial_state[fact.var] == fact.value) {
+                if (initial_state[fact.var].get_value() == fact.value) {
                     reached.set(node_p->get_id());
                     ++inserted;
                     break;
@@ -63,9 +63,9 @@ void LandmarkStatusManager::set_landmarks_for_initial_state(
 }
 
 
-bool LandmarkStatusManager::update_reached_lms(const GlobalState &parent_global_state,
+bool LandmarkStatusManager::update_reached_lms(const State &parent_global_state,
                                                OperatorID,
-                                               const GlobalState &global_state) {
+                                               const State &global_state) {
     if (global_state.get_id() == parent_global_state.get_id()) {
         // This can happen, e.g., in Satellite-01.
         return false;
@@ -106,7 +106,7 @@ bool LandmarkStatusManager::update_reached_lms(const GlobalState &parent_global_
     return true;
 }
 
-bool LandmarkStatusManager::update_lm_status(const GlobalState &global_state) {
+bool LandmarkStatusManager::update_lm_status(const State &global_state) {
     const BitsetView reached = get_reached_landmarks(global_state);
 
     const set<LandmarkNode *> &nodes = lm_graph.get_nodes();

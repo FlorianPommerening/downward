@@ -81,9 +81,10 @@ EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
     }
     evaluator->get_path_dependent_evaluators(path_dependent_evaluators);
 
-    const GlobalState initial_state = get_initial_state(state_registry, task_proxy);
+    State unpacked_initial_state = task_proxy.get_initial_state();
+    state_registry.register_state(unpacked_initial_state);
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(initial_state);
+        evaluator->notify_initial_state(unpacked_initial_state);
     }
     use_preferred = find(preferred_operator_evaluators.begin(),
                          preferred_operator_evaluators.end(), evaluator) !=
@@ -97,7 +98,7 @@ EnforcedHillClimbingSearch::~EnforcedHillClimbingSearch() {
 }
 
 void EnforcedHillClimbingSearch::reach_state(
-    const GlobalState &parent, OperatorID op_id, const GlobalState &state) {
+    const State &parent, OperatorID op_id, const State &state) {
     for (Evaluator *evaluator : path_dependent_evaluators) {
         evaluator->notify_state_transition(parent, op_id, state);
     }
@@ -223,7 +224,7 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
 
         if (node.is_new()) {
             EvaluationContext eval_context(state, &statistics);
-            reach_state(parent_state, last_op_id, state);
+            reach_state(unpacked_parent_state, last_op_id, unpacked_state);
             statistics.inc_evaluated_states();
 
             if (eval_context.is_evaluator_value_infinite(evaluator.get())) {

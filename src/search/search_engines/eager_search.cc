@@ -73,7 +73,7 @@ void EagerSearch::initialize() {
     state_registry.register_state(unpacked_initial_state);
     const GlobalState &initial_state = state_registry.lookup_state(unpacked_initial_state.get_id());
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(initial_state);
+        evaluator->notify_initial_state(unpacked_initial_state);
     }
 
     /*
@@ -158,7 +158,7 @@ SearchStatus EagerSearch::step() {
         SearchNode succ_node = search_space.get_node(succ_state);
 
         for (Evaluator *evaluator : path_dependent_evaluators) {
-            evaluator->notify_state_transition(s, op_id, succ_state);
+            evaluator->notify_state_transition(unpacked_state, op_id, unpacked_successor);
         }
 
         // Previously encountered dead end. Don't re-evaluate.
