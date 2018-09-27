@@ -4,6 +4,8 @@
 #include "search_node_info.h"
 #include "task_proxy.h"
 
+#include "task_utils/task_properties.h"
+
 #include <cassert>
 
 using namespace std;
@@ -125,9 +127,9 @@ SearchNode SearchSpace::get_node(const State &state) {
     return SearchNode(state_registry, state.get_id(), search_node_infos[state]);
 }
 
-void SearchSpace::trace_path(const GlobalState &goal_state,
+void SearchSpace::trace_path(const State &goal_state,
                              vector<OperatorID> &path) const {
-    GlobalState current_state = goal_state;
+    State current_state = goal_state;
     assert(path.empty());
     for (;;) {
         const SearchNodeInfo &info = search_node_infos[current_state];
@@ -136,7 +138,7 @@ void SearchSpace::trace_path(const GlobalState &goal_state,
             break;
         }
         path.push_back(info.creating_operator);
-        current_state = state_registry.lookup_state(info.parent_state_id);
+        current_state = state_registry.lookup_state(info.parent_state_id).unpack();
     }
     reverse(path.begin(), path.end());
 }
@@ -146,10 +148,10 @@ void SearchSpace::dump(const TaskProxy &task_proxy) const {
     for (StateID id : state_registry) {
         /* The body duplicates SearchNode::dump() but we cannot create
            a search node without discarding the const qualifier. */
-        GlobalState state = state_registry.lookup_state(id);
+        State state = state_registry.lookup_state(id).unpack();
         const SearchNodeInfo &node_info = search_node_infos[state];
         cout << id << ": ";
-        state.dump_fdr();
+        task_properties::dump_fdr(state);
         if (node_info.creating_operator != OperatorID::no_operator &&
             node_info.parent_state_id != StateID::no_state) {
             OperatorProxy op = operators[node_info.creating_operator.get_index()];

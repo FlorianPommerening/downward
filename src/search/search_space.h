@@ -60,7 +60,7 @@ public:
     explicit SearchSpace(StateRegistry &state_registry);
 
     SearchNode get_node(const State &state);
-    void trace_path(const GlobalState &goal_state,
+    void trace_path(const State &goal_state,
                     std::vector<OperatorID> &path) const;
 
     void dump(const TaskProxy &task_proxy) const;

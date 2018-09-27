@@ -190,8 +190,10 @@ void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
 SearchStatus EnforcedHillClimbingSearch::step() {
     last_num_expanded = statistics.get_expanded();
     search_progress.check_progress(current_eval_context);
+    GlobalState current_state = current_eval_context.get_state();
+    State unpacked_current_state = current_state.unpack();
 
-    if (check_goal_and_set_plan(current_eval_context.get_state())) {
+    if (check_goal_and_set_plan(unpacked_current_state)) {
         return SOLVED;
     }
 

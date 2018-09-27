@@ -121,7 +121,8 @@ SearchStatus EagerSearch::step() {
     SearchNode node = n.first;
 
     GlobalState s = node.get_state();
-    if (check_goal_and_set_plan(s))
+    State unpacked_state = s.unpack();
+    if (check_goal_and_set_plan(unpacked_state))
         return SOLVED;
 
     vector<OperatorID> applicable_ops;
@@ -147,7 +148,6 @@ SearchStatus EagerSearch::step() {
         if ((node.get_real_g() + op.get_cost()) >= bound)
             continue;
 
-        State unpacked_state = s.unpack();
         State unpacked_successor = unpacked_state.get_successor(op);
         state_registry.register_state(unpacked_successor);
         StateID succ_id = unpacked_successor.get_id();
