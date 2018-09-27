@@ -49,18 +49,19 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
     assert(preferred_operators.empty());
 
     const GlobalState &state = eval_context.get_state();
+    State unpacked_state = state.unpack();
     bool calculate_preferred = eval_context.get_calculate_preferred();
 
     int heuristic = NO_VALUE;
 
     if (!calculate_preferred && cache_evaluator_values &&
-        heuristic_cache[state].h != NO_VALUE && !heuristic_cache[state].dirty) {
-        heuristic = heuristic_cache[state].h;
+        heuristic_cache[unpacked_state].h != NO_VALUE && !heuristic_cache[unpacked_state].dirty) {
+        heuristic = heuristic_cache[unpacked_state].h;
         result.set_count_evaluation(false);
     } else {
-        heuristic = compute_heuristic(state.unpack());
+        heuristic = compute_heuristic(unpacked_state);
         if (cache_evaluator_values) {
-            heuristic_cache[state] = HEntry(heuristic, false);
+            heuristic_cache[unpacked_state] = HEntry(heuristic, false);
         }
         result.set_count_evaluation(true);
     }
@@ -80,8 +81,7 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
     }
 
 #ifndef NDEBUG
-    TaskProxy global_task_proxy = TaskProxy(*tasks::g_root_task);
-    State unpacked_state = state.unpack();
+    TaskProxy global_task_proxy = unpacked_state.get_task();
     OperatorsProxy global_operators = global_task_proxy.get_operators();
     if (heuristic != EvaluationResult::INFTY) {
         for (OperatorID op_id : preferred_operators)
