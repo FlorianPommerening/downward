@@ -6,7 +6,6 @@
 #include <set>
 
 class EvaluationContext;
-class GlobalState;
 class State;
 
 class Evaluator {

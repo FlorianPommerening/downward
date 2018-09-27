@@ -30,8 +30,8 @@ void Heuristic::set_preferred(const OperatorProxy &op) {
     preferred_operators.insert(op.get_ancestor_operator_id(tasks::g_root_task.get()));
 }
 
-State Heuristic::convert_global_state(const GlobalState &global_state) const {
-    return task_proxy.convert_ancestor_state(global_state.unpack());
+State Heuristic::convert_global_state(const State &ancestor_state) const {
+    return task_proxy.convert_ancestor_state(ancestor_state);
 }
 
 void Heuristic::add_options_to_parser(OptionParser &parser) {

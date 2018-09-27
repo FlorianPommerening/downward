@@ -23,7 +23,7 @@ BlindSearchHeuristic::~BlindSearchHeuristic() {
 }
 
 int BlindSearchHeuristic::compute_heuristic(const GlobalState &global_state) {
-    State state = convert_global_state(global_state);
+    State state = convert_global_state(global_state.unpack());
     if (task_properties::is_goal_state(task_proxy, state))
         return 0;
     else

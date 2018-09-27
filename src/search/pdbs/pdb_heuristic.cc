@@ -27,7 +27,7 @@ PDBHeuristic::PDBHeuristic(const Options &opts)
 }
 
 int PDBHeuristic::compute_heuristic(const GlobalState &global_state) {
-    State state = convert_global_state(global_state);
+    State state = convert_global_state(global_state.unpack());
     return compute_heuristic(state);
 }
 
