@@ -20,10 +20,5 @@ void SuccessorGenerator::generate_applicable_ops(
     root->generate_applicable_ops(state, applicable_ops);
 }
 
-void SuccessorGenerator::generate_applicable_ops(
-    const GlobalState &state, vector<OperatorID> &applicable_ops) const {
-    root->generate_applicable_ops(state, applicable_ops);
-}
-
 PerTaskInformation<SuccessorGenerator> g_successor_generators;
 }
