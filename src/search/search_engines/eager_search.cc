@@ -263,6 +263,7 @@ pair<SearchNode, bool> EagerSearch::fetch_next_node() {
         //      One way would be to store GlobalState objects inside SearchNodes
         //      instead of StateIDs
         GlobalState s = state_registry.lookup_state(id);
+        State unpacked_state = s.unpack();
         SearchNode node = search_space.get_node(s);
 
         if (node.is_closed())
@@ -289,8 +290,8 @@ pair<SearchNode, bool> EagerSearch::fetch_next_node() {
             if (node.is_dead_end())
                 continue;
 
-            if (lazy_evaluator->is_estimate_cached(s)) {
-                int old_h = lazy_evaluator->get_cached_estimate(s);
+            if (lazy_evaluator->is_estimate_cached(unpacked_state)) {
+                int old_h = lazy_evaluator->get_cached_estimate(unpacked_state);
                 /*
                   We can pass calculate_preferred=false here
                   since preferred operators are computed when the state is expanded.

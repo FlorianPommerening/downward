@@ -100,11 +100,11 @@ bool Heuristic::does_cache_estimates() const {
     return cache_evaluator_values;
 }
 
-bool Heuristic::is_estimate_cached(const GlobalState &state) const {
+bool Heuristic::is_estimate_cached(const State &state) const {
     return heuristic_cache[state].h != NO_VALUE;
 }
 
-int Heuristic::get_cached_estimate(const GlobalState &state) const {
+int Heuristic::get_cached_estimate(const State &state) const {
     assert(is_estimate_cached(state));
     return heuristic_cache[state].h;
 }

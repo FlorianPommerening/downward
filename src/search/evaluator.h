@@ -7,6 +7,7 @@
 
 class EvaluationContext;
 class GlobalState;
+class State;
 
 class Evaluator {
     const std::string description;
@@ -85,12 +86,12 @@ public:
     bool is_used_for_counting_evaluations() const;
 
     virtual bool does_cache_estimates() const;
-    virtual bool is_estimate_cached(const GlobalState &state) const;
+    virtual bool is_estimate_cached(const State &state) const;
     /*
       Calling get_cached_estimate is only allowed if an estimate for
       the given state is cached, i.e., is_estimate_cached returns true.
     */
-    virtual int get_cached_estimate(const GlobalState &state) const;
+    virtual int get_cached_estimate(const State &state) const;
 };
 
 #endif
