@@ -174,7 +174,7 @@ void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
            by the open list. */
         vector<OperatorID> successor_operators;
         successor_generator.generate_applicable_ops(
-            eval_context.get_state(), successor_operators);
+            unpacked_current_state, successor_operators);
         for (OperatorID op_id : successor_operators) {
             bool preferred = use_preferred &&
                 preferred_operators.contains(op_id);

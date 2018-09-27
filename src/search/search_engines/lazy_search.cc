@@ -71,8 +71,9 @@ void LazySearch::initialize() {
 vector<OperatorID> LazySearch::get_successor_operators(
     const ordered_set::OrderedSet<OperatorID> &preferred_operators) const {
     vector<OperatorID> applicable_operators;
+    State unpacked_current_state = current_state.unpack();
     successor_generator.generate_applicable_ops(
-        current_state, applicable_operators);
+        unpacked_current_state, applicable_operators);
 
     if (randomize_successors) {
         rng->shuffle(applicable_operators);
