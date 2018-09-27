@@ -161,13 +161,10 @@ class StateRegistry : public subscriber::SubscriberService<StateRegistry> {
     segmented_vector::SegmentedArrayVector<PackedStateBin> state_data_pool;
     StateIDSet registered_states;
 
-    GlobalState *cached_initial_state;
-
     StateID insert_id_or_pop_state();
     int get_bins_per_state() const;
 public:
     explicit StateRegistry(const TaskProxy &task_proxy);
-    ~StateRegistry();
 
     const TaskProxy &get_task_proxy() const {
         return task_proxy;
