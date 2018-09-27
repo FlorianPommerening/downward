@@ -79,10 +79,6 @@ PerStateBitset::PerStateBitset(const vector<bool> &default_bits)
       data(pack_bit_vector(default_bits)) {
 }
 
-BitsetView PerStateBitset::operator[](const GlobalState &state) {
-    return BitsetView(data[state], num_bits_per_entry);
-}
-
 BitsetView PerStateBitset::operator[](const State &state) {
     return BitsetView(data[state], num_bits_per_entry);
 }

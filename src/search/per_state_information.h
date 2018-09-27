@@ -111,33 +111,6 @@ public:
         }
     }
 
-    Entry &operator[](const GlobalState &state) {
-        const StateRegistry *registry = &state.get_registry();
-        segmented_vector::SegmentedVector<Entry> *entries = get_entries(registry);
-        int state_id = state.get_id().value;
-        size_t virtual_size = registry->size();
-        assert(utils::in_bounds(state_id, *registry));
-        if (entries->size() < virtual_size) {
-            entries->resize(virtual_size, default_value);
-        }
-        return (*entries)[state_id];
-    }
-
-    const Entry &operator[](const GlobalState &state) const {
-        const StateRegistry *registry = &state.get_registry();
-        const segmented_vector::SegmentedVector<Entry> *entries = get_entries(registry);
-        if (!entries) {
-            return default_value;
-        }
-        int state_id = state.get_id().value;
-        assert(utils::in_bounds(state_id, *registry));
-        int num_entries = entries->size();
-        if (state_id >= num_entries) {
-            return default_value;
-        }
-        return (*entries)[state_id];
-    }
-
     Entry &operator[](const State &state) {
         const StateRegistry *registry = state.get_registry();
         segmented_vector::SegmentedVector<Entry> *entries = get_entries(registry);
