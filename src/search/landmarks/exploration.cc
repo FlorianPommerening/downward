@@ -372,7 +372,7 @@ void Exploration::prepare_heuristic_computation(const State &state) {
 }
 
 int Exploration::compute_heuristic(const GlobalState &global_state) {
-    State state = convert_global_state(global_state.unpack());
+    State state = convert_ancestor_state(global_state.unpack());
     if (heuristic_recomputation_needed) {
         prepare_heuristic_computation(state);
     }

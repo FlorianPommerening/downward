@@ -42,7 +42,7 @@ CanonicalPDBsHeuristic::CanonicalPDBsHeuristic(const Options &opts)
 }
 
 int CanonicalPDBsHeuristic::compute_heuristic(const GlobalState &global_state) {
-    State state = convert_global_state(global_state.unpack());
+    State state = convert_ancestor_state(global_state.unpack());
     return compute_heuristic(state);
 }
 

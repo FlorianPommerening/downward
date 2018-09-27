@@ -139,7 +139,7 @@ int AdditiveHeuristic::compute_heuristic(const State &state) {
 }
 
 int AdditiveHeuristic::compute_heuristic(const GlobalState &global_state) {
-    return compute_heuristic(convert_global_state(global_state.unpack()));
+    return compute_heuristic(convert_ancestor_state(global_state.unpack()));
 }
 
 void AdditiveHeuristic::compute_heuristic_for_cegar(const State &state) {

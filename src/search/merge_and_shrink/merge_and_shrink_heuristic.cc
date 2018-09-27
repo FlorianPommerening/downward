@@ -394,7 +394,7 @@ void MergeAndShrinkHeuristic::build(const utils::Timer &timer) {
 }
 
 int MergeAndShrinkHeuristic::compute_heuristic(const GlobalState &global_state) {
-    State state = convert_global_state(global_state.unpack());
+    State state = convert_ancestor_state(global_state.unpack());
     int cost = mas_representation->get_value(state);
     if (cost == PRUNED_STATE || cost == INF) {
         // If state is unreachable or irrelevant, we encountered a dead end.

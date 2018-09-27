@@ -17,7 +17,7 @@ PotentialHeuristic::~PotentialHeuristic() {
 }
 
 int PotentialHeuristic::compute_heuristic(const GlobalState &global_state) {
-    const State state = convert_global_state(global_state.unpack());
+    const State state = convert_ancestor_state(global_state.unpack());
     return max(0, function->get_value(state));
 }
 }
