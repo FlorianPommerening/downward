@@ -40,7 +40,7 @@ class LamaSynergyHeuristic : public Heuristic {
     void compute_heuristics(EvaluationContext &eval_context);
 
 protected:
-    virtual int compute_heuristic(const GlobalState & /*state*/) override {
+    virtual int compute_heuristic(const State & /*ancestor_state*/) override {
         ABORT("This method should never be called.");
     }
 

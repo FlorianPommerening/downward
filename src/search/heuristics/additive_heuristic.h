@@ -53,10 +53,8 @@ class AdditiveHeuristic : public relaxation_heuristic::RelaxationHeuristic {
     }
 
     void write_overflow_warning();
-
-    int compute_heuristic(const State &state);
 protected:
-    virtual int compute_heuristic(const GlobalState &global_state);
+    virtual int compute_heuristic(const State &ancestor_state) override;
 
     // Common part of h^add and h^ff computation.
     int compute_add_and_ff(const State &state);

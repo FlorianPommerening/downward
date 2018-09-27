@@ -11,7 +11,7 @@ class FFSynergyHeuristic : public Heuristic {
     std::shared_ptr<LamaSynergyHeuristic> master;
 
 protected:
-    virtual int compute_heuristic(const GlobalState & /*state*/) override {
+    virtual int compute_heuristic(const State & /*ancestor_state*/) override {
         ABORT("This method should never be called.");
     }
 

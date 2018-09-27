@@ -58,7 +58,7 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
         heuristic = heuristic_cache[state].h;
         result.set_count_evaluation(false);
     } else {
-        heuristic = compute_heuristic(state);
+        heuristic = compute_heuristic(state.unpack());
         if (cache_evaluator_values) {
             heuristic_cache[state] = HEntry(heuristic, false);
         }

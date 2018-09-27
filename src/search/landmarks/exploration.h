@@ -127,7 +127,7 @@ class Exploration : public Heuristic {
     void increase_cost(int &cost, int amount);
     void write_overflow_warning();
 protected:
-    virtual int compute_heuristic(const GlobalState &state) override;
+    virtual int compute_heuristic(const State &ancestor_state) override;
 public:
     explicit Exploration(const options::Options &opts);
 

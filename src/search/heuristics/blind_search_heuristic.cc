@@ -22,8 +22,8 @@ BlindSearchHeuristic::BlindSearchHeuristic(const Options &opts)
 BlindSearchHeuristic::~BlindSearchHeuristic() {
 }
 
-int BlindSearchHeuristic::compute_heuristic(const GlobalState &global_state) {
-    State state = convert_ancestor_state(global_state.unpack());
+int BlindSearchHeuristic::compute_heuristic(const State &ancestor_state) {
+    State state = convert_ancestor_state(ancestor_state);
     if (task_properties::is_goal_state(task_proxy, state))
         return 0;
     else

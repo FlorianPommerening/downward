@@ -391,8 +391,8 @@ void ContextEnhancedAdditiveHeuristic::mark_helpful_transitions(
     }
 }
 
-int ContextEnhancedAdditiveHeuristic::compute_heuristic(const GlobalState &g_state) {
-    const State state = convert_ancestor_state(g_state.unpack());
+int ContextEnhancedAdditiveHeuristic::compute_heuristic(const State &ancestor_state) {
+    const State state = convert_ancestor_state(ancestor_state);
     initialize_heap();
     goal_problem->base_priority = -1;
     for (LocalProblem *problem : local_problems)

@@ -145,14 +145,13 @@ int LandmarkCountHeuristic::get_heuristic_value(const State &global_state) {
     return h;
 }
 
-int LandmarkCountHeuristic::compute_heuristic(const GlobalState &global_state) {
-    State unpacked_global_state = global_state.unpack();
-    State state = convert_ancestor_state(unpacked_global_state);
+int LandmarkCountHeuristic::compute_heuristic(const State &ancestor_state) {
+    State state = convert_ancestor_state(ancestor_state);
 
     if (task_properties::is_goal_state(task_proxy, state))
         return 0;
 
-    int h = get_heuristic_value(unpacked_global_state);
+    int h = get_heuristic_value(ancestor_state);
 
     // no (need for) helpful actions, return
     if (!use_preferred_operators) {
@@ -164,13 +163,13 @@ int LandmarkCountHeuristic::compute_heuristic(const GlobalState &global_state) {
     // reached within next step, helpful actions are those occuring in a plan
     // to achieve one of the LM leaves.
 
-    BitsetView landmark_info = lm_status_manager->get_reached_landmarks(unpacked_global_state);
+    BitsetView landmark_info = lm_status_manager->get_reached_landmarks(ancestor_state);
     LandmarkSet reached_lms = convert_to_landmark_set(landmark_info);
 
     int num_reached = reached_lms.size();
     if (num_reached == lgraph->number_of_landmarks() ||
         !generate_helpful_actions(state, reached_lms)) {
-        set_exploration_goals(unpacked_global_state);
+        set_exploration_goals(ancestor_state);
 
         // Use FF to plan to a landmark leaf.
         vector<FactPair> leaves = collect_lm_leaves(
