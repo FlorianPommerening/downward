@@ -128,6 +128,30 @@ public:
         */
     }
 
+    ArrayView<Element> operator[](const State &state) {
+        const StateRegistry *registry = state.get_registry();
+        segmented_vector::SegmentedArrayVector<Element> *entries = get_entries(registry);
+        int state_id = state.get_id().value;
+        size_t virtual_size = registry->size();
+        assert(utils::in_bounds(state_id, *registry));
+        if (entries->size() < virtual_size) {
+            entries->resize(virtual_size, default_array.data());
+        }
+        return ArrayView<Element>((*entries)[state_id], default_array.size());
+    }
+
+    ArrayView<Element> operator[](const State &) const {
+        ABORT("PerStateArray::operator[] const not implemented. "
+              "See source code for more information.");
+        /*
+          This method is not implemented because it is currently not used and
+          would require quite a bit of boilerplate, introducing a ConstArrayView
+          class similar to ArrayView. If you need it, it should be easy to
+          implement based on PerStateInformation:operator[] const. This method
+          should return a ConstArrayView<Element>.
+        */
+    }
+
     virtual void notify_service_destroyed(const StateRegistry *registry) override {
         delete entry_arrays_by_registry[registry];
         entry_arrays_by_registry.erase(registry);

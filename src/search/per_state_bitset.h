@@ -53,6 +53,7 @@ public:
     PerStateBitset &operator=(const PerStateBitset &) = delete;
 
     BitsetView operator[](const GlobalState &state);
+    BitsetView operator[](const State &state);
 };
 
 #endif
