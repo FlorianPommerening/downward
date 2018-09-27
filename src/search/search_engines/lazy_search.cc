@@ -132,16 +132,17 @@ SearchStatus LazySearch::fetch_next_state() {
     current_predecessor_id = next.first;
     current_operator_id = next.second;
     GlobalState current_predecessor = state_registry.lookup_state(current_predecessor_id);
-    OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
-    assert(task_properties::is_applicable(current_operator, current_predecessor.unpack()));
-
     State unpacked_current_predecessor = current_predecessor.unpack();
+
+    OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
+    assert(task_properties::is_applicable(current_operator, unpacked_current_predecessor));
+
     State unpacked_successor = unpacked_current_predecessor.get_successor(current_operator);
     state_registry.register_state(unpacked_successor);
     StateID succ_id = unpacked_successor.get_id();
     current_state = state_registry.lookup_state(succ_id);
 
-    SearchNode pred_node = search_space.get_node(current_predecessor);
+    SearchNode pred_node = search_space.get_node(unpacked_current_predecessor);
     current_g = pred_node.get_g() + get_adjusted_cost(current_operator);
     current_real_g = pred_node.get_real_g() + current_operator.get_cost();
 
@@ -166,8 +167,9 @@ SearchStatus LazySearch::step() {
     // - current_g is the g value of the current state according to the cost_type
     // - current_real_g is the g value of the current state (using real costs)
 
+    State unpacked_current_state = current_state.unpack();
 
-    SearchNode node = search_space.get_node(current_state);
+    SearchNode node = search_space.get_node(unpacked_current_state);
     bool reopen = reopen_closed_nodes && !node.is_new() &&
         !node.is_dead_end() && (current_g < node.get_g());
 
@@ -177,7 +179,7 @@ SearchStatus LazySearch::step() {
             GlobalState parent_state = state_registry.lookup_state(current_predecessor_id);
             for (Evaluator *evaluator : path_dependent_evaluators)
                 evaluator->notify_state_transition(
-                    parent_state.unpack(), current_operator_id, current_state.unpack());
+                    parent_state.unpack(), current_operator_id, unpacked_current_state);
         }
         statistics.inc_evaluated_states();
         if (!open_list->is_dead_end(current_eval_context)) {
@@ -188,7 +190,8 @@ SearchStatus LazySearch::step() {
                     print_checkpoint_line(current_g);
             } else {
                 GlobalState parent_state = state_registry.lookup_state(current_predecessor_id);
-                SearchNode parent_node = search_space.get_node(parent_state);
+                State unpacked_parent_state = parent_state.unpack();
+                SearchNode parent_node = search_space.get_node(unpacked_parent_state);
                 OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
                 if (reopen) {
                     node.reopen(parent_node, current_operator, get_adjusted_cost(current_operator));

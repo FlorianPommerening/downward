@@ -90,10 +90,10 @@ void EagerSearch::initialize() {
         if (search_progress.check_progress(eval_context))
             print_checkpoint_line(0);
         start_f_value_statistics(eval_context);
-        SearchNode node = search_space.get_node(initial_state);
+        SearchNode node = search_space.get_node(unpacked_initial_state);
         node.open_initial();
 
-        open_list->insert(eval_context, initial_state.get_id());
+        open_list->insert(eval_context, unpacked_initial_state.get_id());
     }
 
     print_initial_evaluator_values(eval_context);
@@ -155,7 +155,7 @@ SearchStatus EagerSearch::step() {
         statistics.inc_generated();
         bool is_preferred = preferred_operators.contains(op_id);
 
-        SearchNode succ_node = search_space.get_node(succ_state);
+        SearchNode succ_node = search_space.get_node(unpacked_successor);
 
         for (Evaluator *evaluator : path_dependent_evaluators) {
             evaluator->notify_state_transition(unpacked_state, op_id, unpacked_successor);
@@ -185,7 +185,7 @@ SearchStatus EagerSearch::step() {
             }
             succ_node.open(node, op, get_adjusted_cost(op));
 
-            open_list->insert(eval_context, succ_state.get_id());
+            open_list->insert(eval_context, unpacked_successor.get_id());
             if (search_progress.check_progress(eval_context)) {
                 print_checkpoint_line(succ_node.get_g());
                 reward_progress();
@@ -251,9 +251,8 @@ pair<SearchNode, bool> EagerSearch::fetch_next_node() {
         if (open_list->empty()) {
             cout << "Completely explored state space -- no solution!" << endl;
             // HACK! HACK! we do this because SearchNode has no default/copy constructor
-            State unpacked_initial_state = task_proxy.get_initial_state();
-            state_registry.register_state(unpacked_initial_state);
-            const GlobalState &initial_state = state_registry.lookup_state(unpacked_initial_state.get_id());
+            State initial_state = task_proxy.get_initial_state();
+            state_registry.register_state(initial_state);
             SearchNode dummy_node = search_space.get_node(initial_state);
             return make_pair(dummy_node, false);
         }
@@ -264,7 +263,7 @@ pair<SearchNode, bool> EagerSearch::fetch_next_node() {
         //      instead of StateIDs
         GlobalState s = state_registry.lookup_state(id);
         State unpacked_state = s.unpack();
-        SearchNode node = search_space.get_node(s);
+        SearchNode node = search_space.get_node(unpacked_state);
 
         if (node.is_closed())
             continue;

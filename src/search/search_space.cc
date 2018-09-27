@@ -121,7 +121,7 @@ SearchSpace::SearchSpace(StateRegistry &state_registry)
     : state_registry(state_registry) {
 }
 
-SearchNode SearchSpace::get_node(const GlobalState &state) {
+SearchNode SearchSpace::get_node(const State &state) {
     return SearchNode(state_registry, state.get_id(), search_node_infos[state]);
 }
 

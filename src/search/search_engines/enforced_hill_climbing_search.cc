@@ -126,7 +126,9 @@ void EnforcedHillClimbingSearch::initialize() {
             utils::exit_with(ExitCode::SEARCH_UNSOLVED_INCOMPLETE);
     }
 
-    SearchNode node = search_space.get_node(current_eval_context.get_state());
+    GlobalState current_state = current_eval_context.get_state();
+    State unpacked_current_state = current_state.unpack();
+    SearchNode node = search_space.get_node(unpacked_current_state);
     node.open_initial();
 
     current_phase_start_g = 0;
@@ -148,7 +150,9 @@ void EnforcedHillClimbingSearch::insert_successor_into_open_list(
 }
 
 void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
-    SearchNode node = search_space.get_node(eval_context.get_state());
+    GlobalState current_state = eval_context.get_state();
+    State unpacked_current_state = current_state.unpack();
+    SearchNode node = search_space.get_node(unpacked_current_state);
     int node_g = node.get_g();
 
     ordered_set::OrderedSet<OperatorID> preferred_operators;
@@ -203,7 +207,8 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         OperatorProxy last_op = task_proxy.get_operators()[last_op_id];
 
         GlobalState parent_state = state_registry.lookup_state(parent_state_id);
-        SearchNode parent_node = search_space.get_node(parent_state);
+        State unpacked_parent_state = parent_state.unpack();
+        SearchNode parent_node = search_space.get_node(unpacked_parent_state);
 
         // d: distance from initial node in this EHC phase
         int d = parent_node.get_g() - current_phase_start_g +
@@ -212,7 +217,6 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         if (parent_node.get_real_g() + last_op.get_cost() >= bound)
             continue;
 
-        State unpacked_parent_state = parent_state.unpack();
         State unpacked_state = unpacked_parent_state.get_successor(last_op);
         state_registry.register_state(unpacked_state);
         StateID state_id = unpacked_state.get_id();
@@ -220,7 +224,7 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         GlobalState state = state_registry.lookup_state(state_id);
         statistics.inc_generated();
 
-        SearchNode node = search_space.get_node(state);
+        SearchNode node = search_space.get_node(unpacked_state);
 
         if (node.is_new()) {
             EvaluationContext eval_context(state, &statistics);
