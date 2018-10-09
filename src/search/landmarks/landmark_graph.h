@@ -1,7 +1,6 @@
 #ifndef LANDMARKS_LANDMARK_GRAPH_H
 #define LANDMARKS_LANDMARK_GRAPH_H
 
-#include "../global_state.h"
 #include "../task_proxy.h"
 
 #include <cassert>

@@ -2,8 +2,8 @@
 #define TASK_PROXY_H
 
 #include "abstract_task.h"
-#include "global_state.h"
 #include "operator_id.h"
+#include "state_id.h"
 #include "task_id.h"
 
 #include "utils/collections.h"
@@ -29,6 +29,7 @@ class OperatorProxy;
 class OperatorsProxy;
 class PreconditionsProxy;
 class State;
+class StateRegistry;
 class TaskProxy;
 class VariableProxy;
 class VariablesProxy;

@@ -1,7 +1,6 @@
 #ifndef TASK_UTILS_TASK_PROPERTIES_H
 #define TASK_UTILS_TASK_PROPERTIES_H
 
-#include "../global_state.h"
 #include "../per_task_information.h"
 #include "../task_proxy.h"
 

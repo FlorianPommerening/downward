@@ -1,6 +1,5 @@
 #include "pruning_method.h"
 
-#include "global_state.h"
 #include "plugin.h"
 
 #include <cassert>

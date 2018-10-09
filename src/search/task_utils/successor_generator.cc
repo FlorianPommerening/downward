@@ -4,7 +4,6 @@
 #include "successor_generator_internals.h"
 
 #include "../abstract_task.h"
-#include "../global_state.h"
 
 using namespace std;
 

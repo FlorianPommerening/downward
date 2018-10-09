@@ -1,7 +1,6 @@
 #ifndef SEARCH_SPACE_H
 #define SEARCH_SPACE_H
 
-#include "global_state.h"
 #include "operator_cost.h"
 #include "per_state_information.h"
 #include "search_node_info.h"

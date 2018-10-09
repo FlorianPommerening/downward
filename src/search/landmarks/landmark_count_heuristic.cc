@@ -4,7 +4,6 @@
 #include "landmark_factory.h"
 #include "landmark_status_manager.h"
 
-#include "../global_state.h"
 #include "../option_parser.h"
 #include "../per_state_bitset.h"
 #include "../plugin.h"

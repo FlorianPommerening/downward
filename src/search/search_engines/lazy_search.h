@@ -3,7 +3,6 @@
 
 #include "../evaluation_context.h"
 #include "../evaluator.h"
-#include "../global_state.h"
 #include "../open_list.h"
 #include "../operator_id.h"
 #include "../search_engine.h"
