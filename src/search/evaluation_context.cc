@@ -10,9 +10,9 @@ using namespace std;
 
 
 EvaluationContext::EvaluationContext(
-    const EvaluatorCache &cache, int g_value, bool is_preferred,
+    EvaluatorCache &&cache, int g_value, bool is_preferred,
     SearchStatistics *statistics, bool calculate_preferred)
-    : cache(cache),
+    : cache(move(cache)),
       g_value(g_value),
       preferred(is_preferred),
       statistics(statistics),
@@ -20,15 +20,15 @@ EvaluationContext::EvaluationContext(
 }
 
 EvaluationContext::EvaluationContext(
-    const GlobalState &state, int g_value, bool is_preferred,
+    State &&state, int g_value, bool is_preferred,
     SearchStatistics *statistics, bool calculate_preferred)
-    : EvaluationContext(EvaluatorCache(state), g_value, is_preferred, statistics, calculate_preferred) {
+    : EvaluationContext(EvaluatorCache(move(state)), g_value, is_preferred, statistics, calculate_preferred) {
 }
 
 EvaluationContext::EvaluationContext(
-    const GlobalState &state,
+    State &&state,
     SearchStatistics *statistics, bool calculate_preferred)
-    : EvaluationContext(EvaluatorCache(state), INVALID, false, statistics, calculate_preferred) {
+    : EvaluationContext(EvaluatorCache(move(state)), INVALID, false, statistics, calculate_preferred) {
 }
 
 const EvaluationResult &EvaluationContext::get_result(Evaluator *evaluator) {
@@ -48,7 +48,7 @@ const EvaluatorCache &EvaluationContext::get_cache() const {
     return cache;
 }
 
-const GlobalState &EvaluationContext::get_state() const {
+const State &EvaluationContext::get_state() const {
     return cache.get_state();
 }
 

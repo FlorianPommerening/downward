@@ -16,10 +16,10 @@
 using namespace std;
 
 namespace lazy_search {
-const GlobalState get_initial_state(StateRegistry &state_registry, const TaskProxy &task_proxy) {
+State get_initial_state(StateRegistry &state_registry, const TaskProxy &task_proxy) {
     State unpacked_initial_state = task_proxy.get_initial_state();
     state_registry.register_state(unpacked_initial_state);
-    return state_registry.lookup_state(unpacked_initial_state.get_id());
+    return unpacked_initial_state;
 }
 
 LazySearch::LazySearch(const Options &opts)
@@ -30,12 +30,11 @@ LazySearch::LazySearch(const Options &opts)
       randomize_successors(opts.get<bool>("randomize_successors")),
       preferred_successors_first(opts.get<bool>("preferred_successors_first")),
       rng(utils::parse_rng_from_options(opts)),
-      current_state(get_initial_state(state_registry, task_proxy)),
       current_predecessor_id(StateID::no_state),
       current_operator_id(OperatorID::no_operator),
       current_g(0),
       current_real_g(0),
-      current_eval_context(current_state, 0, true, &statistics) {
+      current_eval_context(get_initial_state(state_registry, task_proxy), 0, true, &statistics) {
     /*
       We initialize current_eval_context in such a way that the initial node
       counts as "preferred".
@@ -68,12 +67,14 @@ void LazySearch::initialize() {
     }
 }
 
+const State &LazySearch::get_current_state() const {
+    return current_eval_context.get_state();
+}
+
 vector<OperatorID> LazySearch::get_successor_operators(
     const ordered_set::OrderedSet<OperatorID> &preferred_operators) const {
     vector<OperatorID> applicable_operators;
-    State unpacked_current_state = current_state.unpack();
-    successor_generator.generate_applicable_ops(
-        unpacked_current_state, applicable_operators);
+    successor_generator.generate_applicable_ops(get_current_state(), applicable_operators);
 
     if (randomize_successors) {
         rng->shuffle(applicable_operators);
@@ -109,6 +110,9 @@ void LazySearch::generate_successors() {
 
     statistics.inc_generated(successor_operators.size());
 
+    StateID current_state_id = get_current_state().get_id();
+    const EvaluatorCache &current_cache = current_eval_context.get_cache();
+
     for (OperatorID op_id : successor_operators) {
         OperatorProxy op = task_proxy.get_operators()[op_id];
         int new_g = current_g + get_adjusted_cost(op);
@@ -116,8 +120,8 @@ void LazySearch::generate_successors() {
         bool is_preferred = preferred_operators.contains(op_id);
         if (new_real_g < bound) {
             EvaluationContext new_eval_context(
-                current_eval_context.get_cache(), new_g, is_preferred, nullptr);
-            open_list->insert(new_eval_context, make_pair(current_state.get_id(), op_id));
+                EvaluatorCache(current_cache), new_g, is_preferred, nullptr);
+            open_list->insert(new_eval_context, make_pair(current_state_id, op_id));
         }
     }
 }
@@ -138,10 +142,8 @@ SearchStatus LazySearch::fetch_next_state() {
     OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
     assert(task_properties::is_applicable(current_operator, unpacked_current_predecessor));
 
-    State unpacked_successor = unpacked_current_predecessor.get_successor(current_operator);
-    state_registry.register_state(unpacked_successor);
-    StateID succ_id = unpacked_successor.get_id();
-    current_state = state_registry.lookup_state(succ_id);
+    State current_state = unpacked_current_predecessor.get_successor(current_operator);
+    state_registry.register_state(current_state);
 
     SearchNode pred_node = search_space.get_node(unpacked_current_predecessor);
     current_g = pred_node.get_g() + get_adjusted_cost(current_operator);
@@ -155,7 +157,7 @@ SearchStatus LazySearch::fetch_next_state() {
       associate with the expanded vs. evaluated nodes in lazy search
       and where to obtain it from.
     */
-    current_eval_context = EvaluationContext(current_state, current_g, true, &statistics);
+    current_eval_context = EvaluationContext(move(current_state), current_g, true, &statistics);
 
     return IN_PROGRESS;
 }
@@ -168,9 +170,9 @@ SearchStatus LazySearch::step() {
     // - current_g is the g value of the current state according to the cost_type
     // - current_real_g is the g value of the current state (using real costs)
 
-    State unpacked_current_state = current_state.unpack();
+    const State &current_state = get_current_state();
 
-    SearchNode node = search_space.get_node(unpacked_current_state);
+    SearchNode node = search_space.get_node(current_state);
     bool reopen = reopen_closed_nodes && !node.is_new() &&
         !node.is_dead_end() && (current_g < node.get_g());
 
@@ -180,7 +182,7 @@ SearchStatus LazySearch::step() {
             GlobalState parent_state = state_registry.lookup_state(current_predecessor_id);
             for (Evaluator *evaluator : path_dependent_evaluators)
                 evaluator->notify_state_transition(
-                    parent_state.unpack(), current_operator_id, unpacked_current_state);
+                    parent_state.unpack(), current_operator_id, current_state);
         }
         statistics.inc_evaluated_states();
         if (!open_list->is_dead_end(current_eval_context)) {
@@ -202,7 +204,7 @@ SearchStatus LazySearch::step() {
                 }
             }
             node.close();
-            if (check_goal_and_set_plan(unpacked_current_state))
+            if (check_goal_and_set_plan(get_current_state()))
                 return SOLVED;
             if (search_progress.check_progress(current_eval_context)) {
                 print_checkpoint_line(current_g);

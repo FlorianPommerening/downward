@@ -33,7 +33,6 @@ protected:
     std::vector<Evaluator *> path_dependent_evaluators;
     std::vector<std::shared_ptr<Evaluator>> preferred_operator_evaluators;
 
-    GlobalState current_state;
     StateID current_predecessor_id;
     OperatorID current_operator_id;
     int current_g;
@@ -47,6 +46,8 @@ protected:
     SearchStatus fetch_next_state();
 
     void reward_progress();
+
+    const State &get_current_state() const;
 
     std::vector<OperatorID> get_successor_operators(
         const ordered_set::OrderedSet<OperatorID> &preferred_operators) const;

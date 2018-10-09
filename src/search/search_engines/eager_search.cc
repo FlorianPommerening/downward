@@ -69,18 +69,17 @@ void EagerSearch::initialize() {
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
 
-    State unpacked_initial_state = task_proxy.get_initial_state();
-    state_registry.register_state(unpacked_initial_state);
-    const GlobalState &initial_state = state_registry.lookup_state(unpacked_initial_state.get_id());
+    State initial_state = task_proxy.get_initial_state();
+    state_registry.register_state(initial_state);
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(unpacked_initial_state);
+        evaluator->notify_initial_state(initial_state);
     }
 
     /*
       Note: we consider the initial state as reached by a preferred
       operator.
     */
-    EvaluationContext eval_context(initial_state, 0, true, &statistics);
+    EvaluationContext eval_context(move(initial_state), 0, true, &statistics);
 
     statistics.inc_evaluated_states();
 
@@ -90,10 +89,10 @@ void EagerSearch::initialize() {
         if (search_progress.check_progress(eval_context))
             print_checkpoint_line(0);
         start_f_value_statistics(eval_context);
-        SearchNode node = search_space.get_node(unpacked_initial_state);
+        SearchNode node = search_space.get_node(eval_context.get_state());
         node.open_initial();
 
-        open_list->insert(eval_context, unpacked_initial_state.get_id());
+        open_list->insert(eval_context, eval_context.get_state().get_id());
     }
 
     print_initial_evaluator_values(eval_context);
@@ -135,7 +134,7 @@ SearchStatus EagerSearch::step() {
     pruning_method->prune_operators(unpacked_state, applicable_ops);
 
     // This evaluates the expanded state (again) to get preferred ops
-    EvaluationContext eval_context(s, node.get_g(), false, &statistics, true);
+    EvaluationContext eval_context(move(unpacked_state), node.get_g(), false, &statistics, true);
     ordered_set::OrderedSet<OperatorID> preferred_operators;
     for (const shared_ptr<Evaluator> &preferred_operator_evaluator : preferred_operator_evaluators) {
         collect_preferred_operators(eval_context,
@@ -148,17 +147,15 @@ SearchStatus EagerSearch::step() {
         if ((node.get_real_g() + op.get_cost()) >= bound)
             continue;
 
-        State unpacked_successor = unpacked_state.get_successor(op);
-        state_registry.register_state(unpacked_successor);
-        StateID succ_id = unpacked_successor.get_id();
-        GlobalState succ_state = state_registry.lookup_state(succ_id);
+        State succ_state = eval_context.get_state().get_successor(op);
+        state_registry.register_state(succ_state);
         statistics.inc_generated();
         bool is_preferred = preferred_operators.contains(op_id);
 
-        SearchNode succ_node = search_space.get_node(unpacked_successor);
+        SearchNode succ_node = search_space.get_node(succ_state);
 
         for (Evaluator *evaluator : path_dependent_evaluators) {
-            evaluator->notify_state_transition(unpacked_state, op_id, unpacked_successor);
+            evaluator->notify_state_transition(eval_context.get_state(), op_id, succ_state);
         }
 
         // Previously encountered dead end. Don't re-evaluate.
@@ -175,7 +172,7 @@ SearchStatus EagerSearch::step() {
             int succ_g = node.get_g() + get_adjusted_cost(op);
 
             EvaluationContext eval_context(
-                succ_state, succ_g, is_preferred, &statistics);
+                move(succ_state), succ_g, is_preferred, &statistics);
             statistics.inc_evaluated_states();
 
             if (open_list->is_dead_end(eval_context)) {
@@ -185,7 +182,7 @@ SearchStatus EagerSearch::step() {
             }
             succ_node.open(node, op, get_adjusted_cost(op));
 
-            open_list->insert(eval_context, unpacked_successor.get_id());
+            open_list->insert(eval_context, eval_context.get_state().get_id());
             if (search_progress.check_progress(eval_context)) {
                 print_checkpoint_line(succ_node.get_g());
                 reward_progress();
@@ -206,7 +203,7 @@ SearchStatus EagerSearch::step() {
                 succ_node.reopen(node, op, get_adjusted_cost(op));
 
                 EvaluationContext eval_context(
-                    succ_state, succ_node.get_g(), is_preferred, &statistics);
+                    move(succ_state), succ_node.get_g(), is_preferred, &statistics);
 
                 /*
                   Note: our old code used to retrieve the h value from
@@ -225,7 +222,7 @@ SearchStatus EagerSearch::step() {
                   rather than a recomputation of the evaluator value
                   from scratch.
                 */
-                open_list->insert(eval_context, succ_state.get_id());
+                open_list->insert(eval_context, eval_context.get_state().get_id());
             } else {
                 // If we do not reopen closed nodes, we just update the parent pointers.
                 // Note that this could cause an incompatibility between
@@ -295,7 +292,7 @@ pair<SearchNode, bool> EagerSearch::fetch_next_node() {
                   We can pass calculate_preferred=false here
                   since preferred operators are computed when the state is expanded.
                 */
-                EvaluationContext eval_context(s, node.get_g(), false, &statistics);
+                EvaluationContext eval_context(move(unpacked_state), node.get_g(), false, &statistics);
                 int new_h = eval_context.get_evaluator_value_or_infinity(lazy_evaluator.get());
                 if (open_list->is_dead_end(eval_context)) {
                     node.mark_as_dead_end();
@@ -342,7 +339,9 @@ void EagerSearch::update_f_value_statistics(const SearchNode &node) {
           TODO: This code doesn't fit the idea of supporting
           an arbitrary f evaluator.
         */
-        EvaluationContext eval_context(node.get_state(), node.get_g(), false, &statistics);
+        GlobalState state = node.get_state();
+        State unpacked_state = state.unpack();
+        EvaluationContext eval_context(move(unpacked_state), node.get_g(), false, &statistics);
         int f_value = eval_context.get_evaluator_value(f_evaluator.get());
         statistics.report_f_value_progress(f_value);
     }

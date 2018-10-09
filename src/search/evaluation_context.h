@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 class Evaluator;
-class GlobalState;
+class State;
 class SearchStatistics;
 
 /*
@@ -57,14 +57,14 @@ public:
       TODO: Can we reuse caches? Can we move them instead of copying them?
     */
     EvaluationContext(
-        const EvaluatorCache &cache, int g_value, bool is_preferred,
+        EvaluatorCache &&cache, int g_value, bool is_preferred,
         SearchStatistics *statistics, bool calculate_preferred = false);
     /*
       Create new heuristic cache for caching heuristic values. Used for example
       by eager search.
     */
     EvaluationContext(
-        const GlobalState &state, int g_value, bool is_preferred,
+        State &&state, int g_value, bool is_preferred,
         SearchStatistics *statistics, bool calculate_preferred = false);
     /*
       Use the following constructor when you don't care about g values,
@@ -79,14 +79,12 @@ public:
             contexts that don't need this information.
     */
     EvaluationContext(
-        const GlobalState &state,
+        State &&state,
         SearchStatistics *statistics = nullptr, bool calculate_preferred = false);
-
-    ~EvaluationContext() = default;
 
     const EvaluationResult &get_result(Evaluator *eval);
     const EvaluatorCache &get_cache() const;
-    const GlobalState &get_state() const;
+    const State &get_state() const;
     int get_g_value() const;
     bool is_preferred() const;
 

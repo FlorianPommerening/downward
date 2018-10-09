@@ -59,10 +59,10 @@ static shared_ptr<OpenListFactory> create_ehc_open_list_factory(
     }
 }
 
-const GlobalState get_initial_state(StateRegistry &state_registry, const TaskProxy &task_proxy) {
-    State unpacked_initial_state = task_proxy.get_initial_state();
-    state_registry.register_state(unpacked_initial_state);
-    return state_registry.lookup_state(unpacked_initial_state.get_id());
+State get_initial_state(StateRegistry &state_registry, const TaskProxy &task_proxy) {
+    State initial_state = task_proxy.get_initial_state();
+    state_registry.register_state(initial_state);
+    return initial_state;
 }
 
 
@@ -126,9 +126,8 @@ void EnforcedHillClimbingSearch::initialize() {
             utils::exit_with(ExitCode::SEARCH_UNSOLVED_INCOMPLETE);
     }
 
-    GlobalState current_state = current_eval_context.get_state();
-    State unpacked_current_state = current_state.unpack();
-    SearchNode node = search_space.get_node(unpacked_current_state);
+    const State &current_state = current_eval_context.get_state();
+    SearchNode node = search_space.get_node(current_state);
     node.open_initial();
 
     current_phase_start_g = 0;
@@ -139,20 +138,20 @@ void EnforcedHillClimbingSearch::insert_successor_into_open_list(
     int parent_g,
     OperatorID op_id,
     bool preferred) {
+    const EvaluatorCache &cache = eval_context.get_cache();
     OperatorProxy op = task_proxy.get_operators()[op_id];
     int succ_g = parent_g + get_adjusted_cost(op);
     EdgeOpenListEntry entry = make_pair(
         eval_context.get_state().get_id(), op_id);
     EvaluationContext new_eval_context(
-        eval_context.get_cache(), succ_g, preferred, &statistics);
+        EvaluatorCache(cache), succ_g, preferred, &statistics);
     open_list->insert(new_eval_context, entry);
     statistics.inc_generated_ops();
 }
 
 void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
-    GlobalState current_state = eval_context.get_state();
-    State unpacked_current_state = current_state.unpack();
-    SearchNode node = search_space.get_node(unpacked_current_state);
+    const State &current_state = eval_context.get_state();
+    SearchNode node = search_space.get_node(current_state);
     int node_g = node.get_g();
 
     ordered_set::OrderedSet<OperatorID> preferred_operators;
@@ -174,7 +173,7 @@ void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
            by the open list. */
         vector<OperatorID> successor_operators;
         successor_generator.generate_applicable_ops(
-            unpacked_current_state, successor_operators);
+            current_state, successor_operators);
         for (OperatorID op_id : successor_operators) {
             bool preferred = use_preferred &&
                 preferred_operators.contains(op_id);
@@ -190,10 +189,9 @@ void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
 SearchStatus EnforcedHillClimbingSearch::step() {
     last_num_expanded = statistics.get_expanded();
     search_progress.check_progress(current_eval_context);
-    GlobalState current_state = current_eval_context.get_state();
-    State unpacked_current_state = current_state.unpack();
+    const State &current_state = current_eval_context.get_state();
 
-    if (check_goal_and_set_plan(unpacked_current_state)) {
+    if (check_goal_and_set_plan(current_state)) {
         return SOLVED;
     }
 
@@ -221,16 +219,13 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
 
         State unpacked_state = unpacked_parent_state.get_successor(last_op);
         state_registry.register_state(unpacked_state);
-        StateID state_id = unpacked_state.get_id();
-
-        GlobalState state = state_registry.lookup_state(state_id);
         statistics.inc_generated();
 
         SearchNode node = search_space.get_node(unpacked_state);
 
         if (node.is_new()) {
-            EvaluationContext eval_context(state, &statistics);
             reach_state(unpacked_parent_state, last_op_id, unpacked_state);
+            EvaluationContext eval_context(move(unpacked_state), &statistics);
             statistics.inc_evaluated_states();
 
             if (eval_context.is_evaluator_value_infinite(evaluator.get())) {
@@ -251,7 +246,7 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
                 d_pair.first += 1;
                 d_pair.second += statistics.get_expanded() - last_num_expanded;
 
-                current_eval_context = eval_context;
+                current_eval_context = move(eval_context);
                 open_list->clear();
                 current_phase_start_g = node.get_g();
                 return IN_PROGRESS;

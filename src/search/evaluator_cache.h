@@ -2,7 +2,7 @@
 #define EVALUATOR_CACHE_H
 
 #include "evaluation_result.h"
-#include "global_state.h"
+#include "task_proxy.h"
 
 #include <unordered_map>
 
@@ -15,15 +15,19 @@ using EvaluationResults = std::unordered_map<Evaluator *, EvaluationResult>;
 */
 class EvaluatorCache {
     EvaluationResults eval_results;
-    GlobalState state;
+    State state;
 
 public:
-    explicit EvaluatorCache(const GlobalState &state);
+    explicit EvaluatorCache(State &&state);
     ~EvaluatorCache() = default;
+
+    EvaluatorCache(EvaluatorCache &&other) = default;
+    EvaluatorCache(const EvaluatorCache &other) = default;
+    EvaluatorCache &operator=(EvaluatorCache &&other) = default;
 
     EvaluationResult &operator[](Evaluator *eval);
 
-    const GlobalState &get_state() const;
+    const State &get_state() const;
 
     template<class Callback>
     void for_each_evaluator_result(const Callback &callback) const {
