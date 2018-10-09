@@ -136,16 +136,15 @@ SearchStatus LazySearch::fetch_next_state() {
 
     current_predecessor_id = next.first;
     current_operator_id = next.second;
-    GlobalState current_predecessor = state_registry.lookup_state(current_predecessor_id);
-    State unpacked_current_predecessor = current_predecessor.unpack();
+    State current_predecessor = state_registry.lookup_state(current_predecessor_id);
 
     OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
-    assert(task_properties::is_applicable(current_operator, unpacked_current_predecessor));
+    assert(task_properties::is_applicable(current_operator, current_predecessor));
 
-    State current_state = unpacked_current_predecessor.get_successor(current_operator);
+    State current_state = current_predecessor.get_successor(current_operator);
     state_registry.register_state(current_state);
 
-    SearchNode pred_node = search_space.get_node(unpacked_current_predecessor);
+    SearchNode pred_node = search_space.get_node(current_predecessor);
     current_g = pred_node.get_g() + get_adjusted_cost(current_operator);
     current_real_g = pred_node.get_real_g() + current_operator.get_cost();
 
@@ -179,10 +178,10 @@ SearchStatus LazySearch::step() {
     if (node.is_new() || reopen) {
         if (current_operator_id != OperatorID::no_operator) {
             assert(current_predecessor_id != StateID::no_state);
-            GlobalState parent_state = state_registry.lookup_state(current_predecessor_id);
+            State parent_state = state_registry.lookup_state(current_predecessor_id);
             for (Evaluator *evaluator : path_dependent_evaluators)
                 evaluator->notify_state_transition(
-                    parent_state.unpack(), current_operator_id, current_state);
+                    parent_state, current_operator_id, current_state);
         }
         statistics.inc_evaluated_states();
         if (!open_list->is_dead_end(current_eval_context)) {
@@ -192,9 +191,8 @@ SearchStatus LazySearch::step() {
                 if (search_progress.check_progress(current_eval_context))
                     print_checkpoint_line(current_g);
             } else {
-                GlobalState parent_state = state_registry.lookup_state(current_predecessor_id);
-                State unpacked_parent_state = parent_state.unpack();
-                SearchNode parent_node = search_space.get_node(unpacked_parent_state);
+                State parent_state = state_registry.lookup_state(current_predecessor_id);
+                SearchNode parent_node = search_space.get_node(parent_state);
                 OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
                 if (reopen) {
                     node.reopen(parent_node, current_operator, get_adjusted_cost(current_operator));

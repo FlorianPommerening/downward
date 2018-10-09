@@ -8,8 +8,8 @@
 
 #include <vector>
 
-class GlobalState;
 class OperatorProxy;
+class State;
 class TaskProxy;
 
 
@@ -25,7 +25,7 @@ public:
     StateID get_state_id() const {
         return state_id;
     }
-    GlobalState get_state() const;
+    State get_state() const;
 
     bool is_new() const;
     bool is_open() const;

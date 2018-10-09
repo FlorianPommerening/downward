@@ -182,7 +182,7 @@ public:
       Returns the state that was registered at the given ID. The ID must refer
       to a state in this registry. Do not mix IDs from from different registries.
     */
-    GlobalState lookup_state(StateID id) const;
+    State lookup_state(StateID id) const;
 
     /*
       Register the state if this was not done before. Calling this with a state

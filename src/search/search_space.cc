@@ -19,7 +19,7 @@ SearchNode::SearchNode(const StateRegistry &state_registry,
     assert(state_id != StateID::no_state);
 }
 
-GlobalState SearchNode::get_state() const {
+State SearchNode::get_state() const {
     return state_registry.lookup_state(state_id);
 }
 
@@ -108,7 +108,7 @@ void SearchNode::mark_as_dead_end() {
 
 void SearchNode::dump(const TaskProxy &task_proxy) const {
     cout << state_id << ": ";
-    get_state().dump_fdr();
+    task_properties::dump_fdr(get_state());
     if (info.creating_operator != OperatorID::no_operator) {
         OperatorsProxy operators = task_proxy.get_operators();
         OperatorProxy op = operators[info.creating_operator.get_index()];
@@ -138,7 +138,7 @@ void SearchSpace::trace_path(const State &goal_state,
             break;
         }
         path.push_back(info.creating_operator);
-        current_state = state_registry.lookup_state(info.parent_state_id).unpack();
+        current_state = state_registry.lookup_state(info.parent_state_id);
     }
     reverse(path.begin(), path.end());
 }
@@ -148,7 +148,7 @@ void SearchSpace::dump(const TaskProxy &task_proxy) const {
     for (StateID id : state_registry) {
         /* The body duplicates SearchNode::dump() but we cannot create
            a search node without discarding the const qualifier. */
-        State state = state_registry.lookup_state(id).unpack();
+        State state = state_registry.lookup_state(id);
         const SearchNodeInfo &node_info = search_node_infos[state];
         cout << id << ": ";
         task_properties::dump_fdr(state);

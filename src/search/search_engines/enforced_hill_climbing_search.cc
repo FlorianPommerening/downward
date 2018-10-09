@@ -206,9 +206,8 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         OperatorID last_op_id = entry.second;
         OperatorProxy last_op = task_proxy.get_operators()[last_op_id];
 
-        GlobalState parent_state = state_registry.lookup_state(parent_state_id);
-        State unpacked_parent_state = parent_state.unpack();
-        SearchNode parent_node = search_space.get_node(unpacked_parent_state);
+        State parent_state = state_registry.lookup_state(parent_state_id);
+        SearchNode parent_node = search_space.get_node(parent_state);
 
         // d: distance from initial node in this EHC phase
         int d = parent_node.get_g() - current_phase_start_g +
@@ -217,14 +216,14 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         if (parent_node.get_real_g() + last_op.get_cost() >= bound)
             continue;
 
-        State unpacked_state = unpacked_parent_state.get_successor(last_op);
+        State unpacked_state = parent_state.get_successor(last_op);
         state_registry.register_state(unpacked_state);
         statistics.inc_generated();
 
         SearchNode node = search_space.get_node(unpacked_state);
 
         if (node.is_new()) {
-            reach_state(unpacked_parent_state, last_op_id, unpacked_state);
+            reach_state(parent_state, last_op_id, unpacked_state);
             EvaluationContext eval_context(move(unpacked_state), &statistics);
             statistics.inc_evaluated_states();
 

@@ -119,22 +119,21 @@ SearchStatus EagerSearch::step() {
     }
     SearchNode node = n.first;
 
-    GlobalState s = node.get_state();
-    State unpacked_state = s.unpack();
-    if (check_goal_and_set_plan(unpacked_state))
+    State s = node.get_state();
+    if (check_goal_and_set_plan(s))
         return SOLVED;
 
     vector<OperatorID> applicable_ops;
-    successor_generator.generate_applicable_ops(unpacked_state, applicable_ops);
+    successor_generator.generate_applicable_ops(s, applicable_ops);
 
     /*
       TODO: When preferred operators are in use, a preferred operator will be
       considered by the preferred operator queues even when it is pruned.
     */
-    pruning_method->prune_operators(unpacked_state, applicable_ops);
+    pruning_method->prune_operators(s, applicable_ops);
 
     // This evaluates the expanded state (again) to get preferred ops
-    EvaluationContext eval_context(move(unpacked_state), node.get_g(), false, &statistics, true);
+    EvaluationContext eval_context(move(s), node.get_g(), false, &statistics, true);
     ordered_set::OrderedSet<OperatorID> preferred_operators;
     for (const shared_ptr<Evaluator> &preferred_operator_evaluator : preferred_operator_evaluators) {
         collect_preferred_operators(eval_context,
@@ -258,9 +257,8 @@ pair<SearchNode, bool> EagerSearch::fetch_next_node() {
         //      recreate it outside of this function with node.get_state()?
         //      One way would be to store GlobalState objects inside SearchNodes
         //      instead of StateIDs
-        GlobalState s = state_registry.lookup_state(id);
-        State unpacked_state = s.unpack();
-        SearchNode node = search_space.get_node(unpacked_state);
+        State s = state_registry.lookup_state(id);
+        SearchNode node = search_space.get_node(s);
 
         if (node.is_closed())
             continue;
@@ -286,13 +284,13 @@ pair<SearchNode, bool> EagerSearch::fetch_next_node() {
             if (node.is_dead_end())
                 continue;
 
-            if (lazy_evaluator->is_estimate_cached(unpacked_state)) {
-                int old_h = lazy_evaluator->get_cached_estimate(unpacked_state);
+            if (lazy_evaluator->is_estimate_cached(s)) {
+                int old_h = lazy_evaluator->get_cached_estimate(s);
                 /*
                   We can pass calculate_preferred=false here
                   since preferred operators are computed when the state is expanded.
                 */
-                EvaluationContext eval_context(move(unpacked_state), node.get_g(), false, &statistics);
+                EvaluationContext eval_context(move(s), node.get_g(), false, &statistics);
                 int new_h = eval_context.get_evaluator_value_or_infinity(lazy_evaluator.get());
                 if (open_list->is_dead_end(eval_context)) {
                     node.mark_as_dead_end();
@@ -339,9 +337,8 @@ void EagerSearch::update_f_value_statistics(const SearchNode &node) {
           TODO: This code doesn't fit the idea of supporting
           an arbitrary f evaluator.
         */
-        GlobalState state = node.get_state();
-        State unpacked_state = state.unpack();
-        EvaluationContext eval_context(move(unpacked_state), node.get_g(), false, &statistics);
+        State state = node.get_state();
+        EvaluationContext eval_context(move(state), node.get_g(), false, &statistics);
         int f_value = eval_context.get_evaluator_value(f_evaluator.get());
         statistics.report_f_value_progress(f_value);
     }
