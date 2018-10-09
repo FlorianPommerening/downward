@@ -69,8 +69,7 @@ void EagerSearch::initialize() {
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
 
-    State initial_state = task_proxy.get_initial_state();
-    state_registry.register_state(initial_state);
+    State initial_state = get_registered_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
         evaluator->notify_initial_state(initial_state);
     }
@@ -146,8 +145,7 @@ SearchStatus EagerSearch::step() {
         if ((node.get_real_g() + op.get_cost()) >= bound)
             continue;
 
-        State succ_state = eval_context.get_state().get_successor(op);
-        state_registry.register_state(succ_state);
+        State succ_state = get_registered_successor_state(eval_context.get_state(), op);
         statistics.inc_generated();
         bool is_preferred = preferred_operators.contains(op_id);
 
@@ -247,8 +245,7 @@ pair<SearchNode, bool> EagerSearch::fetch_next_node() {
         if (open_list->empty()) {
             cout << "Completely explored state space -- no solution!" << endl;
             // HACK! HACK! we do this because SearchNode has no default/copy constructor
-            State initial_state = task_proxy.get_initial_state();
-            state_registry.register_state(initial_state);
+            State initial_state = get_registered_initial_state();
             SearchNode dummy_node = search_space.get_node(initial_state);
             return make_pair(dummy_node, false);
         }

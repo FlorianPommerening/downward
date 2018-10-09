@@ -192,7 +192,7 @@ public:
       otherwise it will be registered and subsequent calls to state.get_id()
       will return the state's ID.
     */
-    void register_state(State &state);
+    StateID register_state(const State &state);
 
     /*
       Returns the number of states registered so far.

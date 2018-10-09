@@ -46,7 +46,7 @@ State StateRegistry::lookup_state(StateID id) const {
     return state;
 }
 
-void StateRegistry::register_state(State &state) {
+StateID StateRegistry::register_state(const State &state) {
     if (state.get_registry()) {
         cerr << "Tried to register an already registered state." << endl;
         utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
@@ -67,8 +67,7 @@ void StateRegistry::register_state(State &state) {
     // buffer is copied by push_back
     delete[] buffer;
 
-    StateID id = insert_id_or_pop_state();
-    state.set_registry(this, id);
+    return insert_id_or_pop_state();
 }
 
 int StateRegistry::get_bins_per_state() const {

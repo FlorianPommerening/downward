@@ -16,12 +16,6 @@
 using namespace std;
 
 namespace lazy_search {
-State get_initial_state(StateRegistry &state_registry, const TaskProxy &task_proxy) {
-    State unpacked_initial_state = task_proxy.get_initial_state();
-    state_registry.register_state(unpacked_initial_state);
-    return unpacked_initial_state;
-}
-
 LazySearch::LazySearch(const Options &opts)
     : SearchEngine(opts),
       open_list(opts.get<shared_ptr<OpenListFactory>>("open")->
@@ -34,7 +28,7 @@ LazySearch::LazySearch(const Options &opts)
       current_operator_id(OperatorID::no_operator),
       current_g(0),
       current_real_g(0),
-      current_eval_context(get_initial_state(state_registry, task_proxy), 0, true, &statistics) {
+      current_eval_context(get_registered_initial_state(), 0, true, &statistics) {
     /*
       We initialize current_eval_context in such a way that the initial node
       counts as "preferred".
@@ -60,10 +54,9 @@ void LazySearch::initialize() {
     }
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
-    State unpacked_initial_state = task_proxy.get_initial_state();
-    state_registry.register_state(unpacked_initial_state);
+    State initial_state = get_registered_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(unpacked_initial_state);
+        evaluator->notify_initial_state(initial_state);
     }
 }
 
@@ -141,8 +134,7 @@ SearchStatus LazySearch::fetch_next_state() {
     OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
     assert(task_properties::is_applicable(current_operator, current_predecessor));
 
-    State current_state = current_predecessor.get_successor(current_operator);
-    state_registry.register_state(current_state);
+    State current_state = get_registered_successor_state(current_predecessor, current_operator);
 
     SearchNode pred_node = search_space.get_node(current_predecessor);
     current_g = pred_node.get_g() + get_adjusted_cost(current_operator);

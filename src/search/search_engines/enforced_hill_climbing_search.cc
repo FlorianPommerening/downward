@@ -59,20 +59,13 @@ static shared_ptr<OpenListFactory> create_ehc_open_list_factory(
     }
 }
 
-State get_initial_state(StateRegistry &state_registry, const TaskProxy &task_proxy) {
-    State initial_state = task_proxy.get_initial_state();
-    state_registry.register_state(initial_state);
-    return initial_state;
-}
-
-
 EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
     const Options &opts)
     : SearchEngine(opts),
       evaluator(opts.get<shared_ptr<Evaluator>>("h")),
       preferred_operator_evaluators(opts.get_list<shared_ptr<Evaluator>>("preferred")),
       preferred_usage(PreferredUsage(opts.get_enum("preferred_usage"))),
-      current_eval_context(get_initial_state(state_registry, task_proxy), &statistics),
+      current_eval_context(get_registered_initial_state(), &statistics),
       current_phase_start_g(-1),
       num_ehc_phases(0),
       last_num_expanded(-1) {
@@ -81,10 +74,9 @@ EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
     }
     evaluator->get_path_dependent_evaluators(path_dependent_evaluators);
 
-    State unpacked_initial_state = task_proxy.get_initial_state();
-    state_registry.register_state(unpacked_initial_state);
+    const State &initial_state = current_eval_context.get_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(unpacked_initial_state);
+        evaluator->notify_initial_state(initial_state);
     }
     use_preferred = find(preferred_operator_evaluators.begin(),
                          preferred_operator_evaluators.end(), evaluator) !=
@@ -216,15 +208,14 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         if (parent_node.get_real_g() + last_op.get_cost() >= bound)
             continue;
 
-        State unpacked_state = parent_state.get_successor(last_op);
-        state_registry.register_state(unpacked_state);
+        State state = get_registered_successor_state(parent_state, last_op);
         statistics.inc_generated();
 
-        SearchNode node = search_space.get_node(unpacked_state);
+        SearchNode node = search_space.get_node(state);
 
         if (node.is_new()) {
-            reach_state(parent_state, last_op_id, unpacked_state);
-            EvaluationContext eval_context(move(unpacked_state), &statistics);
+            reach_state(parent_state, last_op_id, state);
+            EvaluationContext eval_context(move(state), &statistics);
             statistics.inc_evaluated_states();
 
             if (eval_context.is_evaluator_value_infinite(evaluator.get())) {

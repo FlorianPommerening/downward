@@ -69,6 +69,9 @@ public:
     int get_bound() {return bound;}
     PlanManager &get_plan_manager() {return plan_manager;}
 
+    State get_registered_initial_state();
+    State get_registered_successor_state(const State &state, const OperatorProxy &op);
+
     /* The following three methods should become functions as they
        do not require access to private/protected class members. */
     static void add_pruning_option(options::OptionParser &parser);
