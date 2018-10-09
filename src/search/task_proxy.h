@@ -565,12 +565,15 @@ class State {
     const AbstractTask *task;
     std::vector<int> values;
     StateID id;
-    StateRegistry *registry;
+    const StateRegistry *registry;
 public:
     using ItemType = FactProxy;
-    State(const AbstractTask &task, std::vector<int> &&values)
-        : task(&task), values(std::move(values)), id(StateID::no_state), registry(nullptr) {
+    State(const AbstractTask &task, std::vector<int> &&values, StateID id, const StateRegistry *registry)
+        : task(&task), values(std::move(values)), id(id), registry(registry) {
         assert(static_cast<int>(size()) == this->task->get_num_variables());
+    }
+    State(const AbstractTask &task, std::vector<int> &&values)
+        : State(task, move(values), StateID::unregistered_state, nullptr) {
     }
     ~State() = default;
     State(const State &) = default;
@@ -578,6 +581,8 @@ public:
     State(State &&other)
         : task(other.task), values(std::move(other.values)), id(other.id), registry(other.registry) {
         other.task = nullptr;
+        other.id = StateID::no_state;
+        other.registry = nullptr;
     }
 
     State &operator=(State &&other) {
@@ -607,12 +612,6 @@ public:
         return hasher(values);
     }
 
-    void set_registry(StateRegistry *registry_, StateID id_) {
-        assert(registry == nullptr);
-        registry = registry_;
-        id = id_;
-    }
-
     std::size_t size() const {
         return values.size();
     }
@@ -633,7 +632,7 @@ public:
         return id;
     }
 
-    StateRegistry *get_registry() const {
+    const StateRegistry *get_registry() const {
         return registry;
     }
 
@@ -700,8 +699,8 @@ public:
         return GoalsProxy(*task);
     }
 
-    State create_state(std::vector<int> &&state_values) const {
-        return State(*task, std::move(state_values));
+    State create_state(std::vector<int> &&state_values, StateID id = StateID::unregistered_state, const StateRegistry *registry = nullptr) const {
+        return State(*task, std::move(state_values), id, registry);
     }
 
     State get_initial_state() const {

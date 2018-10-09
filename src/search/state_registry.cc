@@ -41,9 +41,7 @@ State StateRegistry::lookup_state(StateID id) const {
     for (int var = 0; var < num_variables; ++var) {
         values[var] = get_state_value(buffer, var);
     }
-    State state = task_proxy.create_state(move(values));
-    state.set_registry(const_cast<StateRegistry *>(this), id);
-    return state;
+    return task_proxy.create_state(move(values), id, this);
 }
 
 StateID StateRegistry::register_state(const State &state) {
