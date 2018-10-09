@@ -36,7 +36,14 @@ StateID StateRegistry::insert_id_or_pop_state() {
 }
 
 State StateRegistry::lookup_state(StateID id) const {
-    return GlobalState(state_data_pool[id.value], *this, id).unpack();
+    const PackedStateBin *buffer = state_data_pool[id.value];
+    vector<int> values(num_variables);
+    for (int var = 0; var < num_variables; ++var) {
+        values[var] = get_state_value(buffer, var);
+    }
+    State state = task_proxy.create_state(move(values));
+    state.set_registry(const_cast<StateRegistry *>(this), id);
+    return state;
 }
 
 void StateRegistry::register_state(State &state) {
