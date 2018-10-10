@@ -124,11 +124,13 @@ public:
 
     const Entry &operator[](const State &state) const {
         const StateRegistry *registry = state.get_registry();
+        assert(registry);
         const segmented_vector::SegmentedVector<Entry> *entries = get_entries(registry);
         if (!entries) {
             return default_value;
         }
         int state_id = state.get_id().value;
+        assert(state.get_id() != StateID::no_state && state.get_id() != StateID::unregistered_state);
         assert(utils::in_bounds(state_id, *registry));
         int num_entries = entries->size();
         if (state_id >= num_entries) {

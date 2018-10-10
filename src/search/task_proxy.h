@@ -570,6 +570,8 @@ public:
     using ItemType = FactProxy;
     State(const AbstractTask &task, std::vector<int> &&values, StateID id, const StateRegistry *registry)
         : task(&task), values(std::move(values)), id(id), registry(registry) {
+        assert(id != StateID::no_state);
+        assert(registry || id == StateID::unregistered_state);
         assert(static_cast<int>(size()) == this->task->get_num_variables());
     }
     State(const AbstractTask &task, std::vector<int> &&values)

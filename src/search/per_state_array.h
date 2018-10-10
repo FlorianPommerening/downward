@@ -104,8 +104,10 @@ public:
 
     ArrayView<Element> operator[](const State &state) {
         const StateRegistry *registry = state.get_registry();
+        assert(registry);
         segmented_vector::SegmentedArrayVector<Element> *entries = get_entries(registry);
         int state_id = state.get_id().value;
+        assert(state.get_id() != StateID::no_state && state.get_id() != StateID::unregistered_state);
         size_t virtual_size = registry->size();
         assert(utils::in_bounds(state_id, *registry));
         if (entries->size() < virtual_size) {
