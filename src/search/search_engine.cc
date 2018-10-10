@@ -124,12 +124,12 @@ int SearchEngine::get_adjusted_cost(const OperatorProxy &op) const {
 
 State SearchEngine::get_registered_initial_state() {
     State initial_state = task_proxy.get_initial_state();
-    return state_registry.register_state(initial_state);
+    return state_registry.register_state(move(initial_state));
 }
 
 State SearchEngine::get_registered_successor_state(const State &state, const OperatorProxy &op) {
     State successor = state.get_successor(op);
-    return state_registry.register_state(successor);
+    return state_registry.register_state(move(successor));
 }
 
 /* TODO: merge this into add_options_to_parser when all search

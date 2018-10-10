@@ -44,7 +44,7 @@ State StateRegistry::lookup_state(StateID id) const {
     return task_proxy.create_state(move(values), id, this);
 }
 
-State StateRegistry::register_state(const State &state) {
+State StateRegistry::register_state(State &&state) {
     if (state.get_registry()) {
         cerr << "Tried to register an already registered state." << endl;
         utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
@@ -66,9 +66,7 @@ State StateRegistry::register_state(const State &state) {
     delete[] buffer;
 
     StateID id = insert_id_or_pop_state();
-    // We use the values from state instead of the buffer to avoid the overhead of unpacking.
-    vector<int> values = state.get_values();
-    return state.get_task().create_state(move(values), id, this);
+    return State(move(state), id, this);
 }
 
 int StateRegistry::get_bins_per_state() const {

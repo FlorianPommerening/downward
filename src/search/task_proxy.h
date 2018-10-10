@@ -574,6 +574,14 @@ public:
         assert(registry || id == StateID::unregistered_state);
         assert(static_cast<int>(size()) == this->task->get_num_variables());
     }
+    State(State &&unregistered_state, StateID id, const StateRegistry *registry)
+        : State(*unregistered_state.task, std::move(unregistered_state.values), id, registry) {
+        assert(registry);
+        assert(id != StateID::unregistered_state);
+        unregistered_state.task = nullptr;
+        unregistered_state.id = StateID::no_state;
+        unregistered_state.registry = nullptr;
+    }
     State(const AbstractTask &task, std::vector<int> &&values)
         : State(task, move(values), StateID::unregistered_state, nullptr) {
     }
