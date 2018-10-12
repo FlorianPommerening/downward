@@ -29,7 +29,7 @@ class HSPMaxHeuristic : public relaxation_heuristic::RelaxationHeuristic {
 protected:
     virtual int compute_heuristic(const State &ancestor_state) override;
 public:
-    HSPMaxHeuristic(const options::Options &options);
+    HSPMaxHeuristic(const options::Options &opts);
     ~HSPMaxHeuristic();
 };
 }

@@ -12,6 +12,8 @@ class State;
 namespace successor_generator {
 class GeneratorBase {
 public:
+    virtual ~GeneratorBase() {}
+
     virtual void generate_applicable_ops(
         const State &state, std::vector<OperatorID> &applicable_ops) const = 0;
 };

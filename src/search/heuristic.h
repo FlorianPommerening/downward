@@ -76,7 +76,7 @@ protected:
     State convert_ancestor_state(const State &ancestor_state) const;
 
 public:
-    explicit Heuristic(const options::Options &options);
+    explicit Heuristic(const options::Options &opts);
     virtual ~Heuristic() override;
 
     virtual void get_path_dependent_evaluators(

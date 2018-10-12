@@ -19,12 +19,12 @@ public:
 
     BitsetView get_reached_landmarks(const State &state);
 
-    bool update_lm_status(const State &state);
+    bool update_lm_status(const State &global_state);
 
     void set_landmarks_for_initial_state(const State &initial_state);
-    bool update_reached_lms(const State &parent_state,
+    bool update_reached_lms(const State &parent_global_state,
                             OperatorID op_id,
-                            const State &state);
+                            const State &global_state);
 };
 }
 

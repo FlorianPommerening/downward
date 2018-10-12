@@ -46,7 +46,7 @@ struct Proposition {
 };
 
 class RelaxationHeuristic : public Heuristic {
-    void build_unary_operators(const OperatorProxy &op, int operator_no);
+    void build_unary_operators(const OperatorProxy &op, int op_no);
     void simplify();
 protected:
     std::vector<UnaryOperator> unary_operators;
@@ -55,7 +55,7 @@ protected:
 
     Proposition *get_proposition(const FactProxy &fact);
 public:
-    RelaxationHeuristic(const options::Options &options);
+    RelaxationHeuristic(const options::Options &opts);
     virtual ~RelaxationHeuristic();
     virtual bool dead_ends_are_reliable() const;
 };

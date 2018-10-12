@@ -8,7 +8,7 @@ class GoalCountHeuristic : public Heuristic {
 protected:
     virtual int compute_heuristic(const State &ancestor_state) override;
 public:
-    GoalCountHeuristic(const options::Options &options);
+    GoalCountHeuristic(const options::Options &opts);
     ~GoalCountHeuristic();
 };
 }
