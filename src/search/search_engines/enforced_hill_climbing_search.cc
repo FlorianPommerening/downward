@@ -118,8 +118,7 @@ void EnforcedHillClimbingSearch::initialize() {
             utils::exit_with(ExitCode::SEARCH_UNSOLVED_INCOMPLETE);
     }
 
-    const State &current_state = current_eval_context.get_state();
-    SearchNode node = search_space.get_node(current_state);
+    SearchNode node = search_space.get_node(current_eval_context.get_state());
     node.open_initial();
 
     current_phase_start_g = 0;
@@ -142,8 +141,7 @@ void EnforcedHillClimbingSearch::insert_successor_into_open_list(
 }
 
 void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
-    const State &current_state = eval_context.get_state();
-    SearchNode node = search_space.get_node(current_state);
+    SearchNode node = search_space.get_node(eval_context.get_state());
     int node_g = node.get_g();
 
     ordered_set::OrderedSet<OperatorID> preferred_operators;
@@ -165,7 +163,7 @@ void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
            by the open list. */
         vector<OperatorID> successor_operators;
         successor_generator.generate_applicable_ops(
-            current_state, successor_operators);
+            eval_context.get_state(), successor_operators);
         for (OperatorID op_id : successor_operators) {
             bool preferred = use_preferred &&
                 preferred_operators.contains(op_id);
@@ -181,9 +179,8 @@ void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
 SearchStatus EnforcedHillClimbingSearch::step() {
     last_num_expanded = statistics.get_expanded();
     search_progress.check_progress(current_eval_context);
-    const State &current_state = current_eval_context.get_state();
 
-    if (check_goal_and_set_plan(current_state)) {
+    if (check_goal_and_set_plan(current_eval_context.get_state())) {
         return SOLVED;
     }
 
