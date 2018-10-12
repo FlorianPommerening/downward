@@ -37,7 +37,6 @@ class LandmarkCountHeuristic : public Heuristic {
         const State &state, const LandmarkSet &reached, LandmarkNode &lm) const;
     bool generate_helpful_actions(
         const State &state, const LandmarkSet &reached);
-    void set_exploration_goals(const State &global_state);
 
     LandmarkSet convert_to_landmark_set(const BitsetView &landmark_bitset);
 protected:
