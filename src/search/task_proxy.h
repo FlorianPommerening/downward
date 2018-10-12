@@ -633,7 +633,6 @@ public:
     inline TaskProxy get_task() const;
 
     StateID get_id() const {
-        assert(id != StateID::unregistered_state);
         return id;
     }
 
