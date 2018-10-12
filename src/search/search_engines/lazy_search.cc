@@ -104,7 +104,6 @@ void LazySearch::generate_successors() {
     statistics.inc_generated(successor_operators.size());
 
     StateID current_state_id = get_current_state().get_id();
-    const EvaluatorCache &current_cache = current_eval_context.get_cache();
 
     for (OperatorID op_id : successor_operators) {
         OperatorProxy op = task_proxy.get_operators()[op_id];
@@ -112,8 +111,9 @@ void LazySearch::generate_successors() {
         int new_real_g = current_real_g + op.get_cost();
         bool is_preferred = preferred_operators.contains(op_id);
         if (new_real_g < bound) {
+            EvaluatorCache cache_copy(current_eval_context.get_cache());
             EvaluationContext new_eval_context(
-                EvaluatorCache(current_cache), new_g, is_preferred, nullptr);
+                move(cache_copy), new_g, is_preferred, nullptr);
             open_list->insert(new_eval_context, make_pair(current_state_id, op_id));
         }
     }
