@@ -129,16 +129,17 @@ SearchNode SearchSpace::get_node(StateID id) {
 
 void SearchSpace::trace_path(const State &goal_state,
                              vector<OperatorID> &path) const {
-    State current_state = goal_state;
+    StateHandle current_state_handle = goal_state.get_handle();
+    assert(current_state_handle.get_registry() == &state_registry);
     assert(path.empty());
     for (;;) {
-        const SearchNodeInfo &info = search_node_infos[current_state.get_handle()];
+        const SearchNodeInfo &info = search_node_infos[current_state_handle];
         if (info.creating_operator == OperatorID::no_operator) {
             assert(info.parent_state_id == StateID::no_state);
             break;
         }
         path.push_back(info.creating_operator);
-        current_state = state_registry.lookup_state(info.parent_state_id);
+        current_state_handle = StateHandle(&state_registry, info.parent_state_id);
     }
     reverse(path.begin(), path.end());
 }
