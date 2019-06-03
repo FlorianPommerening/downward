@@ -70,7 +70,8 @@ public:
     PlanManager &get_plan_manager() {return plan_manager;}
 
     EvaluationContext get_evaluation_context_for_initial_state();
-    State get_registered_successor_state(const State &state, const OperatorProxy &op);
+    EvaluationContext get_successor_evaluation_context(
+        const State &state, const OperatorProxy &op, int g, bool is_preferred);
 
     /* The following three methods should become functions as they
        do not require access to private/protected class members. */

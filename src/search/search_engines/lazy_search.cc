@@ -130,8 +130,6 @@ SearchStatus LazySearch::fetch_next_state() {
     OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
     assert(task_properties::is_applicable(current_operator, current_predecessor));
 
-    State current_state = get_registered_successor_state(current_predecessor, current_operator);
-
     SearchNode pred_node = search_space.get_node(current_predecessor.get_handle());
     current_g = pred_node.get_g() + get_adjusted_cost(current_operator);
     current_real_g = pred_node.get_real_g() + current_operator.get_cost();
@@ -144,7 +142,8 @@ SearchStatus LazySearch::fetch_next_state() {
       associate with the expanded vs. evaluated nodes in lazy search
       and where to obtain it from.
     */
-    current_eval_context = EvaluationContext(move(current_state), current_g, true, &statistics);
+    current_eval_context = get_successor_evaluation_context(
+        current_predecessor, current_operator, current_g, true);
 
     return IN_PROGRESS;
 }
