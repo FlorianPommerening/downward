@@ -69,7 +69,7 @@ public:
     int get_bound() {return bound;}
     PlanManager &get_plan_manager() {return plan_manager;}
 
-    State get_registered_initial_state();
+    EvaluationContext get_evaluation_context_for_initial_state();
     State get_registered_successor_state(const State &state, const OperatorProxy &op);
 
     /* The following three methods should become functions as they

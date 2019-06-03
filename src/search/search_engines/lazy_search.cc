@@ -28,11 +28,7 @@ LazySearch::LazySearch(const Options &opts)
       current_operator_id(OperatorID::no_operator),
       current_g(0),
       current_real_g(0),
-      current_eval_context(get_registered_initial_state(), 0, true, &statistics) {
-    /*
-      We initialize current_eval_context in such a way that the initial node
-      counts as "preferred".
-    */
+      current_eval_context(get_evaluation_context_for_initial_state()) {
 }
 
 void LazySearch::set_preferred_operator_evaluators(
@@ -54,9 +50,8 @@ void LazySearch::initialize() {
     }
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
-    State initial_state = get_registered_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(initial_state);
+        evaluator->notify_initial_state(current_eval_context.get_state());
     }
 }
 

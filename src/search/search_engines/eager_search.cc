@@ -70,16 +70,10 @@ void EagerSearch::initialize() {
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
 
-    State initial_state = get_registered_initial_state();
+    EvaluationContext eval_context = get_evaluation_context_for_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(initial_state);
+        evaluator->notify_initial_state(eval_context.get_state());
     }
-
-    /*
-      Note: we consider the initial state as reached by a preferred
-      operator.
-    */
-    EvaluationContext eval_context(move(initial_state), 0, true, &statistics);
 
     statistics.inc_evaluated_states();
 
