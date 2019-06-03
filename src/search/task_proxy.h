@@ -650,7 +650,7 @@ public:
         return values;
     }
 
-    State get_successor(OperatorProxy op) const;
+    State get_successor(const OperatorProxy &op) const;
 };
 
 
