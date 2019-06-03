@@ -4,11 +4,11 @@
 #include "evaluation_result.h"
 #include "evaluator_cache.h"
 #include "operator_id.h"
+#include "task_proxy.h"
 
 #include <unordered_map>
 
 class Evaluator;
-class State;
 class SearchStatistics;
 
 /*
@@ -42,6 +42,7 @@ class SearchStatistics;
 
 class EvaluationContext {
     EvaluatorCache cache;
+    State state;
     int g_value;
     bool preferred;
     SearchStatistics *statistics;
@@ -57,7 +58,7 @@ public:
       TODO: Can we reuse caches? Can we move them instead of copying them?
     */
     EvaluationContext(
-        EvaluatorCache &&cache, int g_value, bool is_preferred,
+        EvaluatorCache &&cache, State &&state, int g_value, bool is_preferred,
         SearchStatistics *statistics, bool calculate_preferred = false);
     /*
       Create new heuristic cache for caching heuristic values. Used for example

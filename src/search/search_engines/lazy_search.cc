@@ -112,8 +112,9 @@ void LazySearch::generate_successors() {
         bool is_preferred = preferred_operators.contains(op_id);
         if (new_real_g < bound) {
             EvaluatorCache cache_copy(current_eval_context.get_cache());
+            State state_copy(current_eval_context.get_state());
             EvaluationContext new_eval_context(
-                move(cache_copy), new_g, is_preferred, nullptr);
+                move(cache_copy), move(state_copy), new_g, is_preferred, nullptr);
             open_list->insert(new_eval_context, make_pair(current_state_id, op_id));
         }
     }
