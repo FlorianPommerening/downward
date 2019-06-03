@@ -3,6 +3,7 @@
 
 #include "abstract_task.h"
 #include "operator_id.h"
+#include "state_handle.h"
 #include "state_id.h"
 #include "task_id.h"
 
@@ -639,6 +640,10 @@ public:
 
     const StateRegistry *get_registry() const {
         return registry;
+    }
+
+    StateHandle get_handle() const {
+        return StateHandle(registry, id);
     }
 
     const std::vector<int> &get_values() const {

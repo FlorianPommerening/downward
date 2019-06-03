@@ -15,7 +15,7 @@ LandmarkStatusManager::LandmarkStatusManager(LandmarkGraph &graph)
 }
 
 BitsetView LandmarkStatusManager::get_reached_landmarks(const State &state) {
-    return reached_lms[state];
+    return reached_lms[state.get_handle()];
 }
 
 void LandmarkStatusManager::set_landmarks_for_initial_state(

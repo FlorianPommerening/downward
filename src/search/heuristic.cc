@@ -54,13 +54,13 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
     int heuristic = NO_VALUE;
 
     if (!calculate_preferred && cache_evaluator_values &&
-        heuristic_cache[state].h != NO_VALUE && !heuristic_cache[state].dirty) {
-        heuristic = heuristic_cache[state].h;
+        heuristic_cache[state.get_handle()].h != NO_VALUE && !heuristic_cache[state.get_handle()].dirty) {
+        heuristic = heuristic_cache[state.get_handle()].h;
         result.set_count_evaluation(false);
     } else {
         heuristic = compute_heuristic(state);
         if (cache_evaluator_values) {
-            heuristic_cache[state] = HEntry(heuristic, false);
+            heuristic_cache[state.get_handle()] = HEntry(heuristic, false);
         }
         result.set_count_evaluation(true);
     }
@@ -100,10 +100,10 @@ bool Heuristic::does_cache_estimates() const {
 }
 
 bool Heuristic::is_estimate_cached(const State &state) const {
-    return heuristic_cache[state].h != NO_VALUE;
+    return heuristic_cache[state.get_handle()].h != NO_VALUE;
 }
 
 int Heuristic::get_cached_estimate(const State &state) const {
     assert(is_estimate_cached(state));
-    return heuristic_cache[state].h;
+    return heuristic_cache[state.get_handle()].h;
 }
