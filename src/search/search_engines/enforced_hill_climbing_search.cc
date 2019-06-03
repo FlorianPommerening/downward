@@ -118,7 +118,7 @@ void EnforcedHillClimbingSearch::initialize() {
             utils::exit_with(ExitCode::SEARCH_UNSOLVED_INCOMPLETE);
     }
 
-    SearchNode node = search_space.get_node(current_eval_context.get_state().get_handle());
+    SearchNode node = search_space.get_node(current_eval_context.get_state().get_id());
     node.open_initial();
 
     current_phase_start_g = 0;
@@ -142,7 +142,7 @@ void EnforcedHillClimbingSearch::insert_successor_into_open_list(
 }
 
 void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
-    SearchNode node = search_space.get_node(eval_context.get_state().get_handle());
+    SearchNode node = search_space.get_node(eval_context.get_state().get_id());
     int node_g = node.get_g();
 
     ordered_set::OrderedSet<OperatorID> preferred_operators;
@@ -196,9 +196,7 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         OperatorID last_op_id = entry.second;
         OperatorProxy last_op = task_proxy.get_operators()[last_op_id];
 
-        State parent_state = state_registry.lookup_state(parent_state_id);
-        SearchNode parent_node = search_space.get_node(parent_state.get_handle());
-
+        SearchNode parent_node = search_space.get_node(parent_state_id);
         // d: distance from initial node in this EHC phase
         int d = parent_node.get_g() - current_phase_start_g +
             get_adjusted_cost(last_op);
@@ -206,12 +204,13 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         if (parent_node.get_real_g() + last_op.get_cost() >= bound)
             continue;
 
+        State parent_state = state_registry.lookup_state(parent_state_id);
         // TODO: use constant instead of -1.
         EvaluationContext eval_context = get_successor_evaluation_context(
             parent_state, last_op, -1, true);
         statistics.inc_generated();
 
-        SearchNode node = search_space.get_node(eval_context.get_state().get_handle());
+        SearchNode node = search_space.get_node(eval_context.get_state().get_id());
 
         if (node.is_new()) {
             reach_state(parent_state, last_op_id, eval_context.get_state());

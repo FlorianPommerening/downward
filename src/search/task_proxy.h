@@ -565,36 +565,30 @@ bool does_fire(const EffectProxy &effect, const State &state);
 class State {
     const AbstractTask *task;
     std::vector<int> values;
-    StateID id;
-    const StateRegistry *registry;
+    StateHandle handle;
 public:
     using ItemType = FactProxy;
-    State(const AbstractTask &task, std::vector<int> &&values, StateID id, const StateRegistry *registry)
-        : task(&task), values(std::move(values)), id(id), registry(registry) {
-        assert(id != StateID::no_state);
-        assert(registry || id == StateID::unregistered_state);
+    State(const AbstractTask &task, std::vector<int> &&values, StateHandle handle)
+        : task(&task), values(std::move(values)), handle(handle) {
         assert(static_cast<int>(size()) == this->task->get_num_variables());
     }
-    State(State &&unregistered_state, StateID id, const StateRegistry *registry)
-        : State(*unregistered_state.task, std::move(unregistered_state.values), id, registry) {
-        assert(registry);
-        assert(id != StateID::unregistered_state);
+    State(State &&unregistered_state, StateHandle handle)
+        : State(*unregistered_state.task, std::move(unregistered_state.values), handle) {
+        assert(handle != StateHandle::unregistered_state);
         unregistered_state.task = nullptr;
-        unregistered_state.id = StateID::no_state;
-        unregistered_state.registry = nullptr;
+        unregistered_state.handle = StateHandle::unregistered_state;
     }
 
     State(const AbstractTask &task, std::vector<int> &&values)
-        : State(task, move(values), StateID::unregistered_state, nullptr) {
+        : State(task, move(values), StateHandle::unregistered_state) {
     }
     ~State() = default;
     State(const State &) = default;
 
     State(State &&other)
-        : task(other.task), values(std::move(other.values)), id(other.id), registry(other.registry) {
+        : task(other.task), values(std::move(other.values)), handle(other.handle) {
         other.task = nullptr;
-        other.id = StateID::no_state;
-        other.registry = nullptr;
+        other.handle = StateHandle::unregistered_state;
     }
 
     State &operator=(State &&other) {
@@ -602,10 +596,8 @@ public:
             values = std::move(other.values);
             task = other.task;
             other.task = nullptr;
-            id = other.id;
-            other.id = StateID::no_state;
-            registry = other.registry;
-            other.registry = nullptr;
+            handle = other.handle;
+            other.handle = StateHandle::unregistered_state;
         }
         return *this;
     }
@@ -635,15 +627,15 @@ public:
     inline TaskProxy get_task() const;
 
     StateID get_id() const {
-        return id;
+        return handle.get_id();
     }
 
     const StateRegistry *get_registry() const {
-        return registry;
+        return handle.get_registry();
     }
 
     StateHandle get_handle() const {
-        return StateHandle(registry, id);
+        return handle;
     }
 
     const std::vector<int> &get_values() const {
@@ -692,8 +684,8 @@ public:
         return GoalsProxy(*task);
     }
 
-    State create_state(std::vector<int> &&state_values, StateID id = StateID::unregistered_state, const StateRegistry *registry = nullptr) const {
-        return State(*task, std::move(state_values), id, registry);
+    State create_state(std::vector<int> &&state_values, StateHandle handle = StateHandle::unregistered_state) const {
+        return State(*task, std::move(state_values), handle);
     }
 
     State get_initial_state() const {

@@ -41,7 +41,7 @@ State StateRegistry::lookup_state(StateID id) const {
     for (int var = 0; var < num_variables; ++var) {
         values[var] = get_state_value(buffer, var);
     }
-    return task_proxy.create_state(move(values), id, this);
+    return task_proxy.create_state(move(values), StateHandle(this, id));
 }
 
 State StateRegistry::register_state(State &&state) {
@@ -66,7 +66,7 @@ State StateRegistry::register_state(State &&state) {
     delete[] buffer;
 
     StateID id = insert_id_or_pop_state();
-    return State(move(state), id, this);
+    return State(move(state), StateHandle(this, id));
 }
 
 int StateRegistry::get_bins_per_state() const {

@@ -58,7 +58,7 @@ class SearchSpace {
 public:
     explicit SearchSpace(StateRegistry &state_registry);
 
-    SearchNode get_node(StateHandle handle);
+    SearchNode get_node(StateID id);
     void trace_path(const State &goal_state,
                     std::vector<OperatorID> &path) const;
 

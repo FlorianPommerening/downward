@@ -122,8 +122,9 @@ SearchSpace::SearchSpace(StateRegistry &state_registry)
     : state_registry(state_registry) {
 }
 
-SearchNode SearchSpace::get_node(StateHandle handle) {
-    return SearchNode(state_registry, handle.get_id(), search_node_infos[handle]);
+SearchNode SearchSpace::get_node(StateID id) {
+    StateHandle handle(&state_registry, id);
+    return SearchNode(state_registry, id, search_node_infos[handle]);
 }
 
 void SearchSpace::trace_path(const State &goal_state,
