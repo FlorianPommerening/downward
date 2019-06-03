@@ -96,7 +96,8 @@ bool FactoredTransitionSystem::is_component_valid(int index) const {
     if (compute_goal_distances && !distances[index]->are_goal_distances_computed()) {
         return false;
     }
-    return transition_systems[index]->are_transitions_sorted_unique();
+    return transition_systems[index]->are_transitions_sorted_unique() &&
+           transition_systems[index]->in_sync_with_label_equivalence_relation();
 }
 
 void FactoredTransitionSystem::assert_all_components_valid() const {
@@ -132,10 +133,6 @@ bool FactoredTransitionSystem::apply_abstraction(
 
     int new_num_states = state_equivalence_relation.size();
     if (new_num_states == transition_systems[index]->get_size()) {
-        if (verbosity >= Verbosity::VERBOSE) {
-            cout << transition_systems[index]->tag()
-                 << "not applying abstraction (same number of states)" << endl;
-        }
         return false;
     }
 

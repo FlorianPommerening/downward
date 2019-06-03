@@ -1,8 +1,6 @@
 #ifndef PDBS_PDB_HEURISTIC_H
 #define PDBS_PDB_HEURISTIC_H
 
-#include "pattern_database.h"
-
 #include "../heuristic.h"
 
 namespace options {
@@ -10,9 +8,11 @@ class Options;
 }
 
 namespace pdbs {
+class PatternDatabase;
+
 // Implements a heuristic for a single PDB.
 class PDBHeuristic : public Heuristic {
-    PatternDatabase pdb;
+    std::shared_ptr<PatternDatabase> pdb;
 protected:
     virtual int compute_heuristic(const State &ancestor_state) override;
 public:

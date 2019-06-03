@@ -2,16 +2,11 @@
 
 #include "errors.h"
 
-#include "../ext/tree_util.hh"
-
 #include <iostream>
+#include <tree_util.hh>
 
 
 using namespace std;
-
-namespace landmarks {
-class LandmarkFactory;
-}
 
 namespace options {
 const string OptionParser::NONE = "<none>";

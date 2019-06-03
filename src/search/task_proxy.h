@@ -582,6 +582,7 @@ public:
         unregistered_state.id = StateID::no_state;
         unregistered_state.registry = nullptr;
     }
+
     State(const AbstractTask &task, std::vector<int> &&values)
         : State(task, move(values), StateID::unregistered_state, nullptr) {
     }
@@ -743,4 +744,5 @@ inline bool does_fire(const EffectProxy &effect, const State &state) {
     }
     return true;
 }
+
 #endif
