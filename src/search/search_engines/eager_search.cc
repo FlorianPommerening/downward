@@ -83,7 +83,7 @@ void EagerSearch::initialize() {
         if (search_progress.check_progress(eval_context))
             print_checkpoint_line(0);
         start_f_value_statistics(eval_context);
-        SearchNode node = search_space.get_node(eval_context.get_state());
+        SearchNode node = search_space.get_node(eval_context.get_state().get_handle());
         node.open_initial();
 
         open_list->insert(eval_context, eval_context.get_state().get_id());
@@ -119,7 +119,7 @@ SearchStatus EagerSearch::step() {
         //      One way would be to store GlobalState objects inside SearchNodes
         //      instead of StateIDs
         State s = state_registry.lookup_state(id);
-        node.emplace(search_space.get_node(s));
+        node.emplace(search_space.get_node(s.get_handle()));
 
         if (node->is_closed())
             continue;
@@ -201,7 +201,7 @@ SearchStatus EagerSearch::step() {
         statistics.inc_generated();
         bool is_preferred = preferred_operators.contains(op_id);
 
-        SearchNode succ_node = search_space.get_node(succ_state);
+        SearchNode succ_node = search_space.get_node(succ_state.get_handle());
 
         for (Evaluator *evaluator : path_dependent_evaluators) {
             evaluator->notify_state_transition(eval_context.get_state(), op_id, succ_state);
