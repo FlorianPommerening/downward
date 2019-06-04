@@ -122,10 +122,9 @@ int SearchEngine::get_adjusted_cost(const OperatorProxy &op) const {
     return get_adjusted_action_cost(op, cost_type, is_unit_cost);
 }
 
-EvaluationContext SearchEngine::get_evaluation_context_for_initial_state() {
-    // Note: we consider the initial state as reached by a preferred operator.
-    return EvaluationContext(
-        state_registry.register_state(task_proxy.get_initial_state()), 0, true, &statistics);
+State SearchEngine::get_registered_initial_state() {
+    State initial_state = task_proxy.get_initial_state();
+    return state_registry.register_state(move(initial_state));
 }
 
 State SearchEngine::get_registered_successor_state(const State &state, const OperatorProxy &op) {

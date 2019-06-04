@@ -65,7 +65,7 @@ EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
       evaluator(opts.get<shared_ptr<Evaluator>>("h")),
       preferred_operator_evaluators(opts.get_list<shared_ptr<Evaluator>>("preferred")),
       preferred_usage(PreferredUsage(opts.get_enum("preferred_usage"))),
-      current_eval_context(get_evaluation_context_for_initial_state()),
+      current_eval_context(get_registered_initial_state(), &statistics),
       current_phase_start_g(-1),
       num_ehc_phases(0),
       last_num_expanded(-1) {
