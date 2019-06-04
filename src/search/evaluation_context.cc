@@ -49,7 +49,7 @@ const EvaluatorCache &EvaluationContext::get_cache() const {
     return cache;
 }
 
-const std::shared_ptr<State> &EvaluationContext::get_state() const {
+const shared_ptr<State> &EvaluationContext::get_state() const {
     return state;
 }
 
