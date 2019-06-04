@@ -123,7 +123,8 @@ int SearchEngine::get_adjusted_cost(const OperatorProxy &op) const {
 }
 
 shared_ptr<State> SearchEngine::get_initial_state() {
-    return make_shared<State>(task_proxy.get_initial_state());
+    return make_shared<State>(
+        state_registry.register_state(task_proxy.get_initial_state()));
 }
 
 shared_ptr<State> SearchEngine::get_successor_state(
