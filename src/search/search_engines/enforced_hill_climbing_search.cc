@@ -119,7 +119,7 @@ void EnforcedHillClimbingSearch::initialize() {
             utils::exit_with(ExitCode::SEARCH_UNSOLVED_INCOMPLETE);
     }
 
-    SearchNode node = search_space.get_node(current_eval_context.get_state().get_id());
+    SearchNode node = search_space.get_node(current_eval_context.get_state()->get_id());
     node.open_initial();
 
     current_phase_start_g = 0;
@@ -132,16 +132,17 @@ void EnforcedHillClimbingSearch::insert_successor_into_open_list(
     bool preferred) {
     OperatorProxy op = task_proxy.get_operators()[op_id];
     int succ_g = parent_g + get_adjusted_cost(op);
-    const shared_ptr<State> &state = eval_context.get_state_ptr();
+    const shared_ptr<State> &state = eval_context.get_state();
     EdgeOpenListEntry entry = make_pair(state->get_id(), op_id);
+    EvaluatorCache cache_copy = eval_context.get_cache();
     EvaluationContext new_eval_context(
-        eval_context.get_cache(), state, succ_g, preferred, &statistics);
+        move(cache_copy), state, succ_g, preferred, &statistics);
     open_list->insert(new_eval_context, entry);
     statistics.inc_generated_ops();
 }
 
 void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
-    SearchNode node = search_space.get_node(eval_context.get_state().get_id());
+    SearchNode node = search_space.get_node(eval_context.get_state()->get_id());
     int node_g = node.get_g();
 
     ordered_set::OrderedSet<OperatorID> preferred_operators;
@@ -163,7 +164,7 @@ void EnforcedHillClimbingSearch::expand(EvaluationContext &eval_context) {
            by the open list. */
         vector<OperatorID> successor_operators;
         successor_generator.generate_applicable_ops(
-            eval_context.get_state(), successor_operators);
+            *eval_context.get_state(), successor_operators);
         for (OperatorID op_id : successor_operators) {
             bool preferred = use_preferred &&
                 preferred_operators.contains(op_id);
@@ -180,7 +181,7 @@ SearchStatus EnforcedHillClimbingSearch::step() {
     last_num_expanded = statistics.get_expanded();
     search_progress.check_progress(current_eval_context);
 
-    if (check_goal_and_set_plan(current_eval_context.get_state())) {
+    if (check_goal_and_set_plan(*current_eval_context.get_state())) {
         return SOLVED;
     }
 

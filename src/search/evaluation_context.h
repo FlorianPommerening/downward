@@ -85,8 +85,7 @@ public:
 
     const EvaluationResult &get_result(Evaluator *eval);
     const EvaluatorCache &get_cache() const;
-    const State &get_state() const;
-    const std::shared_ptr<State> &get_state_ptr() const;
+    const std::shared_ptr<State> &get_state() const;
     int get_g_value() const;
     bool is_preferred() const;
 
