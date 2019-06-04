@@ -128,10 +128,9 @@ EvaluationContext SearchEngine::get_evaluation_context_for_initial_state() {
         state_registry.register_state(task_proxy.get_initial_state()), 0, true, &statistics);
 }
 
-EvaluationContext SearchEngine::get_successor_evaluation_context(
-    const State &state, const OperatorProxy &op, int g, bool is_preferred) {
-    State successor = state_registry.register_state(state.get_successor(op));
-    return EvaluationContext(move(successor), g, is_preferred, &statistics);
+State SearchEngine::get_registered_successor_state(const State &state, const OperatorProxy &op) {
+    State successor = state.get_successor(op);
+    return state_registry.register_state(move(successor));
 }
 
 shared_ptr<State> SearchEngine::get_initial_state() {

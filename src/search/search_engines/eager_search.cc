@@ -198,20 +198,15 @@ SearchStatus EagerSearch::step() {
         if ((node->get_real_g() + op.get_cost()) >= bound)
             continue;
 
-        // Careful: succ_node.get_g() is not available here yet,
-        // hence the stupid computation of succ_g.
-        // TODO: Make this less fragile.
-        int succ_g = node->get_g() + get_adjusted_cost(op);
-        bool is_preferred = preferred_operators.contains(op_id);
-        EvaluationContext succ_eval_context = get_successor_evaluation_context(
-            eval_context.get_state(), op, succ_g, is_preferred);
-        statistics.inc_generated();
 
-        SearchNode succ_node = search_space.get_node(
-            succ_eval_context.get_state().get_id());
+        State succ_state = get_registered_successor_state(eval_context.get_state(), op);
+        statistics.inc_generated();
+        bool is_preferred = preferred_operators.contains(op_id);
+
+        SearchNode succ_node = search_space.get_node(succ_state.get_id());
 
         for (Evaluator *evaluator : path_dependent_evaluators) {
-            evaluator->notify_state_transition(eval_context.get_state(), op_id, succ_eval_context.get_state());
+            evaluator->notify_state_transition(eval_context.get_state(), op_id, succ_state);
         }
 
         // Previously encountered dead end. Don't re-evaluate.
@@ -221,6 +216,14 @@ SearchStatus EagerSearch::step() {
         if (succ_node.is_new()) {
             // We have not seen this state before.
             // Evaluate and create a new node.
+
+            // Careful: succ_node.get_g() is not available here yet,
+            // hence the stupid computation of succ_g.
+            // TODO: Make this less fragile.
+            int succ_g = node->get_g() + get_adjusted_cost(op);
+
+            EvaluationContext succ_eval_context(
+                move(succ_state), succ_g, is_preferred, &statistics);
 
             statistics.inc_evaluated_states();
             if (open_list->is_dead_end(succ_eval_context)) {
@@ -249,6 +252,9 @@ SearchStatus EagerSearch::step() {
                     statistics.inc_reopened();
                 }
                 succ_node.reopen(*node, op, get_adjusted_cost(op));
+
+                EvaluationContext succ_eval_context(
+                    move(succ_state), succ_node.get_g(), is_preferred, &statistics);
 
                 /*
                   Note: our old code used to retrieve the h value from

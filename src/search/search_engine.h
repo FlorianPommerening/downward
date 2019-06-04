@@ -70,8 +70,7 @@ public:
     PlanManager &get_plan_manager() {return plan_manager;}
 
     EvaluationContext get_evaluation_context_for_initial_state();
-    EvaluationContext get_successor_evaluation_context(
-        const State &state, const OperatorProxy &op, int g, bool is_preferred);
+    State get_registered_successor_state(const State &state, const OperatorProxy &op);
 
     std::shared_ptr<State> get_initial_state();
     std::shared_ptr<State> get_successor_state(const State &state, const OperatorProxy &op);

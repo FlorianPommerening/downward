@@ -205,15 +205,14 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
             continue;
 
         State parent_state = state_registry.lookup_state(parent_state_id);
-        // TODO: use constant instead of -1.
-        EvaluationContext eval_context = get_successor_evaluation_context(
-            parent_state, last_op, -1, true);
+        State state = get_registered_successor_state(parent_state, last_op);
         statistics.inc_generated();
 
-        SearchNode node = search_space.get_node(eval_context.get_state().get_id());
+        SearchNode node = search_space.get_node(state.get_id());
 
         if (node.is_new()) {
-            reach_state(parent_state, last_op_id, eval_context.get_state());
+            reach_state(parent_state, last_op_id, state);
+            EvaluationContext eval_context(move(state), &statistics);
             statistics.inc_evaluated_states();
 
             if (eval_context.is_evaluator_value_infinite(evaluator.get())) {
