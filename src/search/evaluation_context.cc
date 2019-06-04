@@ -10,9 +10,9 @@ using namespace std;
 
 
 EvaluationContext::EvaluationContext(
-    EvaluatorCache &&cache, const shared_ptr<State> &state, int g_value, bool is_preferred,
-    SearchStatistics *statistics, bool calculate_preferred)
-    : cache(move(cache)),
+    const EvaluatorCache &cache, const shared_ptr<State> &state, int g_value,
+    bool is_preferred, SearchStatistics *statistics, bool calculate_preferred)
+    : cache(cache),
       state(state),
       g_value(g_value),
       preferred(is_preferred),

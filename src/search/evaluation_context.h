@@ -58,8 +58,9 @@ public:
       TODO: Can we reuse caches? Can we move them instead of copying them?
     */
     EvaluationContext(
-        EvaluatorCache &&cache, const std::shared_ptr<State> &state, int g_value, bool is_preferred,
-        SearchStatistics *statistics, bool calculate_preferred = false);
+        const EvaluatorCache &cache, const std::shared_ptr<State> &state,
+        int g_value, bool is_preferred, SearchStatistics *statistics,
+        bool calculate_preferred = false);
     /*
       Create new heuristic cache for caching heuristic values. Used for example
       by eager search.
