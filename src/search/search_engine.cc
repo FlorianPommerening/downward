@@ -134,6 +134,16 @@ EvaluationContext SearchEngine::get_successor_evaluation_context(
     return EvaluationContext(move(successor), g, is_preferred, &statistics);
 }
 
+shared_ptr<State> SearchEngine::get_initial_state() {
+    return make_shared<State>(task_proxy.get_initial_state());
+}
+
+shared_ptr<State> SearchEngine::get_successor_state(
+    const State &state, const OperatorProxy &op) {
+    State successor = state_registry.register_state(state.get_successor(op));
+    return make_shared<State>(move(successor));
+}
+
 /* TODO: merge this into add_options_to_parser when all search
          engines support pruning.
 

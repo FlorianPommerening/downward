@@ -73,6 +73,9 @@ public:
     EvaluationContext get_successor_evaluation_context(
         const State &state, const OperatorProxy &op, int g, bool is_preferred);
 
+    std::shared_ptr<State> get_initial_state();
+    std::shared_ptr<State> get_successor_state(const State &state, const OperatorProxy &op);
+
     /* The following three methods should become functions as they
        do not require access to private/protected class members. */
     static void add_pruning_option(options::OptionParser &parser);
