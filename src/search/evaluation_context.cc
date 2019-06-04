@@ -10,10 +10,10 @@ using namespace std;
 
 
 EvaluationContext::EvaluationContext(
-    EvaluatorCache &&cache, State &&state, int g_value, bool is_preferred,
+    EvaluatorCache &&cache, const shared_ptr<State> &state, int g_value, bool is_preferred,
     SearchStatistics *statistics, bool calculate_preferred)
     : cache(move(cache)),
-      state(move(state)),
+      state(state),
       g_value(g_value),
       preferred(is_preferred),
       statistics(statistics),
@@ -21,15 +21,15 @@ EvaluationContext::EvaluationContext(
 }
 
 EvaluationContext::EvaluationContext(
-    State &&state, int g_value, bool is_preferred,
+    const shared_ptr<State> &state, int g_value, bool is_preferred,
     SearchStatistics *statistics, bool calculate_preferred)
-    : EvaluationContext(EvaluatorCache(), move(state), g_value, is_preferred, statistics, calculate_preferred) {
+    : EvaluationContext(EvaluatorCache(), state, g_value, is_preferred, statistics, calculate_preferred) {
 }
 
 EvaluationContext::EvaluationContext(
-    State &&state,
+    const shared_ptr<State> &state,
     SearchStatistics *statistics, bool calculate_preferred)
-    : EvaluationContext(EvaluatorCache(), move(state), INVALID, false, statistics, calculate_preferred) {
+    : EvaluationContext(EvaluatorCache(), state, INVALID, false, statistics, calculate_preferred) {
 }
 
 const EvaluationResult &EvaluationContext::get_result(Evaluator *evaluator) {
@@ -50,6 +50,10 @@ const EvaluatorCache &EvaluationContext::get_cache() const {
 }
 
 const State &EvaluationContext::get_state() const {
+    return *state;
+}
+
+const std::shared_ptr<State> &EvaluationContext::get_state_ptr() const {
     return state;
 }
 

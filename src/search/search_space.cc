@@ -18,8 +18,8 @@ SearchNode::SearchNode(const StateRegistry &state_registry,
     assert(state_id != StateID::no_state);
 }
 
-State SearchNode::get_state() const {
-    return state_registry.lookup_state(state_id);
+shared_ptr<State> SearchNode::get_state() const {
+    return make_shared<State>(state_registry.lookup_state(state_id));
 }
 
 bool SearchNode::is_open() const {
@@ -107,7 +107,7 @@ void SearchNode::mark_as_dead_end() {
 
 void SearchNode::dump(const TaskProxy &task_proxy) const {
     cout << state_id << ": ";
-    task_properties::dump_fdr(get_state());
+    task_properties::dump_fdr(*get_state());
     if (info.creating_operator != OperatorID::no_operator) {
         OperatorsProxy operators = task_proxy.get_operators();
         OperatorProxy op = operators[info.creating_operator.get_index()];

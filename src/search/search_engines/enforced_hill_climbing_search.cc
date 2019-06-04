@@ -65,7 +65,7 @@ EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
       evaluator(opts.get<shared_ptr<Evaluator>>("h")),
       preferred_operator_evaluators(opts.get_list<shared_ptr<Evaluator>>("preferred")),
       preferred_usage(PreferredUsage(opts.get_enum("preferred_usage"))),
-      current_eval_context(get_registered_initial_state(), &statistics),
+      current_eval_context(get_initial_state(), &statistics),
       current_phase_start_g(-1),
       num_ehc_phases(0),
       last_num_expanded(-1) {
@@ -134,9 +134,8 @@ void EnforcedHillClimbingSearch::insert_successor_into_open_list(
     EdgeOpenListEntry entry = make_pair(
         eval_context.get_state().get_id(), op_id);
     EvaluatorCache cache_copy(eval_context.get_cache());
-    State state_copy(eval_context.get_state());
     EvaluationContext new_eval_context(
-        move(cache_copy), move(state_copy), succ_g, preferred, &statistics);
+        move(cache_copy), eval_context.get_state_ptr(), succ_g, preferred, &statistics);
     open_list->insert(new_eval_context, entry);
     statistics.inc_generated_ops();
 }
@@ -205,14 +204,14 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
             continue;
 
         State parent_state = state_registry.lookup_state(parent_state_id);
-        State state = get_registered_successor_state(parent_state, last_op);
+        shared_ptr<State> state = get_successor_state(parent_state, last_op);
         statistics.inc_generated();
 
-        SearchNode node = search_space.get_node(state.get_id());
+        SearchNode node = search_space.get_node(state->get_id());
 
         if (node.is_new()) {
-            reach_state(parent_state, last_op_id, state);
-            EvaluationContext eval_context(move(state), &statistics);
+            reach_state(parent_state, last_op_id, *state);
+            EvaluationContext eval_context(state, &statistics);
             statistics.inc_evaluated_states();
 
             if (eval_context.is_evaluator_value_infinite(evaluator.get())) {

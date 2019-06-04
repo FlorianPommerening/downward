@@ -69,9 +69,6 @@ public:
     int get_bound() {return bound;}
     PlanManager &get_plan_manager() {return plan_manager;}
 
-    State get_registered_initial_state();
-    State get_registered_successor_state(const State &state, const OperatorProxy &op);
-
     std::shared_ptr<State> get_initial_state();
     std::shared_ptr<State> get_successor_state(const State &state, const OperatorProxy &op);
 

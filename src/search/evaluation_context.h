@@ -42,7 +42,7 @@ class SearchStatistics;
 
 class EvaluationContext {
     EvaluatorCache cache;
-    State state;
+    std::shared_ptr<State> state;
     int g_value;
     bool preferred;
     SearchStatistics *statistics;
@@ -58,14 +58,14 @@ public:
       TODO: Can we reuse caches? Can we move them instead of copying them?
     */
     EvaluationContext(
-        EvaluatorCache &&cache, State &&state, int g_value, bool is_preferred,
+        EvaluatorCache &&cache, const std::shared_ptr<State> &state, int g_value, bool is_preferred,
         SearchStatistics *statistics, bool calculate_preferred = false);
     /*
       Create new heuristic cache for caching heuristic values. Used for example
       by eager search.
     */
     EvaluationContext(
-        State &&state, int g_value, bool is_preferred,
+        const std::shared_ptr<State> &state, int g_value, bool is_preferred,
         SearchStatistics *statistics, bool calculate_preferred = false);
     /*
       Use the following constructor when you don't care about g values,
@@ -80,12 +80,13 @@ public:
             contexts that don't need this information.
     */
     EvaluationContext(
-        State &&state,
+        const std::shared_ptr<State> &state,
         SearchStatistics *statistics = nullptr, bool calculate_preferred = false);
 
     const EvaluationResult &get_result(Evaluator *eval);
     const EvaluatorCache &get_cache() const;
     const State &get_state() const;
+    const std::shared_ptr<State> &get_state_ptr() const;
     int get_g_value() const;
     bool is_preferred() const;
 

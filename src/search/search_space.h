@@ -24,7 +24,7 @@ public:
     StateID get_state_id() const {
         return state_id;
     }
-    State get_state() const;
+    std::shared_ptr<State> get_state() const;
 
     bool is_new() const;
     bool is_open() const;

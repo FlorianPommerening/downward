@@ -70,16 +70,16 @@ void EagerSearch::initialize() {
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
 
-    State initial_state = get_registered_initial_state();
+    shared_ptr<State> initial_state = get_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(initial_state);
+        evaluator->notify_initial_state(*initial_state);
     }
 
     /*
       Note: we consider the initial state as reached by a preferred
       operator.
     */
-    EvaluationContext eval_context(move(initial_state), 0, true, &statistics);
+    EvaluationContext eval_context(initial_state, 0, true, &statistics);
 
     statistics.inc_evaluated_states();
 
@@ -89,10 +89,10 @@ void EagerSearch::initialize() {
         if (search_progress.check_progress(eval_context))
             print_checkpoint_line(0);
         start_f_value_statistics(eval_context);
-        SearchNode node = search_space.get_node(initial_state.get_id());
+        SearchNode node = search_space.get_node(initial_state->get_id());
         node.open_initial();
 
-        open_list->insert(eval_context, initial_state.get_id());
+        open_list->insert(eval_context, initial_state->get_id());
     }
 
     print_initial_evaluator_values(eval_context);
@@ -129,12 +129,12 @@ SearchStatus EagerSearch::step() {
         //      recreate it outside the while loop with node.get_state()?
         //      One way would be to store State objects inside SearchNodes
         //      instead of StateIDs
-        State s = state_registry.lookup_state(id);
+        shared_ptr<State> s = make_shared<State>(state_registry.lookup_state(id));
         /*
           We can pass calculate_preferred=false here since preferred
           operators are computed when the state is expanded.
         */
-        EvaluationContext eval_context(move(s), node->get_g(), false, &statistics);
+        EvaluationContext eval_context(s, node->get_g(), false, &statistics);
 
         if (lazy_evaluator) {
             /*
@@ -176,21 +176,21 @@ SearchStatus EagerSearch::step() {
         break;
     }
 
-    State s = node->get_state();
-    if (check_goal_and_set_plan(s))
+    shared_ptr<State> s = node->get_state();
+    if (check_goal_and_set_plan(*s))
         return SOLVED;
 
     vector<OperatorID> applicable_ops;
-    successor_generator.generate_applicable_ops(s, applicable_ops);
+    successor_generator.generate_applicable_ops(*s, applicable_ops);
 
     /*
       TODO: When preferred operators are in use, a preferred operator will be
       considered by the preferred operator queues even when it is pruned.
     */
-    pruning_method->prune_operators(s, applicable_ops);
+    pruning_method->prune_operators(*s, applicable_ops);
 
     // This evaluates the expanded state (again) to get preferred ops
-    EvaluationContext eval_context(move(s), node->get_g(), false, &statistics, true);
+    EvaluationContext eval_context(s, node->get_g(), false, &statistics, true);
     ordered_set::OrderedSet<OperatorID> preferred_operators;
     for (const shared_ptr<Evaluator> &preferred_operator_evaluator : preferred_operator_evaluators) {
         collect_preferred_operators(eval_context,
@@ -204,14 +204,14 @@ SearchStatus EagerSearch::step() {
             continue;
 
 
-        State succ_state = get_registered_successor_state(eval_context.get_state(), op);
+        shared_ptr<State> succ_state = get_successor_state(eval_context.get_state(), op);
         statistics.inc_generated();
         bool is_preferred = preferred_operators.contains(op_id);
 
-        SearchNode succ_node = search_space.get_node(succ_state.get_id());
+        SearchNode succ_node = search_space.get_node(succ_state->get_id());
 
         for (Evaluator *evaluator : path_dependent_evaluators) {
-            evaluator->notify_state_transition(eval_context.get_state(), op_id, succ_state);
+            evaluator->notify_state_transition(*s, op_id, *succ_state);
         }
 
         // Previously encountered dead end. Don't re-evaluate.
@@ -228,7 +228,7 @@ SearchStatus EagerSearch::step() {
             int succ_g = node->get_g() + get_adjusted_cost(op);
 
             EvaluationContext succ_eval_context(
-                move(succ_state), succ_g, is_preferred, &statistics);
+                succ_state, succ_g, is_preferred, &statistics);
 
             statistics.inc_evaluated_states();
             if (open_list->is_dead_end(succ_eval_context)) {
@@ -259,7 +259,7 @@ SearchStatus EagerSearch::step() {
                 succ_node.reopen(*node, op, get_adjusted_cost(op));
 
                 EvaluationContext succ_eval_context(
-                    move(succ_state), succ_node.get_g(), is_preferred, &statistics);
+                    succ_state, succ_node.get_g(), is_preferred, &statistics);
 
                 /*
                   Note: our old code used to retrieve the h value from

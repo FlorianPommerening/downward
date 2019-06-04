@@ -28,7 +28,7 @@ LazySearch::LazySearch(const Options &opts)
       current_operator_id(OperatorID::no_operator),
       current_g(0),
       current_real_g(0),
-      current_eval_context(get_registered_initial_state(), 0, true, &statistics) {
+      current_eval_context(get_initial_state(), 0, true, &statistics) {
     /*
       We initialize current_eval_context in such a way that the initial node
       counts as "preferred".
@@ -54,9 +54,9 @@ void LazySearch::initialize() {
     }
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
-    State initial_state = get_registered_initial_state();
+    shared_ptr<State> initial_state = get_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(initial_state);
+        evaluator->notify_initial_state(*initial_state);
     }
 }
 
@@ -112,9 +112,8 @@ void LazySearch::generate_successors() {
         bool is_preferred = preferred_operators.contains(op_id);
         if (new_real_g < bound) {
             EvaluatorCache cache_copy(current_eval_context.get_cache());
-            State state_copy(current_eval_context.get_state());
             EvaluationContext new_eval_context(
-                move(cache_copy), move(state_copy), new_g, is_preferred, nullptr);
+                move(cache_copy), current_eval_context.get_state_ptr(), new_g, is_preferred, nullptr);
             open_list->insert(new_eval_context, make_pair(current_state_id, op_id));
         }
     }
@@ -135,7 +134,7 @@ SearchStatus LazySearch::fetch_next_state() {
     OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
     assert(task_properties::is_applicable(current_operator, current_predecessor));
 
-    State current_state = get_registered_successor_state(current_predecessor, current_operator);
+    shared_ptr<State> current_state = get_successor_state(current_predecessor, current_operator);
 
     SearchNode pred_node = search_space.get_node(current_predecessor_id);
     current_g = pred_node.get_g() + get_adjusted_cost(current_operator);
@@ -149,7 +148,7 @@ SearchStatus LazySearch::fetch_next_state() {
       associate with the expanded vs. evaluated nodes in lazy search
       and where to obtain it from.
     */
-    current_eval_context = EvaluationContext(move(current_state), current_g, true, &statistics);
+    current_eval_context = EvaluationContext(current_state, current_g, true, &statistics);
 
     return IN_PROGRESS;
 }
