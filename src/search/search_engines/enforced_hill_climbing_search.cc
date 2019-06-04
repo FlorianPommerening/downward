@@ -59,6 +59,7 @@ static shared_ptr<OpenListFactory> create_ehc_open_list_factory(
     }
 }
 
+
 EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
     const Options &opts)
     : SearchEngine(opts),
@@ -74,9 +75,9 @@ EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
     }
     evaluator->get_path_dependent_evaluators(path_dependent_evaluators);
 
-    const State &initial_state = current_eval_context.get_state();
+    shared_ptr<State> initial_state = get_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(initial_state);
+        evaluator->notify_initial_state(*initial_state);
     }
     use_preferred = find(preferred_operator_evaluators.begin(),
                          preferred_operator_evaluators.end(), evaluator) !=
@@ -131,11 +132,10 @@ void EnforcedHillClimbingSearch::insert_successor_into_open_list(
     bool preferred) {
     OperatorProxy op = task_proxy.get_operators()[op_id];
     int succ_g = parent_g + get_adjusted_cost(op);
-    EdgeOpenListEntry entry = make_pair(
-        eval_context.get_state().get_id(), op_id);
-    EvaluatorCache cache_copy(eval_context.get_cache());
+    const shared_ptr<State> &state = eval_context.get_state_ptr();
+    EdgeOpenListEntry entry = make_pair(state->get_id(), op_id);
     EvaluationContext new_eval_context(
-        move(cache_copy), eval_context.get_state_ptr(), succ_g, preferred, &statistics);
+        eval_context.get_cache(), state, succ_g, preferred, &statistics);
     open_list->insert(new_eval_context, entry);
     statistics.inc_generated_ops();
 }
@@ -210,8 +210,8 @@ SearchStatus EnforcedHillClimbingSearch::ehc() {
         SearchNode node = search_space.get_node(state->get_id());
 
         if (node.is_new()) {
-            reach_state(parent_state, last_op_id, *state);
             EvaluationContext eval_context(state, &statistics);
+            reach_state(parent_state, last_op_id, *state);
             statistics.inc_evaluated_states();
 
             if (eval_context.is_evaluator_value_infinite(evaluator.get())) {

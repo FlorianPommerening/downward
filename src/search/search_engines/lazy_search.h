@@ -46,7 +46,7 @@ protected:
 
     void reward_progress();
 
-    const State &get_current_state() const;
+    std::shared_ptr<State> get_current_state() const;
 
     std::vector<OperatorID> get_successor_operators(
         const ordered_set::OrderedSet<OperatorID> &preferred_operators) const;
