@@ -14,8 +14,8 @@ State State::get_successor(const OperatorProxy &op) const {
     vector<int> new_values = values;
     for (EffectProxy effect : op.get_effects()) {
         if (does_fire(effect, *this)) {
-            FactProxy effect_fact = effect.get_fact();
-            new_values[effect_fact.get_variable().get_id()] = effect_fact.get_value();
+            FactPair effect_fact = effect.get_fact().get_pair();
+            new_values[effect_fact.var] = effect_fact.value;
         }
     }
     if (task->get_num_axioms() > 0) {
