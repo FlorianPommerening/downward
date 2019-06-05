@@ -246,10 +246,11 @@ public:
             element_allocator.construct(dest++, *entry++);
     }
 
-    Element *push_pack_empty_element() {
+    Element *push_back_empty_element() {
         Element *dest = add_uninitialized_array();
+        Element *element = dest;
         for (size_t i = 0; i < elements_per_array; ++i)
-            element_allocator.construct(dest++, Element());
+            element_allocator.construct(element++, Element());
         return dest;
     }
 

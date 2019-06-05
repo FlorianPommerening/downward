@@ -54,7 +54,9 @@ State StateRegistry::register_state(State &&state) {
         utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
     }
 
-    PackedStateBin *buffer = state_data_pool.push_pack_empty_element();
+    PackedStateBin *buffer = state_data_pool.push_back_empty_element();
+    // Avoid garbage values in half-full bins.
+    fill_n(buffer, get_bins_per_state(), 0);
     for (size_t i = 0; i < state.size(); ++i) {
         state_packer.set(buffer, i, state[i].get_value());
     }
