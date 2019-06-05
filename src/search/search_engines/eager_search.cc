@@ -125,11 +125,7 @@ SearchStatus EagerSearch::step() {
         if (node->is_closed())
             continue;
 
-        // TODO is there a way we can avoid creating the state here and then
-        //      recreate it outside the while loop with node.get_state()?
-        //      One way would be to store State objects inside SearchNodes
-        //      instead of StateIDs
-        shared_ptr<State> s = make_shared<State>(state_registry.lookup_state(id));
+        shared_ptr<State> s = node->get_state();
         /*
           We can pass calculate_preferred=false here since preferred
           operators are computed when the state is expanded.
