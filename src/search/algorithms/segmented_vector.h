@@ -174,6 +174,18 @@ class SegmentedArrayVector {
         segments.push_back(new_segment);
     }
 
+    Element *add_uninitialized_array() {
+        size_t segment = get_segment(the_size);
+        size_t offset = get_offset(the_size);
+        if (segment == segments.size()) {
+            assert(offset == 0);
+            // Must add a new segment.
+            add_segment();
+        }
+        ++the_size;
+        return segments[segment] + offset;
+    }
+
     // No implementation to forbid copies and assignment
     SegmentedArrayVector(const SegmentedArrayVector<Element> &);
     SegmentedArrayVector &operator=(const SegmentedArrayVector<Element> &);
@@ -229,17 +241,16 @@ public:
     }
 
     void push_back(const Element *entry) {
-        size_t segment = get_segment(the_size);
-        size_t offset = get_offset(the_size);
-        if (segment == segments.size()) {
-            assert(offset == 0);
-            // Must add a new segment.
-            add_segment();
-        }
-        Element *dest = segments[segment] + offset;
+        Element *dest = add_uninitialized_array();
         for (size_t i = 0; i < elements_per_array; ++i)
             element_allocator.construct(dest++, *entry++);
-        ++the_size;
+    }
+
+    Element *push_pack_empty_element() {
+        Element *dest = add_uninitialized_array();
+        for (size_t i = 0; i < elements_per_array; ++i)
+            element_allocator.construct(dest++, Element());
+        return dest;
     }
 
     void pop_back() {

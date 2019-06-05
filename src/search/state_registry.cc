@@ -54,16 +54,10 @@ State StateRegistry::register_state(State &&state) {
         utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
     }
 
-    PackedStateBin *buffer = new PackedStateBin[get_bins_per_state()];
-    // Avoid garbage values in half-full bins.
-    fill_n(buffer, get_bins_per_state(), 0);
-
+    PackedStateBin *buffer = state_data_pool.push_pack_empty_element();
     for (size_t i = 0; i < state.size(); ++i) {
         state_packer.set(buffer, i, state[i].get_value());
     }
-    state_data_pool.push_back(buffer);
-    // buffer is copied by push_back
-    delete[] buffer;
 
     StateID id = insert_id_or_pop_state();
     return State(move(state), StateHandle(this, id));
