@@ -167,18 +167,6 @@ class StateRegistry : public subscriber::SubscriberService<StateRegistry> {
 public:
     explicit StateRegistry(const TaskProxy &task_proxy);
 
-    const TaskProxy &get_task_proxy() const {
-        return task_proxy;
-    }
-
-    int get_num_variables() const {
-        return num_variables;
-    }
-
-    int get_state_value(const PackedStateBin *buffer, int var) const {
-        return state_packer.get(buffer, var);
-    }
-
     /*
       Returns the state that was registered at the given ID. The ID must refer
       to a state in this registry. Do not mix IDs from from different registries.

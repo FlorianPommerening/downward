@@ -5,6 +5,8 @@
 
 #include "task_utils/task_properties.h"
 
+#include <cstring>
+
 using namespace std;
 
 StateRegistry::StateRegistry(const TaskProxy &task_proxy)
@@ -37,11 +39,7 @@ StateID StateRegistry::insert_id_or_pop_state() {
 
 State StateRegistry::lookup_state(StateID id) const {
     const PackedStateBin *buffer = state_data_pool[id.value];
-    vector<int> values(num_variables);
-    for (int var = 0; var < num_variables; ++var) {
-        values[var] = get_state_value(buffer, var);
-    }
-    return task_proxy.create_state(move(values), StateHandle(this, id));
+    return task_proxy.create_state(buffer, state_packer, StateHandle(this, id));
 }
 
 State StateRegistry::register_state(State &&state) {
@@ -55,14 +53,10 @@ State StateRegistry::register_state(State &&state) {
     }
 
     PackedStateBin *buffer = state_data_pool.push_back_empty_element();
-    // Avoid garbage values in half-full bins.
-    fill_n(buffer, get_bins_per_state(), 0);
-    for (size_t i = 0; i < state.size(); ++i) {
-        state_packer.set(buffer, i, state[i].get_value());
-    }
+    memcpy(buffer, state.get_buffer(), sizeof(PackedStateBin) * get_bins_per_state());
 
     StateID id = insert_id_or_pop_state();
-    return State(move(state), StateHandle(this, id));
+    return task_proxy.create_state(buffer, state_packer, StateHandle(this, id));
 }
 
 int StateRegistry::get_bins_per_state() const {

@@ -3,6 +3,7 @@
 
 #include "abstract_task.h"
 #include "operator_id.h"
+#include "state.h"
 #include "state_handle.h"
 #include "state_id.h"
 #include "task_id.h"
@@ -29,7 +30,6 @@ class GoalsProxy;
 class OperatorProxy;
 class OperatorsProxy;
 class PreconditionsProxy;
-class State;
 class StateRegistry;
 class TaskProxy;
 class VariableProxy;
@@ -559,100 +559,6 @@ public:
 };
 
 
-bool does_fire(const EffectProxy &effect, const State &state);
-
-
-class State {
-    const AbstractTask *task;
-    std::vector<int> values;
-    StateHandle handle;
-public:
-    using ItemType = FactProxy;
-    State(const AbstractTask &task, std::vector<int> &&values, StateHandle handle)
-        : task(&task), values(std::move(values)), handle(handle) {
-        assert(static_cast<int>(size()) == this->task->get_num_variables());
-    }
-    State(State &&unregistered_state, StateHandle handle)
-        : State(*unregistered_state.task, std::move(unregistered_state.values), handle) {
-        assert(handle != StateHandle::unregistered_state);
-        unregistered_state.task = nullptr;
-        unregistered_state.handle = StateHandle::unregistered_state;
-    }
-
-    State(const AbstractTask &task, std::vector<int> &&values)
-        : State(task, move(values), StateHandle::unregistered_state) {
-    }
-    ~State() = default;
-    State(const State &) = default;
-
-    State(State &&other)
-        : task(other.task), values(std::move(other.values)), handle(other.handle) {
-        other.task = nullptr;
-        other.handle = StateHandle::unregistered_state;
-    }
-
-    State &operator=(State &&other) {
-        if (this != &other) {
-            values = std::move(other.values);
-            task = other.task;
-            other.task = nullptr;
-            handle = other.handle;
-            other.handle = StateHandle::unregistered_state;
-        }
-        return *this;
-    }
-
-    bool operator==(const State &other) const {
-        assert(task == other.task);
-        return values == other.values;
-    }
-
-    bool operator!=(const State &other) const {
-        return !(*this == other);
-    }
-
-    std::size_t size() const {
-        return values.size();
-    }
-
-    FactProxy operator[](std::size_t var_id) const {
-        assert(var_id < size());
-        return FactProxy(*task, var_id, values[var_id]);
-    }
-
-    FactProxy operator[](VariableProxy var) const {
-        return (*this)[var.get_id()];
-    }
-
-    inline TaskProxy get_task() const;
-
-    StateID get_id() const {
-        return handle.get_id();
-    }
-
-    const StateRegistry *get_registry() const {
-        return handle.get_registry();
-    }
-
-    StateHandle get_handle() const {
-        return handle;
-    }
-
-    const std::vector<int> &get_values() const {
-        return values;
-    }
-
-    State get_successor(const OperatorProxy &op) const;
-};
-
-
-namespace utils {
-inline void feed(HashState &hash_state, const State &state) {
-    feed(hash_state, state.get_values());
-}
-}
-
-
 class TaskProxy {
     const AbstractTask *task;
 public:
@@ -684,12 +590,15 @@ public:
         return GoalsProxy(*task);
     }
 
-    State create_state(std::vector<int> &&state_values, StateHandle handle = StateHandle::unregistered_state) const {
-        return State(*task, std::move(state_values), handle);
+    State create_state(
+        const PackedStateBin *buffer,
+        const int_packer::IntPacker &state_packer,
+        StateHandle handle = StateHandle::unregistered_state) const {
+        return State(*task, buffer, state_packer, handle);
     }
 
     State get_initial_state() const {
-        return create_state(task->get_initial_state_values());
+        return State(*task, task->get_initial_state_values());
     }
 
     /*
@@ -706,9 +615,9 @@ public:
     State convert_ancestor_state(const State &ancestor_state) const {
         TaskProxy ancestor_task_proxy = ancestor_state.get_task();
         // Create a copy of the state values for the new state.
-        std::vector<int> state_values = ancestor_state.get_values();
+        std::vector<int> state_values = ancestor_state.unpack();
         task->convert_state_values(state_values, ancestor_task_proxy.task);
-        return create_state(std::move(state_values));
+        return State(*task, std::move(state_values));
     }
 
     const causal_graph::CausalGraph &get_causal_graph() const;

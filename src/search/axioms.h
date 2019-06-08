@@ -63,6 +63,7 @@ class AxiomEvaluator {
 public:
     explicit AxiomEvaluator(const TaskProxy &task_proxy);
 
+    void evaluate(PackedStateBin *buffer, const int_packer::IntPacker &state_packer);
     void evaluate(std::vector<int> &state);
 };
 
