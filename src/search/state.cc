@@ -48,8 +48,9 @@ State::State(const State &other)
       state_packer(other.state_packer),
       handle(other.handle) {
     if (handle == StateHandle::unregistered_state) {
-        buffer = new PackedStateBin[state_packer.get_num_bins()];
-        memcpy(&buffer, other.buffer, sizeof(PackedStateBin) * state_packer.get_num_bins());
+        PackedStateBin *new_buffer = new PackedStateBin[state_packer.get_num_bins()];
+        memcpy(new_buffer, other.buffer, sizeof(PackedStateBin) * state_packer.get_num_bins());
+        buffer = new_buffer;
     } else {
         buffer = other.buffer;
     }
