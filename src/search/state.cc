@@ -22,6 +22,11 @@ static PackedStateBin *pack_values(
     return buffer;
 }
 
+void State::sanity_check() const {
+    assert((owns_buffer && handle == StateHandle::unregistered_state) ||
+           (!owns_buffer && handle != StateHandle::unregistered_state));
+}
+
 State::State(
     const AbstractTask &task,
     const PackedStateBin *buffer,
@@ -29,6 +34,7 @@ State::State(
     StateHandle handle)
     : task(&task), buffer(buffer), state_packer(state_packer), handle(handle),
       owns_buffer(handle == handle.unregistered_state) {
+    sanity_check();
 }
 
 State::State(const AbstractTask &task, vector<int> &&values)
@@ -37,11 +43,26 @@ State::State(const AbstractTask &task, vector<int> &&values)
       state_packer(task_properties::g_state_packers[TaskProxy(task)]),
       handle(StateHandle::unregistered_state),
       owns_buffer(true) {
+    sanity_check();
 }
 
 State::~State() {
     if (owns_buffer)
         delete[] buffer;
+}
+
+State::State(const State &other)
+    : task(other.task),
+      state_packer(other.state_packer),
+      handle(other.handle),
+      owns_buffer(other.owns_buffer) {
+    if (handle == StateHandle::unregistered_state) {
+        buffer = new PackedStateBin[state_packer.get_num_bins()];
+        memcpy(&buffer, other.buffer, sizeof(PackedStateBin) * state_packer.get_num_bins());
+    } else {
+        buffer = other.buffer;
+    }
+    sanity_check();
 }
 
 State &State::operator=(State &&other) {
@@ -56,6 +77,7 @@ State &State::operator=(State &&other) {
         owns_buffer = other.owns_buffer;
         other.owns_buffer = false;
     }
+    sanity_check();
     return *this;
 }
 
@@ -70,6 +92,7 @@ State::State(State &&other)
     other.buffer = nullptr;
     other.handle = StateHandle::unregistered_state;
     other.owns_buffer = false;
+    sanity_check();
 }
 
 FactProxy State::operator[](std::size_t var_id) const {
