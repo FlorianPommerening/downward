@@ -592,8 +592,8 @@ public:
 
     State create_state(
         const PackedStateBin *buffer,
-        const int_packer::IntPacker &state_packer,
-        StateHandle handle = StateHandle::unregistered_state) const {
+        const StatePacker &state_packer,
+        StateHandle handle) const {
         return {
                    *task, buffer, state_packer, handle
         };
