@@ -23,9 +23,6 @@ class State {
     const PackedStateBin *buffer;
     const StatePacker &state_packer;
     StateHandle handle;
-    bool owns_buffer;
-
-    void sanity_check() const;
 public:
     using ItemType = FactProxy;
     State(
