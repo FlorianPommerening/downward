@@ -27,7 +27,8 @@ State::State(
     const PackedStateBin *buffer,
     const StatePacker &state_packer,
     StateHandle handle)
-    : task(&task), buffer(buffer), state_packer(state_packer), handle(handle), owns_buffer(false) {
+    : task(&task), buffer(buffer), state_packer(state_packer), handle(handle),
+      owns_buffer(handle == handle.unregistered_state) {
 }
 
 State::State(const AbstractTask &task, vector<int> &&values)
