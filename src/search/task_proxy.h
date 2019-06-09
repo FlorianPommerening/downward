@@ -594,11 +594,15 @@ public:
         const PackedStateBin *buffer,
         const int_packer::IntPacker &state_packer,
         StateHandle handle = StateHandle::unregistered_state) const {
-        return State(*task, buffer, state_packer, handle);
+        return {
+                   *task, buffer, state_packer, handle
+        };
     }
 
     State get_initial_state() const {
-        return State(*task, task->get_initial_state_values());
+        return {
+                   *task, task->get_initial_state_values()
+        };
     }
 
     /*
@@ -617,7 +621,9 @@ public:
         // Create a copy of the state values for the new state.
         std::vector<int> state_values = ancestor_state.unpack();
         task->convert_state_values(state_values, ancestor_task_proxy.task);
-        return State(*task, std::move(state_values));
+        return {
+                   *task, std::move(state_values)
+        };
     }
 
     const causal_graph::CausalGraph &get_causal_graph() const;
