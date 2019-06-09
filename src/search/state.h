@@ -35,7 +35,7 @@ public:
     ~State();
 
     State &operator=(State &&other);
-    State(const State &other);
+    State(State &&other);
 
     bool operator==(const State &other) const {
         assert(task == other.task);

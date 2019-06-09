@@ -59,12 +59,17 @@ State &State::operator=(State &&other) {
     return *this;
 }
 
-State::State(const State &other)
+State::State(State &&other)
     : task(other.task),
       buffer(other.buffer),
       state_packer(other.state_packer),
       handle(other.handle),
-      owns_buffer(false) {
+      owns_buffer(other.owns_buffer) {
+    assert(task == other.task);
+    other.task = nullptr;
+    other.buffer = nullptr;
+    other.handle = StateHandle::unregistered_state;
+    other.owns_buffer = false;
 }
 
 FactProxy State::operator[](std::size_t var_id) const {
