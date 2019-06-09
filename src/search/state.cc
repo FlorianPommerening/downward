@@ -46,7 +46,7 @@ State::~State() {
 
 State &State::operator=(State &&other) {
     if (this != &other) {
-        task = other.task;
+        assert(task == other.task);
         other.task = nullptr;
         buffer = other.buffer;
         other.buffer = nullptr;
