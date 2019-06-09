@@ -83,6 +83,8 @@ public:
     State get_successor(const OperatorProxy &op) const;
 };
 
+extern PackedStateBin *copy_buffer(const State &state);
+
 
 namespace utils {
 inline void feed(HashState &hash_state, const State &state) {

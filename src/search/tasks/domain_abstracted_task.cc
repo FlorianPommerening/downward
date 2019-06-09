@@ -79,6 +79,10 @@ vector<int> DomainAbstractedTask::get_initial_state_values() const {
     return initial_state_values;
 }
 
+bool DomainAbstractedTask::transforms_states() const {
+    return true;
+}
+
 void DomainAbstractedTask::convert_state_values_from_parent(
     vector<int> &values) const {
     int num_vars = domain_size.size();

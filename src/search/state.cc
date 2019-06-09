@@ -114,3 +114,10 @@ State State::get_successor(const OperatorProxy &op) const {
     }
     return State(*task, new_buffer, state_packer, StateHandle::unregistered_state);
 }
+
+PackedStateBin *copy_buffer(const State &state) {
+    int num_bins = state.get_state_packer().get_num_bins();
+    PackedStateBin *new_buffer = new PackedStateBin[num_bins];
+    memcpy(new_buffer, state.get_buffer(), sizeof(PackedStateBin) * num_bins);
+    return new_buffer;
+}

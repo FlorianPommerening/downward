@@ -103,6 +103,7 @@ public:
     virtual FactPair get_goal_fact(int index) const override;
 
     virtual vector<int> get_initial_state_values() const override;
+    virtual bool transforms_states() const override;
     virtual void convert_state_values(
         vector<int> &values,
         const AbstractTask *ancestor_task) const override;
@@ -484,6 +485,10 @@ FactPair RootTask::get_goal_fact(int index) const {
 
 vector<int> RootTask::get_initial_state_values() const {
     return initial_state_values;
+}
+
+bool RootTask::transforms_states() const {
+    return false;
 }
 
 void RootTask::convert_state_values(

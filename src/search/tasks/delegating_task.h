@@ -55,7 +55,7 @@ public:
     virtual FactPair get_goal_fact(int index) const override;
 
     virtual std::vector<int> get_initial_state_values() const override;
-
+    virtual bool transforms_states() const override;
     virtual void convert_state_values(
         std::vector<int> &values,
         const AbstractTask *ancestor_task) const final override;
