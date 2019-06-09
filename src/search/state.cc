@@ -38,22 +38,16 @@ State::State(const AbstractTask &task, vector<int> &&values)
 }
 
 State::~State() {
-    if (buffer && handle == StateHandle::unregistered_state) {
+    if (buffer && !is_registered()) {
         delete[] buffer;
     }
 }
 
 State::State(const State &other)
     : task(other.task),
+      buffer(other.is_registered() ? other.buffer : copy_buffer(other)),
       state_packer(other.state_packer),
       handle(other.handle) {
-    if (handle == StateHandle::unregistered_state) {
-        PackedStateBin *new_buffer = new PackedStateBin[state_packer.get_num_bins()];
-        memcpy(new_buffer, other.buffer, sizeof(PackedStateBin) * state_packer.get_num_bins());
-        buffer = new_buffer;
-    } else {
-        buffer = other.buffer;
-    }
 }
 
 State &State::operator=(State &&other) {

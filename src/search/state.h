@@ -74,6 +74,10 @@ public:
         return buffer;
     }
 
+    bool is_registered() const {
+        return handle.get_registry();
+    }
+
     std::vector<int> unpack() const;
 
     const StatePacker &get_state_packer() const {
