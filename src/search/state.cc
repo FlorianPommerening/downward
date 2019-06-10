@@ -106,7 +106,9 @@ State State::get_successor(const OperatorProxy &op) const {
         AxiomEvaluator &axiom_evaluator = g_axiom_evaluators[TaskProxy(*task)];
         axiom_evaluator.evaluate(new_buffer, state_packer);
     }
-    return State(*task, new_buffer, state_packer, StateHandle::unregistered_state);
+    return {
+               *task, new_buffer, state_packer, StateHandle::unregistered_state
+    };
 }
 
 PackedStateBin *copy_buffer(const State &state) {
