@@ -175,10 +175,7 @@ public:
 
     /*
       Register the state if this was not done before. Calling this with a state
-      that is already registered in a different state registry is an error.
-      If the state is already registered in this registry, it reamins unchanged,
-      otherwise it will be registered and subsequent calls to state.get_id()
-      will return the state's ID.
+      that is already registered is an error.
     */
     State register_state(State &&state);
 
