@@ -79,7 +79,9 @@ GlobalState StateRegistry::get_successor_state(const GlobalState &predecessor, c
     }
     axiom_evaluator.evaluate(buffer, state_packer);
     StateID id = insert_id_or_pop_state();
-    return lookup_state(id);
+    GlobalState global_state = lookup_state(id);
+    State state = global_state.unpack();
+    return global_state;
 }
 
 int StateRegistry::get_bins_per_state() const {
