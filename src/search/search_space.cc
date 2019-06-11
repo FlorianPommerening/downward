@@ -19,7 +19,10 @@ SearchNode::SearchNode(const StateRegistry &state_registry,
 }
 
 shared_ptr<State> SearchNode::get_state() const {
-    return make_shared<State>(state_registry.lookup_state(state_id));
+    if (!state) {
+        state = make_shared<State>(state_registry.lookup_state(state_id));
+    }
+    return state;
 }
 
 bool SearchNode::is_open() const {

@@ -16,6 +16,7 @@ class SearchNode {
     const StateRegistry &state_registry;
     StateID state_id;
     SearchNodeInfo &info;
+    mutable std::shared_ptr<State> state;
 public:
     SearchNode(const StateRegistry &state_registry,
                StateID state_id,
