@@ -43,13 +43,6 @@ State::~State() {
     }
 }
 
-State::State(const State &other)
-    : task(other.task),
-      buffer(other.is_registered() ? other.buffer : copy_buffer(other)),
-      state_packer(other.state_packer),
-      handle(other.handle) {
-}
-
 State &State::operator=(State &&other) {
     if (this != &other) {
         assert(task == other.task);

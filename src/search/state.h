@@ -33,7 +33,6 @@ public:
     State(const AbstractTask &task, std::vector<int> &&values);
     ~State();
 
-    State(const State &other);
     State &operator=(State &&other);
     State(State &&other);
 
