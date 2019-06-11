@@ -177,6 +177,7 @@ SearchStatus EagerSearch::step() {
     }
 
     GlobalState s = node->get_state();
+    s.unpack();
     if (check_goal_and_set_plan(s))
         return SOLVED;
 
