@@ -70,15 +70,17 @@ State StateRegistry::get_registered_successor_state(
     assert(!op.is_axiom());
     state_data_pool.push_back(state_data_pool[predecessor.get_id().value]);
     PackedStateBin *buffer = state_data_pool[state_data_pool.size() - 1];
+    vector<int> new_values = predecessor.get_values();
     for (EffectProxy effect : op.get_effects()) {
         if (does_fire(effect, predecessor)) {
             FactPair effect_pair = effect.get_fact().get_pair();
             state_packer.set(buffer, effect_pair.var, effect_pair.value);
+            new_values[effect_pair.var] = effect_pair.value;
         }
     }
     // TODO: axiom_evaluator.evaluate(buffer, state_packer);
     StateID id = insert_id_or_pop_state();
-    return lookup_state(id);
+    return task_proxy.create_state(move(new_values), StateHandle(this, id));
 }
 
 int StateRegistry::get_bins_per_state() const {
