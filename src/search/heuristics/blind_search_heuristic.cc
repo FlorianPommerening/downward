@@ -24,7 +24,8 @@ BlindSearchHeuristic::~BlindSearchHeuristic() {
 
 int BlindSearchHeuristic::compute_heuristic(const GlobalState &global_state) {
     State state = convert_global_state(global_state);
-    if (task_properties::is_goal_state(task_proxy, state))
+    State state_copy(state);
+    if (task_properties::is_goal_state(task_proxy, state_copy))
         return 0;
     else
         return min_operator_cost;
