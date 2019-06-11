@@ -129,8 +129,7 @@ shared_ptr<State> SearchEngine::get_initial_state() {
 
 shared_ptr<State> SearchEngine::get_successor_state(
     const State &state, const OperatorProxy &op) {
-    State successor = state_registry.register_state(state.get_successor(op));
-    return make_shared<State>(move(successor));
+    return make_shared<State>(state_registry.get_registered_successor_state(state, op));
 }
 
 /* TODO: merge this into add_options_to_parser when all search

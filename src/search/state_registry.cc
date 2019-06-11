@@ -65,6 +65,22 @@ State StateRegistry::register_state(State &&state) {
     return State(move(state), StateHandle(this, id));
 }
 
+State StateRegistry::get_registered_successor_state(
+    const State &predecessor, const OperatorProxy &op) {
+    assert(!op.is_axiom());
+    state_data_pool.push_back(state_data_pool[predecessor.get_id().value]);
+    PackedStateBin *buffer = state_data_pool[state_data_pool.size() - 1];
+    for (EffectProxy effect : op.get_effects()) {
+        if (does_fire(effect, predecessor)) {
+            FactPair effect_pair = effect.get_fact().get_pair();
+            state_packer.set(buffer, effect_pair.var, effect_pair.value);
+        }
+    }
+    // TODO: axiom_evaluator.evaluate(buffer, state_packer);
+    StateID id = insert_id_or_pop_state();
+    return lookup_state(id);
+}
+
 int StateRegistry::get_bins_per_state() const {
     return state_packer.get_num_bins();
 }

@@ -194,6 +194,9 @@ public:
     */
     State register_state(State &&state);
 
+    State get_registered_successor_state(
+        const State &predecessor, const OperatorProxy &op);
+
     /*
       Returns the number of states registered so far.
     */
