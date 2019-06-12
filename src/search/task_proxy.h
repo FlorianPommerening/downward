@@ -564,16 +564,16 @@ bool does_fire(const EffectProxy &effect, const State &state);
 
 class State {
     const AbstractTask *task;
-    std::vector<int> values;
+    std::shared_ptr<std::vector<int>> values;
     StateHandle handle;
 public:
     using ItemType = FactProxy;
     State(const AbstractTask &task, std::vector<int> &&values, StateHandle handle)
-        : task(&task), values(std::move(values)), handle(handle) {
+        : task(&task), values(std::make_shared<std::vector<int>>(std::move(values))), handle(handle) {
         assert(static_cast<int>(size()) == this->task->get_num_variables());
     }
     State(State &&unregistered_state, StateHandle handle)
-        : State(*unregistered_state.task, std::move(unregistered_state.values), handle) {
+        : State(*unregistered_state.task, std::move(*unregistered_state.values), handle) {
         assert(handle != StateHandle::unregistered_state);
         unregistered_state.task = nullptr;
         unregistered_state.handle = StateHandle::unregistered_state;
@@ -587,16 +587,18 @@ public:
     State &operator=(const State &other) = delete;
 
     State(State &&other)
-        : task(other.task), values(std::move(other.values)), handle(other.handle) {
+        : task(other.task), values(other.values), handle(other.handle) {
         other.task = nullptr;
+        other.values = nullptr;
         other.handle = StateHandle::unregistered_state;
     }
 
     State &operator=(State &&other) {
         if (this != &other) {
-            values = std::move(other.values);
             task = other.task;
             other.task = nullptr;
+            values = other.values;
+            other.values = nullptr;
             handle = other.handle;
             other.handle = StateHandle::unregistered_state;
         }
@@ -613,12 +615,12 @@ public:
     }
 
     std::size_t size() const {
-        return values.size();
+        return values->size();
     }
 
     FactProxy operator[](std::size_t var_id) const {
         assert(var_id < size());
-        return FactProxy(*task, var_id, values[var_id]);
+        return FactProxy(*task, var_id, (*values)[var_id]);
     }
 
     FactProxy operator[](VariableProxy var) const {
@@ -640,7 +642,7 @@ public:
     }
 
     const std::vector<int> &get_values() const {
-        return values;
+        return *values;
     }
 
     State get_successor(const OperatorProxy &op) const;

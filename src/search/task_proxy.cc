@@ -11,7 +11,7 @@ using namespace std;
 State State::get_successor(const OperatorProxy &op) const {
     assert(!op.is_axiom());
     //assert(is_applicable(op, state));
-    vector<int> new_values = values;
+    vector<int> new_values = *values;
     for (EffectProxy effect : op.get_effects()) {
         if (does_fire(effect, *this)) {
             FactPair effect_fact = effect.get_fact().get_pair();
