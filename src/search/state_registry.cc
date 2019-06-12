@@ -39,7 +39,7 @@ State StateRegistry::lookup_state(StateID id) const {
     const PackedStateBin *buffer = state_data_pool[id.value];
     vector<int> values(num_variables);
     for (int var = 0; var < num_variables; ++var) {
-        values[var] = get_state_value(buffer, var);
+        values[var] = state_packer.get(buffer, var);
     }
     return task_proxy.create_state(move(values), StateHandle(this, id));
 }
@@ -55,27 +55,6 @@ State StateRegistry::get_initial_state() {
     }
     StateID id = insert_id_or_pop_state();
     return State(move(initial_state), StateHandle(this, id));
-}
-
-State StateRegistry::register_state(State &&state) {
-    if (state.get_registry()) {
-        cerr << "Tried to register an already registered state." << endl;
-        utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
-    }
-    if (state.get_task().get_id() != task_proxy.get_id()) {
-        cerr << "Tried to register a state from an incompatible task." << endl;
-        utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
-    }
-
-    PackedStateBin *buffer = state_data_pool.push_back_empty_element();
-    // Avoid garbage values in half-full bins.
-    fill_n(buffer, get_bins_per_state(), 0);
-    for (size_t i = 0; i < state.size(); ++i) {
-        state_packer.set(buffer, i, state[i].get_value());
-    }
-
-    StateID id = insert_id_or_pop_state();
-    return State(move(state), StateHandle(this, id));
 }
 
 State StateRegistry::get_successor_state(

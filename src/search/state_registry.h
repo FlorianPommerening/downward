@@ -175,24 +175,11 @@ public:
         return num_variables;
     }
 
-    int get_state_value(const PackedStateBin *buffer, int var) const {
-        return state_packer.get(buffer, var);
-    }
-
     /*
       Returns the state that was registered at the given ID. The ID must refer
       to a state in this registry. Do not mix IDs from from different registries.
     */
     State lookup_state(StateID id) const;
-
-    /*
-      Register the state if this was not done before. Calling this with a state
-      that is already registered in a different state registry is an error.
-      If the state is already registered in this registry, it reamins unchanged,
-      otherwise it will be registered and subsequent calls to state.get_id()
-      will return the state's ID.
-    */
-    State register_state(State &&state);
 
     State get_initial_state();
     State get_successor_state(const State &predecessor, const OperatorProxy &op);
