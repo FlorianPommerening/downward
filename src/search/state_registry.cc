@@ -65,7 +65,7 @@ State StateRegistry::register_state(State &&state) {
     return State(move(state), StateHandle(this, id));
 }
 
-State StateRegistry::get_registered_successor_state(
+State StateRegistry::get_successor_state(
     const State &predecessor, const OperatorProxy &op) {
     assert(!op.is_axiom());
     state_data_pool.push_back(state_data_pool[predecessor.get_id().value]);
