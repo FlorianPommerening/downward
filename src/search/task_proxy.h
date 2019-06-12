@@ -583,8 +583,8 @@ public:
         : State(task, move(values), StateHandle::unregistered_state) {
     }
     ~State() = default;
-    State(const State &) = delete;
-    State &operator=(const State &other) = delete;
+    State(const State &) = default;
+    State &operator=(const State &other) = default;
 
     State(State &&other)
         : task(other.task), values(other.values), handle(other.handle) {

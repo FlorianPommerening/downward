@@ -16,7 +16,7 @@ class SearchNode {
     const StateRegistry &state_registry;
     StateID state_id;
     SearchNodeInfo &info;
-    mutable std::shared_ptr<State> state;
+    mutable std::unique_ptr<State> state;
 public:
     SearchNode(const StateRegistry &state_registry,
                StateID state_id,
@@ -25,7 +25,7 @@ public:
     StateID get_state_id() const {
         return state_id;
     }
-    std::shared_ptr<State> get_state() const;
+    const State &get_state() const;
 
     bool is_new() const;
     bool is_open() const;

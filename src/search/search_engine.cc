@@ -122,13 +122,13 @@ int SearchEngine::get_adjusted_cost(const OperatorProxy &op) const {
     return get_adjusted_action_cost(op, cost_type, is_unit_cost);
 }
 
-shared_ptr<State> SearchEngine::get_initial_state() {
-    return make_shared<State>(state_registry.get_initial_state());
+State SearchEngine::get_initial_state() {
+    return state_registry.get_initial_state();
 }
 
-shared_ptr<State> SearchEngine::get_successor_state(
+State SearchEngine::get_successor_state(
     const State &state, const OperatorProxy &op) {
-    return make_shared<State>(state_registry.get_successor_state(state, op));
+    return state_registry.get_successor_state(state, op);
 }
 
 /* TODO: merge this into add_options_to_parser when all search

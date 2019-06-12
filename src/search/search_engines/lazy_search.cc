@@ -54,13 +54,13 @@ void LazySearch::initialize() {
     }
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
-    shared_ptr<State> initial_state = get_initial_state();
+    State initial_state = get_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(*initial_state);
+        evaluator->notify_initial_state(initial_state);
     }
 }
 
-shared_ptr<State> LazySearch::get_current_state() const {
+const State &LazySearch::get_current_state() const {
     return current_eval_context.get_state();
 }
 
@@ -68,7 +68,7 @@ vector<OperatorID> LazySearch::get_successor_operators(
     const ordered_set::OrderedSet<OperatorID> &preferred_operators) const {
     vector<OperatorID> applicable_operators;
     successor_generator.generate_applicable_ops(
-        *get_current_state(), applicable_operators);
+        get_current_state(), applicable_operators);
 
     if (randomize_successors) {
         rng->shuffle(applicable_operators);
@@ -104,7 +104,7 @@ void LazySearch::generate_successors() {
 
     statistics.inc_generated(successor_operators.size());
 
-    StateID current_state_id = get_current_state()->get_id();
+    StateID current_state_id = get_current_state().get_id();
     for (OperatorID op_id : successor_operators) {
         OperatorProxy op = task_proxy.get_operators()[op_id];
         int new_g = current_g + get_adjusted_cost(op);
@@ -131,7 +131,7 @@ SearchStatus LazySearch::fetch_next_state() {
     State current_predecessor = state_registry.lookup_state(current_predecessor_id);
     OperatorProxy current_operator = task_proxy.get_operators()[current_operator_id];
     assert(task_properties::is_applicable(current_operator, current_predecessor));
-    shared_ptr<State> current_state = get_successor_state(current_predecessor, current_operator);
+    State current_state = get_successor_state(current_predecessor, current_operator);
 
     SearchNode pred_node = search_space.get_node(current_predecessor_id);
     current_g = pred_node.get_g() + get_adjusted_cost(current_operator);
@@ -158,7 +158,7 @@ SearchStatus LazySearch::step() {
     // - current_g is the g value of the current state according to the cost_type
     // - current_real_g is the g value of the current state (using real costs)
 
-    const State &current_state = *get_current_state();
+    const State &current_state = get_current_state();
 
     SearchNode node = search_space.get_node(current_state.get_id());
     bool reopen = reopen_closed_nodes && !node.is_new() &&

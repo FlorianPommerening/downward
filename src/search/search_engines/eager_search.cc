@@ -70,9 +70,9 @@ void EagerSearch::initialize() {
 
     path_dependent_evaluators.assign(evals.begin(), evals.end());
 
-    shared_ptr<State> initial_state = get_initial_state();
+    State initial_state = get_initial_state();
     for (Evaluator *evaluator : path_dependent_evaluators) {
-        evaluator->notify_initial_state(*initial_state);
+        evaluator->notify_initial_state(initial_state);
     }
 
     /*
@@ -89,10 +89,10 @@ void EagerSearch::initialize() {
         if (search_progress.check_progress(eval_context))
             print_checkpoint_line(0);
         start_f_value_statistics(eval_context);
-        SearchNode node = search_space.get_node(initial_state->get_id());
+        SearchNode node = search_space.get_node(initial_state.get_id());
         node.open_initial();
 
-        open_list->insert(eval_context, initial_state->get_id());
+        open_list->insert(eval_context, initial_state.get_id());
     }
 
     print_initial_evaluator_values(eval_context);
@@ -125,7 +125,7 @@ SearchStatus EagerSearch::step() {
         if (node->is_closed())
             continue;
 
-        shared_ptr<State> s = node->get_state();
+        State s = node->get_state();
         /*
           We can pass calculate_preferred=false here since preferred
           operators are computed when the state is expanded.
@@ -150,8 +150,8 @@ SearchStatus EagerSearch::step() {
             if (node->is_dead_end())
                 continue;
 
-            if (lazy_evaluator->is_estimate_cached(*s)) {
-                int old_h = lazy_evaluator->get_cached_estimate(*s);
+            if (lazy_evaluator->is_estimate_cached(s)) {
+                int old_h = lazy_evaluator->get_cached_estimate(s);
                 int new_h = eval_context.get_evaluator_value_or_infinity(lazy_evaluator.get());
                 if (open_list->is_dead_end(eval_context)) {
                     node->mark_as_dead_end();
@@ -172,18 +172,18 @@ SearchStatus EagerSearch::step() {
         break;
     }
 
-    shared_ptr<State> s = node->get_state();
-    if (check_goal_and_set_plan(*s))
+    State s = node->get_state();
+    if (check_goal_and_set_plan(s))
         return SOLVED;
 
     vector<OperatorID> applicable_ops;
-    successor_generator.generate_applicable_ops(*s, applicable_ops);
+    successor_generator.generate_applicable_ops(s, applicable_ops);
 
     /*
       TODO: When preferred operators are in use, a preferred operator will be
       considered by the preferred operator queues even when it is pruned.
     */
-    pruning_method->prune_operators(*s, applicable_ops);
+    pruning_method->prune_operators(s, applicable_ops);
 
     // This evaluates the expanded state (again) to get preferred ops
     EvaluationContext eval_context(s, node->get_g(), false, &statistics, true);
@@ -200,14 +200,14 @@ SearchStatus EagerSearch::step() {
             continue;
 
 
-        shared_ptr<State> succ_state = get_successor_state(*s, op);
+        State succ_state = get_successor_state(s, op);
         statistics.inc_generated();
         bool is_preferred = preferred_operators.contains(op_id);
 
-        SearchNode succ_node = search_space.get_node(succ_state->get_id());
+        SearchNode succ_node = search_space.get_node(succ_state.get_id());
 
         for (Evaluator *evaluator : path_dependent_evaluators) {
-            evaluator->notify_state_transition(*s, op_id, *succ_state);
+            evaluator->notify_state_transition(s, op_id, succ_state);
         }
 
         // Previously encountered dead end. Don't re-evaluate.
@@ -234,7 +234,7 @@ SearchStatus EagerSearch::step() {
             }
             succ_node.open(*node, op, get_adjusted_cost(op));
 
-            open_list->insert(succ_eval_context, succ_state->get_id());
+            open_list->insert(succ_eval_context, succ_state.get_id());
             if (search_progress.check_progress(succ_eval_context)) {
                 print_checkpoint_line(succ_node.get_g());
                 reward_progress();
@@ -274,7 +274,7 @@ SearchStatus EagerSearch::step() {
                   rather than a recomputation of the evaluator value
                   from scratch.
                 */
-                open_list->insert(succ_eval_context, succ_state->get_id());
+                open_list->insert(succ_eval_context, succ_state.get_id());
             } else {
                 // If we do not reopen closed nodes, we just update the parent pointers.
                 // Note that this could cause an incompatibility between

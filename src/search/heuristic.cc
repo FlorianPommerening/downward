@@ -48,8 +48,8 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
 
     assert(preferred_operators.empty());
 
-    shared_ptr<State> state = eval_context.get_state();
-    StateHandle state_handle = state->get_handle();
+    State state = eval_context.get_state();
+    StateHandle state_handle = state.get_handle();
     bool calculate_preferred = eval_context.get_calculate_preferred();
 
     int heuristic = NO_VALUE;
@@ -59,7 +59,7 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
         heuristic = heuristic_cache[state_handle].h;
         result.set_count_evaluation(false);
     } else {
-        heuristic = compute_heuristic(*state);
+        heuristic = compute_heuristic(state);
         if (cache_evaluator_values) {
             heuristic_cache[state_handle] = HEntry(heuristic, false);
         }
@@ -81,11 +81,11 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
     }
 
 #ifndef NDEBUG
-    TaskProxy global_task_proxy = state->get_task();
+    TaskProxy global_task_proxy = state.get_task();
     OperatorsProxy global_operators = global_task_proxy.get_operators();
     if (heuristic != EvaluationResult::INFTY) {
         for (OperatorID op_id : preferred_operators)
-            assert(task_properties::is_applicable(global_operators[op_id], *state));
+            assert(task_properties::is_applicable(global_operators[op_id], state));
     }
 #endif
 
