@@ -78,7 +78,12 @@ State StateRegistry::get_successor_state(
             new_values[effect_pair.var] = effect_pair.value;
         }
     }
-    // TODO: axiom_evaluator.evaluate(buffer, state_packer);
+    if (task_properties::has_axioms(task_proxy)) {
+        axiom_evaluator.evaluate(new_values);
+        for (size_t i = 0; i < new_values.size(); ++i) {
+            state_packer.set(buffer, i, new_values[i]);
+        }
+    }
     StateID id = insert_id_or_pop_state();
     return task_proxy.create_state(move(new_values), StateHandle(this, id));
 }
