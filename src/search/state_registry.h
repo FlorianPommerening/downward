@@ -194,6 +194,7 @@ public:
     */
     State register_state(State &&state);
 
+    State get_initial_state();
     State get_successor_state(const State &predecessor, const OperatorProxy &op);
 
     /*

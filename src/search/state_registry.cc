@@ -44,6 +44,19 @@ State StateRegistry::lookup_state(StateID id) const {
     return task_proxy.create_state(move(values), StateHandle(this, id));
 }
 
+State StateRegistry::get_initial_state() {
+    PackedStateBin *buffer = state_data_pool.push_back_empty_element();
+    // Avoid garbage values in half-full bins.
+    fill_n(buffer, get_bins_per_state(), 0);
+
+    State initial_state = task_proxy.get_initial_state();
+    for (size_t i = 0; i < initial_state.size(); ++i) {
+        state_packer.set(buffer, i, initial_state[i].get_value());
+    }
+    StateID id = insert_id_or_pop_state();
+    return State(move(initial_state), StateHandle(this, id));
+}
+
 State StateRegistry::register_state(State &&state) {
     if (state.get_registry()) {
         cerr << "Tried to register an already registered state." << endl;
