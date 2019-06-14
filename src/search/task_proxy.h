@@ -3,6 +3,7 @@
 
 #include "abstract_task.h"
 #include "operator_id.h"
+#include "packed_state_bin.h"
 #include "state_handle.h"
 #include "task_id.h"
 
@@ -549,16 +550,19 @@ bool does_fire(const EffectProxy &effect, const State &state);
 
 class State {
     const AbstractTask *task;
-    std::shared_ptr<std::vector<int>> values;
+    mutable std::shared_ptr<std::vector<int>> values;
+    const PackedStateBin *buffer;
     StateHandle handle;
 public:
     using ItemType = FactProxy;
+    State(const AbstractTask &task, const PackedStateBin *buffer, StateHandle handle)
+        : task(&task), values(nullptr), buffer(buffer), handle(handle) {
+        assert(buffer);
+        assert(handle != StateHandle::unregistered_state);
+    }
     State(const AbstractTask &task, std::vector<int> &&values, StateHandle handle)
         : task(&task), values(std::make_shared<std::vector<int>>(std::move(values))), handle(handle) {
         assert(static_cast<int>(size()) == this->task->get_num_variables());
-    }
-    State(const State &unregistered_state, StateHandle handle)
-        : task(unregistered_state.task), values(unregistered_state.values), handle(handle) {
     }
     ~State() = default;
     State(const State &) = default;
@@ -566,7 +570,11 @@ public:
 
     bool operator==(const State &other) const {
         assert(task == other.task);
-        return *values == *other.values;
+        if (handle != StateHandle::unregistered_state) {
+            return handle == other.handle;
+        }
+        assert(values);
+        return other.values && *values == *other.values;
     }
 
     bool operator!=(const State &other) const {
@@ -574,17 +582,16 @@ public:
     }
 
     std::size_t size() const {
-        return values->size();
+        return task->get_num_variables();
     }
 
-    FactProxy operator[](std::size_t var_id) const {
-        assert(var_id < size());
-        return FactProxy(*task, var_id, (*values)[var_id]);
-    }
+    FactProxy operator[](std::size_t var_id) const;
 
     FactProxy operator[](VariableProxy var) const {
         return (*this)[var.get_id()];
     }
+
+    void unpack() const;
 
     inline TaskProxy get_task() const;
 
@@ -597,6 +604,7 @@ public:
     }
 
     const std::vector<int> &get_values() const {
+        unpack();
         return *values;
     }
 
@@ -642,12 +650,16 @@ public:
         return GoalsProxy(*task);
     }
 
-    State create_state(std::vector<int> &&state_values, StateHandle handle) const {
-        return State(*task, std::move(state_values), handle);
+    State create_state(std::vector<int> &&state_values) const {
+        return State(*task, std::move(state_values), StateHandle::unregistered_state);
+    }
+
+    State create_state(const PackedStateBin *buffer, StateHandle handle) const {
+        return State(*task, buffer, handle);
     }
 
     State get_initial_state() const {
-        return create_state(task->get_initial_state_values(), StateHandle::unregistered_state);
+        return create_state(task->get_initial_state_values());
     }
 
     /*
@@ -666,7 +678,7 @@ public:
         // Create a copy of the state values for the new state.
         std::vector<int> state_values = ancestor_state.get_values();
         task->convert_state_values(state_values, ancestor_task_proxy.task);
-        return create_state(std::move(state_values), StateHandle::unregistered_state);
+        return create_state(std::move(state_values));
     }
 
     const causal_graph::CausalGraph &get_causal_graph() const;

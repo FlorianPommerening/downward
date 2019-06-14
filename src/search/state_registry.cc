@@ -38,11 +38,7 @@ StateID StateRegistry::insert_id_or_pop_state() {
 
 State StateRegistry::lookup_state(StateID id) const {
     const PackedStateBin *buffer = state_data_pool[id.value];
-    vector<int> values(num_variables);
-    for (int var = 0; var < num_variables; ++var) {
-        values[var] = state_packer.get(buffer, var);
-    }
-    return task_proxy.create_state(move(values), StateHandle(this, id));
+    return task_proxy.create_state(buffer, StateHandle(this, id));
 }
 
 const State &StateRegistry::get_initial_state() {
@@ -58,7 +54,8 @@ const State &StateRegistry::get_initial_state() {
         }
         state_data_pool.push_back(buffer);
         StateID id = insert_id_or_pop_state();
-        cached_initial_unpacked_state = utils::make_unique_ptr<State>(move(initial_state), StateHandle(this, id));
+        cached_initial_unpacked_state = utils::make_unique_ptr<State>(
+                    task_proxy.create_state(buffer, StateHandle(this, id)));
     }
     return *cached_initial_unpacked_state;
 }
@@ -70,22 +67,15 @@ State StateRegistry::get_successor_state(const State &predecessor, const Operato
     assert(!op.is_axiom());
     state_data_pool.push_back(state_data_pool[predecessor.get_id().value]);
     PackedStateBin *buffer = state_data_pool[state_data_pool.size() - 1];
-    vector<int> new_values = predecessor.get_values();
     for (EffectProxy effect : op.get_effects()) {
         if (does_fire(effect, predecessor)) {
             FactPair effect_pair = effect.get_fact().get_pair();
             state_packer.set(buffer, effect_pair.var, effect_pair.value);
-            new_values[effect_pair.var] = effect_pair.value;
         }
     }
-    if (task_properties::has_axioms(task_proxy)) {
-        axiom_evaluator.evaluate(new_values);
-        for (size_t i = 0; i < new_values.size(); ++i) {
-            state_packer.set(buffer, i, new_values[i]);
-        }
-    }
+    axiom_evaluator.evaluate(buffer, state_packer);
     StateID id = insert_id_or_pop_state();
-    return task_proxy.create_state(move(new_values), StateHandle(this, id));
+    return task_proxy.create_state(buffer, StateHandle(this, id));
 }
 
 int StateRegistry::get_bins_per_state() const {

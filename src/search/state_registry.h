@@ -170,6 +170,10 @@ public:
         return task_proxy;
     }
 
+    const int_packer::IntPacker &get_state_packer() const {
+        return state_packer;
+    }
+
     int get_num_variables() const {
         return num_variables;
     }
