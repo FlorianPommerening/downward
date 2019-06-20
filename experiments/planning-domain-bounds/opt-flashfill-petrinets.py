@@ -50,22 +50,13 @@ exp = FastDownwardExperiment(path=get_data_dir(), environment=ENVIRONMENT)
 exp.add_suite('', SUITE)
 
 exp.add_algorithm(
-    'astar-blind',
-    get_repo_base(),
-    REVISION,
-    ["--search", "astar(blind())"],
-    driver_options=[
-        "--search-time-limit", "6h",
-        "--search-memory-limit", "3800M"
-    ])
-exp.add_algorithm(
     'astar-hmax',
     get_repo_base(),
     REVISION,
     ["--search", "astar(hmax())"],
     driver_options=[
-        "--search-time-limit", "6h",
-        "--search-memory-limit", "3800M"
+        "--overall-time-limit", "6h",
+        "--overall-memory-limit", "3800M"
     ])
 
 exp.add_step('build', exp.build)
