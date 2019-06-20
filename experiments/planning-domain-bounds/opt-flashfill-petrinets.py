@@ -25,7 +25,7 @@ def api_to_lab_problem(problem):
             'api_upper_bound': ub,
         })
 
-REVISION = 'release-19.06'
+REVISION = 'release-19.06.0'
 # exclude domains with unsupported features
 DOMAINS = [
     153,  # flashfill
@@ -37,7 +37,7 @@ if is_test_run():
     SUITE = [api_to_lab_problem(api.get_problem(4992))]
 else:
     ENVIRONMENT = BaselSlurmEnvironment(
-        partition="infai_2",
+        partition="infai_1",
         email="florian.pommerening@unibas.ch",
         export=["PATH"])
     SUITE = []
