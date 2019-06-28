@@ -21,7 +21,14 @@ CONFIGS = [
     IssueConfig("optimal-lmcount-cplex", ["--search", "astar(lmcount(lm_merged([lm_rhw(),lm_hm(m=1)]), admissible=true, optimal=true, lpsolver=cplex))"]),
 ]
 SUITE = common_setup.DEFAULT_OPTIMAL_SUITE
-ENVIRONMENT = BaselSlurmEnvironment(partition="infai_2", email="florian.pommerening@unibas.ch")
+ENVIRONMENT = BaselSlurmEnvironment(
+    partition="infai_1",
+    email="florian.pommerening@unibas.ch",
+    setup=(
+        BaselSlurmEnvironment.DEFAULT_SETUP+"\n"
+        "module load Gurobi/8.1.0_linux64.lua\n"
+        'LD_LIBRARY_PATH="$GUROBI_HOME/lib:$LD_LIBRARY_PATH"')
+)
 
 if common_setup.is_test_run():
     SUITE = IssueExperiment.DEFAULT_TEST_SUITE
