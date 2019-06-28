@@ -120,8 +120,12 @@ endif()
 
 # Grb component
 if(OSI_Grb_LIBRARIES)
-    message(FATAL_ERROR "Gurobi is not tested yet. Try to copy the config of cplex above and the file cmake/modules/FindCplex.cmake and adapt them for gurobi.")
-    set(OSI_Grb_FOUND FALSE)
+    find_package(Gurobi)
+    if (CPLEX_FOUND)
+        list(APPEND OSI_Grb_LIBRARIES ${GUROBI_LIBRARIES})
+        list(APPEND OSI_Grb_INCLUDE_DIRS ${GUROBI_INCLUDE_DIRS})
+        set(OSI_Grb_FOUND TRUE)
+    endif()
 endif()
 
 
