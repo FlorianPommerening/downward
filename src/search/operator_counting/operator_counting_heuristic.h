@@ -13,18 +13,17 @@ class Options;
 }
 
 namespace operator_counting {
-class ConstraintGenerator;
+class OperatorCountingConstraint;
 
 class OperatorCountingHeuristic : public Heuristic {
-    std::vector<std::shared_ptr<ConstraintGenerator>> constraint_generators;
+    std::vector<std::shared_ptr<OperatorCountingConstraint>> constraint_generators;
     lp::LPSolver lp_solver;
 protected:
-    virtual void initialize() override;
     virtual int compute_heuristic(const GlobalState &global_state) override;
     int compute_heuristic(const State &state);
 public:
     explicit OperatorCountingHeuristic(const options::Options &opts);
-    ~OperatorCountingHeuristic();
+    ~OperatorCountingHeuristic() = default;
 };
 }
 

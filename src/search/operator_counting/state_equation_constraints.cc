@@ -12,12 +12,51 @@
 using namespace std;
 
 namespace operator_counting {
+/* A proposition is an atom of the form Var = Val. It stores the index of the
+   constraint representing it in the LP */
+struct Proposition {
+    std::set<int> always_produced_by;
+    std::set<int> sometimes_produced_by;
+    std::set<int> always_consumed_by;
+};
+
+class StateEquationConstraintGenerator : public OperatorCountingConstraintGeneratorBase {
+    vector<vector<Proposition>> propositions;
+    vector<vector<int>> constraint_indices;
+    vector<lp::LPConstraint> constraints;
+    void build_propositions(const TaskProxy &task_proxy);
+    void add_constraints(double infinity);
+public:
+    virtual std::shared_ptr<OperatorCountingConstraint> create_constraint(
+        const std::shared_ptr<AbstractTask> &task) override {
+        return std::make_shared<StateEquationConstraints>(task);
+    }
+};
+
 void add_indices_to_constraint(lp::LPConstraint &constraint,
                                const set<int> &indices,
                                double coefficient) {
     for (int index : indices) {
         constraint.insert(index, coefficient);
     }
+}
+
+StateEquationConstraints::StateEquationConstraints(
+    const options::Options &options, const shared_ptr<AbstractTask> &task)
+    : OperatorCountingConstraint(options, task) {
+    cout << "Initializing constraints from state equation." << endl;
+    TaskProxy task_proxy(*task);
+    verify_no_axioms(task_proxy);
+    verify_no_conditional_effects(task_proxy);
+    build_propositions(task_proxy);
+
+    // Initialize goal state.
+    VariablesProxy variables = task_proxy.get_variables();
+    goal_state = vector<int>(variables.size(), numeric_limits<int>::max());
+    for (FactProxy goal : task_proxy.get_goals()) {
+        goal_state[goal.get_variable().get_id()] = goal.get_value();
+    }
+
 }
 
 void StateEquationConstraints::build_propositions(const TaskProxy &task_proxy) {
@@ -69,21 +108,8 @@ void StateEquationConstraints::add_constraints(
 }
 
 void StateEquationConstraints::initialize_constraints(
-    const shared_ptr<AbstractTask> task, vector<lp::LPConstraint> &constraints,
-    double infinity) {
-    cout << "Initializing constraints from state equation." << endl;
-    TaskProxy task_proxy(*task);
-    verify_no_axioms(task_proxy);
-    verify_no_conditional_effects(task_proxy);
-    build_propositions(task_proxy);
+    vector<lp::LPConstraint> &constraints, double infinity) {
     add_constraints(constraints, infinity);
-
-    // Initialize goal state.
-    VariablesProxy variables = task_proxy.get_variables();
-    goal_state = vector<int>(variables.size(), numeric_limits<int>::max());
-    for (FactProxy goal : task_proxy.get_goals()) {
-        goal_state[goal.get_variable().get_id()] = goal.get_value();
-    }
 }
 
 bool StateEquationConstraints::update_constraints(const State &state,
@@ -114,7 +140,7 @@ bool StateEquationConstraints::update_constraints(const State &state,
     return false;
 }
 
-static shared_ptr<ConstraintGenerator> _parse(OptionParser &parser) {
+static shared_ptr<OperatorCountingConstraintGeneratorBase> _parse(OptionParser &parser) {
     parser.document_synopsis(
         "State equation constraints",
         "For each fact, a permanent constraint is added that considers the net "
@@ -149,8 +175,9 @@ static shared_ptr<ConstraintGenerator> _parse(OptionParser &parser) {
 
     if (parser.dry_run())
         return nullptr;
-    return make_shared<StateEquationConstraints>();
+    options::Options opts;
+    return make_shared<OperatorCountingConstraintGenerator<StateEquationConstraints>>(opts);
 }
 
-PluginShared<ConstraintGenerator> _plugin("state_equation_constraints", _parse);
+PluginShared<OperatorCountingConstraintGeneratorBase> _plugin("state_equation_constraints", _parse);
 }

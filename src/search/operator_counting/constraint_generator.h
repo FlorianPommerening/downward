@@ -1,6 +1,8 @@
 #ifndef OPERATOR_COUNTING_CONSTRAINT_GENERATOR_H
 #define OPERATOR_COUNTING_CONSTRAINT_GENERATOR_H
 
+#include "../option_parser.h"
+
 #include <memory>
 #include <vector>
 
@@ -27,8 +29,13 @@ namespace operator_counting {
       Example: constraints from landmarks generated for a given state, e.g.
       using the LM-Cut method.
 */
-class ConstraintGenerator {
+class OperatorCountingConstraint {
 public:
+    explicit OperatorCountingConstraint(
+        const options::Options &/*options*/,
+        const std::shared_ptr<AbstractTask> &/*task*/) {
+    }
+
     /*
       Called upon initialization for the given task. Use this to add permanent
       constraints and perform other initialization. The parameter "infinity"
@@ -36,7 +43,6 @@ public:
       and variable bounds.
     */
     virtual void initialize_constraints(
-        const std::shared_ptr<AbstractTask> task,
         std::vector<lp::LPConstraint> &constraints,
         double infinity);
 
@@ -49,6 +55,26 @@ public:
     */
     virtual bool update_constraints(const State &state,
                                     lp::LPSolver &lp_solver) = 0;
+};
+
+class OperatorCountingConstraintGeneratorBase {
+public:
+    virtual std::shared_ptr<OperatorCountingConstraint> create_constraint(
+        const std::shared_ptr<AbstractTask> &task) = 0;
+};
+
+template<class ConstraintType>
+class OperatorCountingConstraintGenerator : public OperatorCountingConstraintGeneratorBase {
+    const options::Options options;
+public:
+    OperatorCountingConstraintGenerator(const options::Options &options)
+        :options(options) {
+    }
+
+    virtual std::shared_ptr<OperatorCountingConstraint> create_constraint(
+        const std::shared_ptr<AbstractTask> &task) override {
+        return std::make_shared<ConstraintType>(options, task);
+    }
 };
 }
 
