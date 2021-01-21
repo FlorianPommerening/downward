@@ -719,9 +719,10 @@ inline void State::unpack() const {
     assert(state_packer);
     if (!values) {
         int num_variables = size();
-        values = std::make_shared<std::vector<int>>(num_variables);
+        values = std::make_shared<std::vector<int>>();
+        values->reserve(num_variables);
         for (int var = 0; var < num_variables; ++var) {
-            (*values)[var] = state_packer->get(buffer, var);
+            values->push_back(state_packer->get(buffer, var));
         }
     }
 }
