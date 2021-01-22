@@ -604,6 +604,7 @@ public:
     }
 
     const std::vector<int> &get_values() const;
+    const PackedStateBin *get_buffer() const;
 
     State get_successor(const OperatorProxy &op) const;
 };
@@ -734,6 +735,15 @@ inline const std::vector<int> &State::get_values() const {
         utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
     }
     return *values;
+}
+
+inline const PackedStateBin *State::get_buffer() const {
+    if (!buffer) {
+        std::cerr << "Accessing the packed values of an unregistered state is "
+                     "treated as an error." << std::endl;
+        utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
+    }
+    return buffer;
 }
 
 inline FactProxy State::operator[](std::size_t var_id) const {
