@@ -160,7 +160,6 @@ public:
         const std::vector<int> &operator_costs = std::vector<int>());
     ~PatternDatabase() = default;
 
-    int get_value(const State &state) const;
     int get_value(const std::vector<int> &state) const;
 
     // Returns the pattern (i.e. all variables used) of the PDB

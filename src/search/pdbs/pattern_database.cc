@@ -296,10 +296,6 @@ size_t PatternDatabase::hash_index(const vector<int> &state) const {
     return index;
 }
 
-int PatternDatabase::get_value(const State &state) const {
-    return distances[hash_index(state)];
-}
-
 int PatternDatabase::get_value(const vector<int> &state) const {
     return distances[hash_index(state)];
 }

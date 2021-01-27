@@ -52,7 +52,7 @@ static State sample_state_with_random_walk(
     vector<OperatorID> applicable_operators;
     for (int j = 0; j < length; ++j) {
         applicable_operators.clear();
-        successor_generator.generate_applicable_ops(current_state.get_values(),
+        successor_generator.generate_applicable_ops(current_state,
                                                     applicable_operators);
         // If there are no applicable operators, do not walk further.
         if (applicable_operators.empty()) {
