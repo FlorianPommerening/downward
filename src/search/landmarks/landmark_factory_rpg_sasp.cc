@@ -93,8 +93,8 @@ void LandmarkFactoryRpgSasp::get_greedy_preconditions_for_lm(
         if (!has_precondition_on_var[var_id] && effect_fact.get_variable().get_domain_size() == 2) {
             for (const FactPair &lm_fact : lmp->facts) {
                 if (lm_fact.var == var_id &&
-                    initial_state[var_id].get_value() != lm_fact.value) {
-                    result.emplace(var_id, initial_state[var_id].get_value());
+                    initial_state[var_id] != lm_fact.value) {
+                    result.emplace(var_id, initial_state[var_id]);
                     break;
                 }
             }
@@ -231,7 +231,7 @@ void LandmarkFactoryRpgSasp::found_disj_lm_and_order(
     FactPair lm_prop = FactPair::no_fact;
     State initial_state = task_proxy.get_initial_state();
     for (const FactPair &lm : a) {
-        if (initial_state[lm.var].get_value() == lm.value) {
+        if (initial_state[lm.var] == lm.value) {
             //utils::g_log << endl << "not adding LM that's true in initial state: "
             //<< g_variable_name[it->first] << " -> " << it->second << endl;
             return;
@@ -516,13 +516,13 @@ bool LandmarkFactoryRpgSasp::domain_connectivity(const State &initial_state,
     // The value that we want to achieve must not be excluded:
     assert(exclude.find(landmark.value) == exclude.end());
     // If the value in the initial state is excluded, we won't achieve our goal value:
-    if (exclude.find(initial_state[var].get_value()) != exclude.end())
+    if (exclude.find(initial_state[var]) != exclude.end())
         return false;
     list<int> open;
-    unordered_set<int> closed(initial_state[var].get_variable().get_domain_size());
+    unordered_set<int> closed(initial_state.get_task().get_variables()[var].get_domain_size());
     closed = exclude;
-    open.push_back(initial_state[var].get_value());
-    closed.insert(initial_state[var].get_value());
+    open.push_back(initial_state[var]);
+    closed.insert(initial_state[var]);
     const vector<unordered_set<int>> &successors = dtg_successors[var];
     while (closed.find(landmark.value) == closed.end()) {
         if (open.empty()) // landmark not in closed and nothing more to insert

@@ -38,7 +38,7 @@ void LandmarkFactoryRpgExhaust::generate_landmarks(
             if (!lm_graph->simple_landmark_exists(lm)) {
                 vector<FactPair> facts = {lm};
                 LandmarkNode node(facts, false);
-                if (initial_state[lm.var].get_value() == lm.value ||
+                if (initial_state[lm.var] == lm.value ||
                     !relaxed_task_solvable(task_proxy, exploration, true, &node)) {
                     lm_graph->landmark_add_simple(lm);
                 }

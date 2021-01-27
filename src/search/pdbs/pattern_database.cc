@@ -283,7 +283,7 @@ bool PatternDatabase::is_goal_state(
 size_t PatternDatabase::hash_index(const State &state) const {
     size_t index = 0;
     for (size_t i = 0; i < pattern.size(); ++i) {
-        index += hash_multipliers[i] * state[pattern[i]].get_value();
+        index += hash_multipliers[i] * state[pattern[i]];
     }
     return index;
 }

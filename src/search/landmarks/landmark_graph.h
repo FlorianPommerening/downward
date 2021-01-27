@@ -72,14 +72,14 @@ public:
     bool is_true_in_state(const State &state) const {
         if (disjunctive) {
             for (const FactPair &fact : facts) {
-                if (state[fact.var].get_value() == fact.value) {
+                if (state[fact.var] == fact.value) {
                     return true;
                 }
             }
             return false;
         } else { // conjunctive or simple
             for (const FactPair &fact : facts) {
-                if (state[fact.var].get_value() != fact.value) {
+                if (state[fact.var] != fact.value) {
                     return false;
                 }
             }

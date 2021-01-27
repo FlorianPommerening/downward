@@ -39,7 +39,7 @@ void LandmarkStatusManager::set_landmarks_for_initial_state(
         if (node_p->conjunctive) {
             bool lm_true = true;
             for (const FactPair &fact : node_p->facts) {
-                if (initial_state[fact.var].get_value() != fact.value) {
+                if (initial_state[fact.var] != fact.value) {
                     lm_true = false;
                     break;
                 }
@@ -50,7 +50,7 @@ void LandmarkStatusManager::set_landmarks_for_initial_state(
             }
         } else {
             for (const FactPair &fact : node_p->facts) {
-                if (initial_state[fact.var].get_value() == fact.value) {
+                if (initial_state[fact.var] == fact.value) {
                     reached.set(node_p->get_id());
                     ++inserted;
                     break;
