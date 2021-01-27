@@ -49,11 +49,10 @@ static State sample_state_with_random_walk(
 
     // Sample one state with a random walk of length length.
     State current_state(initial_state);
-    const int *current_state_data = current_state.get_data();
     vector<OperatorID> applicable_operators;
     for (int j = 0; j < length; ++j) {
         applicable_operators.clear();
-        successor_generator.generate_applicable_ops(current_state_data,
+        successor_generator.generate_applicable_ops(current_state.get_values(),
                                                     applicable_operators);
         // If there are no applicable operators, do not walk further.
         if (applicable_operators.empty()) {
@@ -63,12 +62,10 @@ static State sample_state_with_random_walk(
             OperatorProxy random_op = operators[random_op_id];
             assert(task_properties::is_applicable(random_op, current_state));
             current_state = current_state.get_successor(random_op);
-            current_state_data = current_state.get_data();
             /* If current state is a dead end, then restart the random walk
                with the initial state. */
             if (is_dead_end(current_state)) {
                 current_state = State(initial_state);
-                current_state_data = current_state.get_data();
             }
         }
     }

@@ -584,13 +584,6 @@ public:
     */
     void unpack() const;
 
-    const int *get_data() const {
-        if (!values) {
-            utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
-        }
-        return values->data();
-    }
-
     std::size_t size() const {
         return num_variables;
     }

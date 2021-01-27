@@ -20,7 +20,7 @@ void SuccessorGenerator::generate_applicable_ops(
 }
 
 void SuccessorGenerator::generate_applicable_ops(
-    const int *state, vector<OperatorID> &applicable_ops) const {
+    const vector<int> &state, vector<OperatorID> &applicable_ops) const {
     root->generate_applicable_ops(state, applicable_ops);
 }
 
