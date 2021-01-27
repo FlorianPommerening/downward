@@ -604,9 +604,6 @@ public:
     }
 
     const std::vector<int> &get_values() const;
-    const std::shared_ptr<std::vector<int>> &get_values_ptr() const {
-        return values;
-    }
     const PackedStateBin *get_buffer() const;
 
     State get_successor(const OperatorProxy &op) const;

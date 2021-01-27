@@ -288,10 +288,10 @@ size_t PatternDatabase::hash_index(const State &state) const {
     return index;
 }
 
-size_t PatternDatabase::hash_index(const shared_ptr<vector<int>> &state) const {
+size_t PatternDatabase::hash_index(const vector<int> &state) const {
     size_t index = 0;
     for (size_t i = 0; i < pattern.size(); ++i) {
-        index += hash_multipliers[i] * (*state)[pattern[i]];
+        index += hash_multipliers[i] * state[pattern[i]];
     }
     return index;
 }
@@ -300,7 +300,7 @@ int PatternDatabase::get_value(const State &state) const {
     return distances[hash_index(state)];
 }
 
-int PatternDatabase::get_value(const shared_ptr<vector<int>> &state) const {
+int PatternDatabase::get_value(const vector<int> &state) const {
     return distances[hash_index(state)];
 }
 

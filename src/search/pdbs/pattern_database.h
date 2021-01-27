@@ -141,7 +141,7 @@ class PatternDatabase {
       (distances) during search.
     */
     std::size_t hash_index(const State &state) const;
-    std::size_t hash_index(const std::shared_ptr<std::vector<int>> &state) const;
+    std::size_t hash_index(const std::vector<int> &state) const;
 public:
     /*
       Important: It is assumed that the pattern (passed via Options) is
@@ -161,7 +161,7 @@ public:
     ~PatternDatabase() = default;
 
     int get_value(const State &state) const;
-    int get_value(const std::shared_ptr<std::vector<int>> &state) const;
+    int get_value(const std::vector<int> &state) const;
 
     // Returns the pattern (i.e. all variables used) of the PDB
     const Pattern &get_pattern() const {
