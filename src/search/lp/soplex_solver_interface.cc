@@ -122,7 +122,17 @@ void SoPlexSolverInterface::set_mip_gap(double /*gap*/) {
 }
 
 void SoPlexSolverInterface::solve() {
+    int basis_num_cols = basis_cols.size();
+    int basis_num_rows = basis_rows.size();
+    if (get_num_variables() == basis_num_cols && 
+        get_num_constraints() == basis_num_rows) {
+        soplex.setBasis(basis_rows.data(), basis_cols.data());
+    } else {
+        basis_cols.resize(get_num_variables());
+        basis_rows.resize(get_num_constraints());
+    }
     soplex.optimize();
+    soplex.getBasis(basis_rows.data(), basis_cols.data());
 }
 
 void SoPlexSolverInterface::write_lp(const string &filename) const {

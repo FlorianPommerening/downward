@@ -27,6 +27,8 @@ class SoPlexSolverInterface : public SolverInterface {
     mutable soplex::SoPlex soplex;
     int num_permanent_constraints;
     int num_temporary_constraints;
+    std::vector<soplex::SPxSolverBase<double>::VarStatus> basis_rows;
+    std::vector<soplex::SPxSolverBase<double>::VarStatus> basis_cols;
 public:
     SoPlexSolverInterface();
 
