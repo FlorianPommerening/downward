@@ -50,6 +50,7 @@ static LPColSetReal variables_to_col_set(const named_vector::NamedVector<LPVaria
 SoPlexSolverInterface::SoPlexSolverInterface() : SolverInterface() {
     soplex.setIntParam(SoPlex::VERBOSITY, SoPlex::VERBOSITY_ERROR);
     soplex.setIntParam(SoPlex::SIMPLIFIER, SoPlex::SIMPLIFIER_OFF);
+    soplex.setIntParam(SoPlex::SCALER, SoPlex::SCALER_OFF);
 }
 
 void SoPlexSolverInterface::load_problem(const LinearProgram &lp) {
