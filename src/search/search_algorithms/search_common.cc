@@ -10,6 +10,9 @@
 #include "../open_lists/best_first_open_list.h"
 #include "../open_lists/tiebreaking_open_list.h"
 
+#include "../tasks/root_task.h"
+#include "../state_registry.h"
+
 #include <memory>
 
 using namespace std;
@@ -139,6 +142,63 @@ create_astar_open_list_factory_and_f_eval(const plugins::Options &opts) {
         "evals", vector<shared_ptr<Evaluator>>({g, h}));
     shared_ptr<Evaluator> f = make_shared<SumEval>(f_evaluator_options);
     vector<shared_ptr<Evaluator>> evals = {f, h};
+
+    plugins::Options options;
+    options.set("evals", evals);
+    options.set("pref_only", false);
+    options.set("unsafe_pruning", false);
+    shared_ptr<OpenListFactory> open =
+        make_shared<tiebreaking_open_list::TieBreakingOpenListFactory>(options);
+    return make_pair(open, f);
+}
+
+static double rescale_weight_for_speedstar(
+    double s, const shared_ptr<Evaluator> &h, const shared_ptr<Evaluator> &d,
+    const TaskProxy &task_proxy) {
+    StateRegistry temporary_registry(task_proxy);
+    EvaluationContext evaluation_context(temporary_registry.get_initial_state());
+    EvaluationResult init_h = h->compute_result(evaluation_context);
+    if (init_h.is_infinite()) {
+        return 0; // no need to consider d, h will detect unsolvability as soon as the search starts.
+    }
+    EvaluationResult init_d = d->compute_result(evaluation_context);
+    if (init_d.is_infinite()) {
+        return 1; // d will detect unsolvability as soon as the search starts.
+    }
+    if (init_d.get_evaluator_value() == 0) {
+        return 0; // no need to consider d. TODO is this true?
+    }
+    return (s - 1) * init_h.get_evaluator_value() / init_d.get_evaluator_value();
+}
+
+pair<shared_ptr<OpenListFactory>, const shared_ptr<Evaluator>>
+create_speedstar_open_list_factory_and_f_eval(const plugins::Options &opts) {
+    plugins::Options g_evaluator_options;
+    g_evaluator_options.set<utils::Verbosity>(
+        "verbosity", opts.get<utils::Verbosity>("verbosity"));
+    shared_ptr<GEval> g = make_shared<GEval>(g_evaluator_options);
+    shared_ptr<Evaluator> h = opts.get<shared_ptr<Evaluator>>("eval");
+    shared_ptr<Evaluator> d = opts.get<shared_ptr<Evaluator>>("d_eval");
+    double s = opts.get<double>("s");
+    TaskProxy task_proxy(*tasks::g_root_task); // TODO: avoid using the global variable here.
+    double s_prime = rescale_weight_for_speedstar(s, h, d, task_proxy);
+
+    plugins::Options weighted_d_evaluator_options;
+    weighted_d_evaluator_options.set<utils::Verbosity>(
+        "verbosity", opts.get<utils::Verbosity>("verbosity"));
+    weighted_d_evaluator_options.set<shared_ptr<Evaluator>>(
+        "eval", shared_ptr<Evaluator>(d));
+    weighted_d_evaluator_options.set<int>( // TODO: only int weights so far, have to adapt
+        "weight", static_cast<int>(s_prime));
+    shared_ptr<Evaluator> weighted_d = make_shared<WeightedEval>(weighted_d_evaluator_options);
+
+    plugins::Options f_evaluator_options;
+    f_evaluator_options.set<utils::Verbosity>(
+        "verbosity", opts.get<utils::Verbosity>("verbosity"));
+    f_evaluator_options.set<vector<shared_ptr<Evaluator>>>(
+        "evals", vector<shared_ptr<Evaluator>>({g, h, weighted_d}));
+    shared_ptr<Evaluator> f = make_shared<SumEval>(f_evaluator_options);
+    vector<shared_ptr<Evaluator>> evals = {f, d, h}; // TODO: rethink this
 
     plugins::Options options;
     options.set("evals", evals);
