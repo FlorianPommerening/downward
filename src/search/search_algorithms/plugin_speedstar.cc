@@ -6,9 +6,10 @@
 using namespace std;
 
 namespace plugin_astar {
-class AStarSearchFeature : public plugins::TypedFeature<SearchAlgorithm, eager_search::EagerSearch> {
+class SpeedStarSearchFeature : public plugins::TypedFeature<SearchAlgorithm, eager_search::EagerSearch> {
 public:
-    AStarSearchFeature() : TypedFeature("astar") {
+    SpeedStarSearchFeature() : TypedFeature("speedstar") {
+        // TODO update documentation and options
         document_title("A* search (eager)");
         document_synopsis(
             "A* is a special case of eager best first search that uses g+h "
@@ -40,7 +41,7 @@ public:
 
     virtual shared_ptr<eager_search::EagerSearch> create_component(const plugins::Options &options, const utils::Context &) const override {
         plugins::Options options_copy(options);
-        auto temp = search_common::create_astar_open_list_factory_and_f_eval(options);
+        auto temp = search_common::create_speedstar_open_list_factory_and_f_eval(options);
         options_copy.set("open", temp.first);
         options_copy.set("f_eval", temp.second);
         options_copy.set("reopen_closed", true);
@@ -50,5 +51,5 @@ public:
     }
 };
 
-static plugins::FeaturePlugin<AStarSearchFeature> _plugin;
+static plugins::FeaturePlugin<SpeedStarSearchFeature> _plugin;
 }

@@ -451,6 +451,16 @@ create_fast_downward_library(
 )
 
 create_fast_downward_library(
+    NAME plugin_speedstar
+    HELP "Speed* search"
+    SOURCES
+        search_algorithms/plugin_speedstar
+    DEPENDS
+        eager_search
+        search_common
+)
+
+create_fast_downward_library(
     NAME plugin_eager
     HELP "Eager (i.e., normal) best-first search"
     SOURCES
