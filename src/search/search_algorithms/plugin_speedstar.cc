@@ -9,7 +9,7 @@ namespace plugin_astar {
 class SpeedStarSearchFeature : public plugins::TypedFeature<SearchAlgorithm, eager_search::EagerSearch> {
 public:
     SpeedStarSearchFeature() : TypedFeature("speedstar") {
-        // TODO update documentation and options
+        // TODO update documentation
         document_title("A* search (eager)");
         document_synopsis(
             "A* is a special case of eager best first search that uses g+h "
@@ -17,6 +17,8 @@ public:
             "We break ties using the evaluator. Closed nodes are re-opened.");
 
         add_option<shared_ptr<Evaluator>>("eval", "evaluator for h-value");
+        add_option<shared_ptr<Evaluator>>("d_eval", "evaluator for h-value");
+        add_option<double>("s", "TODO: document");
         add_option<shared_ptr<Evaluator>>(
             "lazy_evaluator",
             "An evaluator that re-evaluates a state before it is expanded.",
