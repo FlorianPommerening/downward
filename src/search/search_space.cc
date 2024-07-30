@@ -73,11 +73,7 @@ void SearchNode::open_new_node(const SearchNode &parent_node,
 void SearchNode::reopen_closed_node(const SearchNode &parent_node,
                                     const OperatorProxy &parent_op,
                                     int adjusted_cost) {
-    assert(info.status == SearchNodeInfo::OPEN ||
-           info.status == SearchNodeInfo::CLOSED);
-
-    // The latter possibility is for inconsistent heuristics, which
-    // may require reopening closed nodes.
+    assert(info.status == SearchNodeInfo::CLOSED);
     info.status = SearchNodeInfo::OPEN;
     update_parent(parent_node, parent_op, adjusted_cost);
 }
@@ -85,13 +81,16 @@ void SearchNode::reopen_closed_node(const SearchNode &parent_node,
 void SearchNode::update_open_node_parent(const SearchNode &parent_node,
                                          const OperatorProxy &parent_op,
                                          int adjusted_cost) {
-    assert(info.status == SearchNodeInfo::OPEN ||
-           info.status == SearchNodeInfo::CLOSED);
-    // The latter possibility is for inconsistent heuristics, which
-    // may require reopening closed nodes.
+    assert(info.status == SearchNodeInfo::OPEN);
     update_parent(parent_node, parent_op, adjusted_cost);
 }
 
+void SearchNode::update_closed_node_parent(const SearchNode &parent_node,
+                                           const OperatorProxy &parent_op,
+                                           int adjusted_cost) {
+    assert(info.status == SearchNodeInfo::CLOSED);
+    update_parent(parent_node, parent_op, adjusted_cost);
+}
 
 void SearchNode::close() {
     assert(info.status == SearchNodeInfo::OPEN);

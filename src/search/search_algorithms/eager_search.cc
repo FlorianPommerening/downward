@@ -288,7 +288,9 @@ SearchStatus EagerSearch::step() {
                   pointers. Note that this could cause an incompatibility
                   between the g-value and the actual path that is traced back.
                 */
-                succ_node.update_open_node_parent(*node, op, get_adjusted_cost(op));
+                assert(succ_node.is_closed() && !reopen_closed_nodes);
+                succ_node.update_closed_node_parent(
+                    *node, op, get_adjusted_cost(op));
             }
         } else {
             // We found a more expensive path to an open or closed state.
