@@ -18,6 +18,10 @@ class LogProxy;
 class SearchNode {
     State state;
     SearchNodeInfo &info;
+
+    void update_parent(const SearchNode &parent_node,
+                       const OperatorProxy &parent_op,
+                       int adjusted_cost);
 public:
     SearchNode(const State &state, SearchNodeInfo &info);
 
