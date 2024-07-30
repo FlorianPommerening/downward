@@ -238,7 +238,7 @@ SearchStatus EagerSearch::step() {
                 statistics.inc_dead_ends();
                 continue;
             }
-            succ_node.open(*node, op, get_adjusted_cost(op));
+            succ_node.open_new_node(*node, op, get_adjusted_cost(op));
 
             open_list->insert(succ_eval_context, succ_state.get_id());
             ++num_open_insert;
@@ -252,7 +252,7 @@ SearchStatus EagerSearch::step() {
                 if (succ_node.is_closed()) {
                     statistics.inc_reopened();
                 }
-                succ_node.reopen(*node, op, get_adjusted_cost(op));
+                succ_node.reopen_closed_node(*node, op, get_adjusted_cost(op));
 
                 EvaluationContext succ_eval_context(
                     succ_state, succ_node.get_g(), is_preferred, &statistics);
@@ -288,7 +288,7 @@ SearchStatus EagerSearch::step() {
                   pointers. Note that this could cause an incompatibility
                   between the g-value and the actual path that is traced back.
                 */
-                succ_node.update_parent(*node, op, get_adjusted_cost(op));
+                succ_node.update_open_node_parent(*node, op, get_adjusted_cost(op));
             }
         } else {
             // We found a more expensive path to an open or closed state.
