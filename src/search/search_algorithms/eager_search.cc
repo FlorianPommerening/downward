@@ -248,14 +248,14 @@ SearchStatus EagerSearch::step() {
             }
         } else if (succ_node.get_g() > node->get_g() + get_adjusted_cost(op)) {
             // We found a new cheapest path to an open or closed state.
-            if (reopen_closed_nodes) {
-                if (succ_node.is_closed()) {
-                    statistics.inc_reopened();
-                }
-                succ_node.reopen_closed_node(*node, op, get_adjusted_cost(op));
-
+            if (succ_node.is_open()) {
+                succ_node.update_open_node_parent(
+                    *node, op, get_adjusted_cost(op));
                 EvaluationContext succ_eval_context(
                     succ_state, succ_node.get_g(), is_preferred, &statistics);
+                open_list->insert(succ_eval_context, succ_state.get_id());
+                ++num_open_insert;
+            } else if (succ_node.is_closed() && reopen_closed_nodes) {
                 /*
                   TODO: It would be nice if we had a way to test
                   that reopening is expected behaviour, i.e., exit
@@ -263,6 +263,10 @@ SearchStatus EagerSearch::step() {
                   reopening should not occur (e.g. A* with a
                   consistent heuristic).
                 */
+                statistics.inc_reopened();
+                succ_node.reopen_closed_node(*node, op, get_adjusted_cost(op));
+                EvaluationContext succ_eval_context(
+                    succ_state, succ_node.get_g(), is_preferred, &statistics);
                 /*
                   Note: our old code used to retrieve the h value from
                   the search node here. Our new code recomputes it as
