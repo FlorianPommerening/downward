@@ -29,7 +29,7 @@ CONFIGS = [
 
 SUITE = common_setup.DEFAULT_OPTIMAL_SUITE
 ENVIRONMENT = BaselSlurmEnvironment(
-    partition="infai_3",
+    partition="infai_2",
     email="florian.pommerening@unibas.ch",
     memory_per_cpu="3947M",
     export=["PATH"],
