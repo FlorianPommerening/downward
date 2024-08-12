@@ -10,7 +10,7 @@ from common_setup import IssueConfig, IssueExperiment
 
 ARCHIVE_PATH = "ai/downward/extract-hplus-mips"
 DIR = os.path.dirname(os.path.abspath(__file__))
-REPO_DIR = os.environ["DOWNWARD_REPO"]
+REPO_DIR = DIR.parent # os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REVISIONS = ["extract-hplus-mips"]
 BUILDS = ["release"]
