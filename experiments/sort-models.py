@@ -27,5 +27,5 @@ def handle_experiment(exp_dir, out_dir):
 if __name__ == "__main__":
     out_dir = Path("models")
     out_dir.mkdir(exist_ok=True)
-    exp_dir = Path(sys.argv[0])
+    exp_dir = Path(sys.argv[1])
     handle_experiment(exp_dir, out_dir)
