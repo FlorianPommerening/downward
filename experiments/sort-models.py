@@ -16,12 +16,16 @@ def handle_rundir(run_dir, out_dir):
     time = float(props.get("total_time", 1800))
 
     if time > 60:
-        shutil.copy(run_dir / "model.mps",
-                    out_dir / f"{domain}-{problem}.mps")
+        try:
+            shutil.copy(run_dir / "model.mps",
+                        out_dir / f"{domain}-{problem}.mps")
+        except:
+            pass
 
 
 def handle_experiment(exp_dir, out_dir):
     for run_dir in exp_dir.glob("runs-*/*"):
+        print(str(run_dir))
         handle_rundir(run_dir, out_dir)
 
 if __name__ == "__main__":
