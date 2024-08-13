@@ -25,7 +25,7 @@ def handle_rundir(run_dir, out_dir):
 
 def handle_experiment(exp_dir, out_dir):
     for run_dir in exp_dir.glob("runs-*/*"):
-        print(str(run_dir))
+        print(str(run_dir), flush=True)
         handle_rundir(run_dir, out_dir)
 
 if __name__ == "__main__":
