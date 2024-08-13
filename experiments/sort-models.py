@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from pathlib import Path
-import json
+import simplejson as json
 import shutil
 import sys
 
