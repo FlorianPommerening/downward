@@ -19,8 +19,8 @@ def handle_rundir(run_dir, out_dir):
         try:
             shutil.copy(run_dir / "model.mps",
                         out_dir / f"{domain}-{problem}.mps")
-        except:
-            pass
+        except FileNotFoundError:
+            print(f"No model for {domain}/{problem} in {run_dir}.")
 
 
 def handle_experiment(exp_dir, out_dir):
