@@ -45,6 +45,8 @@ set_up_options()
 
 project(downward LANGUAGES CXX)
 add_executable(downward planner.cc)
+add_library(downward_lib INTERFACE)
+target_link_libraries(downward PUBLIC downward_lib)
 
 # obtain git SHA1 hash
 execute_process(
@@ -75,12 +77,62 @@ message(NOTICE "Git revision: \"${GIT_REVISION}\"")
 
 configure_file(git_revision.h.in git_revision.h)
 # The header is generated in ${PROJECT_BINARY_DIR}. Add it to the include path.
-target_include_directories(downward PUBLIC "${PROJECT_BINARY_DIR}")
+target_include_directories(downward_lib INTERFACE "${PROJECT_BINARY_DIR}")
 
 # On Windows we have to copy all DLLs next to the generated binary.
 if (WIN32)
-    copy_dlls_to_binary_dir_after_build(downward)
+    copy_dlls_to_binary_dir_after_build(downward_lib)
 endif()
+
+option(
+    COMPILE_PYTHON_INTERFACE
+    "Compile Python bindings for the Fast Downward search code"
+    TRUE
+)
+
+if (COMPILE_PYTHON_INTERFACE)
+    if (CMAKE_VERSION VERSION_LESS 3.18)
+        set(DEV_MODULE Development)
+    else()
+        set(DEV_MODULE Development.Module)
+    endif()
+
+    find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+
+    # TODO: nanobind recommends this but if we need this, we should probably do it in a more central place.
+    if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+        set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+    endif()
+
+    execute_process(
+        COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+        OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
+    find_package(nanobind CONFIG REQUIRED)
+
+    set(BINDING_GENERATED_CC "${CMAKE_CURRENT_BINARY_DIR}/binding_generated.cc")
+    add_custom_command(
+        OUTPUT ${BINDING_GENERATED_CC}
+        COMMAND downward --create-python-binding-code > ${BINDING_GENERATED_CC}
+        DEPENDS
+            downward
+        COMMENT "Generating Python interface"
+        VERBATIM
+    )
+
+    nanobind_add_module(pydownward NB_STATIC
+        python/binding.cc
+        python/binding_static.h
+        python/binding_static.cc
+        python/binding_generated.h
+        ${BINDING_GENERATED_CC}
+    )
+
+    # TODO: Do we need this?
+    target_link_libraries(pydownward PRIVATE downward_lib)
+    target_include_directories(pydownward PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+
 
 # In the following, we include all source files, grouped into libraries with
 # dependencies among each other.
@@ -107,6 +159,7 @@ create_fast_downward_library(
         per_task_information
         plan_manager
         pruning_method
+        python/generate
         search_algorithm
         search_node_info
         search_progress

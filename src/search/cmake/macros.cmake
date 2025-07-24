@@ -83,7 +83,7 @@ function(create_fast_downward_library)
     target_link_libraries(${_LIBRARY_NAME} INTERFACE ${_LIBRARY_DEPENDS})
 
     if (_LIBRARY_CORE_LIBRARY OR LIBRARY_${_LIBRARY_NAME_UPPER}_ENABLED)
-        target_link_libraries(downward PUBLIC ${_LIBRARY_NAME})
+        target_link_libraries(downward_lib INTERFACE ${_LIBRARY_NAME})
     endif()
 endfunction()
 
