@@ -126,6 +126,8 @@ if (COMPILE_PYTHON_INTERFACE)
         python/binding_static.cc
         python/binding_generated.h
         ${BINDING_GENERATED_CC}
+        python/exception.h
+        python/exception.cc
     )
 
     # TODO: Do we need this?
