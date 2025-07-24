@@ -50,6 +50,7 @@ public:
     virtual bool can_convert_into(const Type &other) const;
 
     virtual std::string name() const = 0;
+    virtual std::string fully_qualified_name() const = 0;
     virtual size_t get_hash() const = 0;
 };
 
@@ -63,24 +64,28 @@ public:
     virtual const std::type_index &get_basic_type_index() const override;
     virtual bool can_convert_into(const Type &other) const override;
     virtual std::string name() const override;
+    virtual std::string fully_qualified_name() const override;
     virtual size_t get_hash() const override;
 };
 
 class FeatureType : public Type {
     std::type_index pointer_type;
     std::string type_name;
+    std::string fully_qualified_type_name;
     std::string synopsis;
     bool can_be_bound_to_variable;
 
 public:
     FeatureType(
         std::type_index pointer_type, const std::string &type_name,
+        const std::string &fully_qualified_type_name,
         const std::string &synopsis, bool supports_variable_binding);
     virtual bool operator==(const Type &other) const override;
     virtual bool is_feature_type() const override;
     virtual bool supports_variable_binding() const override;
     virtual std::string get_synopsis() const override;
     virtual std::string name() const override;
+    virtual std::string fully_qualified_name() const override;
     virtual size_t get_hash() const override;
 };
 
@@ -95,6 +100,7 @@ public:
     virtual const Type &get_nested_type() const override;
     virtual bool can_convert_into(const Type &other) const override;
     virtual std::string name() const override;
+    virtual std::string fully_qualified_name() const override;
     virtual size_t get_hash() const override;
 };
 
@@ -104,22 +110,27 @@ public:
     virtual bool is_list_type() const override;
     virtual bool can_convert_into(const Type &other) const override;
     virtual std::string name() const override;
+    virtual std::string fully_qualified_name() const override;
     virtual size_t get_hash() const override;
 };
 
 class EnumType : public Type {
     std::type_index type;
+    std::string fully_qualified_type_name;
     std::vector<std::string> values;
     EnumInfo documented_values;
 
 public:
-    EnumType(std::type_index type, const EnumInfo &documented_values);
+    EnumType(
+        std::type_index type, const std::string &fully_qualified_type_name,
+        const EnumInfo &documented_values);
     virtual bool operator==(const Type &other) const override;
     virtual bool is_enum_type() const override;
     virtual int get_enum_index(
         const std::string &value, utils::Context &context) const override;
     virtual const EnumInfo &get_documented_enum_values() const override;
     virtual std::string name() const override;
+    virtual std::string fully_qualified_name() const override;
     virtual size_t get_hash() const override;
 };
 
@@ -129,6 +140,7 @@ public:
     virtual bool is_symbol_type() const override;
     bool can_convert_into(const Type &other) const override;
     virtual std::string name() const override;
+    virtual std::string fully_qualified_name() const override;
     virtual size_t get_hash() const override;
 };
 
@@ -180,6 +192,17 @@ public:
 
     template<typename T>
     const Type &get_type();
+
+    std::vector<const Type *> get_enum_types() const {
+        std::vector<const Type *> enum_types;
+        for (const auto &entry : registered_types) {
+            const Type *type = entry.second.get();
+            if (type->is_enum_type()) {
+                enum_types.push_back(type);
+            }
+        }
+        return enum_types;
+    }
 
     static TypeRegistry *instance() {
         static TypeRegistry instance_;

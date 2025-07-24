@@ -2,6 +2,7 @@
 #include "git_revision.h"
 #include "search_algorithm.h"
 
+#include "python/generate.h"
 #include "task_utils/task_properties.h"
 #include "tasks/root_task.h"
 #include "utils/logging.h"
@@ -20,6 +21,13 @@ int main(int argc, const char **argv) {
             // We handle this option before registering event handlers to avoid
             // printing peak memory on exit.
             cout << g_git_revision << endl;
+            exit(0);
+        }
+        if (argc == 2 &&
+            static_cast<string>(argv[1]) == "--create-python-binding-code") {
+            /* We handle this option before registering event handlers to avoid
+               printing peak memory on exit. */
+            create_python_binding_code();
             exit(0);
         }
         utils::register_event_handlers();

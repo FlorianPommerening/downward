@@ -201,6 +201,7 @@ public:
     std::type_index get_pointer_type() const;
     std::string get_category_name() const;
     std::string get_class_name() const;
+    std::string get_pointer_class_name() const;
     std::string get_synopsis() const;
     bool supports_variable_binding() const;
 };
@@ -210,8 +211,8 @@ class TypedCategoryPlugin : public CategoryPlugin {
 public:
     TypedCategoryPlugin(const std::string &category_name)
         : CategoryPlugin(
-              typeid(std::shared_ptr<T>),
-              utils::get_type_name<std::shared_ptr<T>>(), category_name) {
+              typeid(std::shared_ptr<T>), utils::get_type_name<T>(),
+              category_name) {
     }
 };
 
@@ -249,9 +250,7 @@ class TypedEnumPlugin : public EnumPlugin {
 public:
     TypedEnumPlugin(
         std::initializer_list<std::pair<std::string, std::string>> enum_values)
-        : EnumPlugin(
-              typeid(T), utils::get_type_name<std::shared_ptr<T>>(),
-              enum_values) {
+        : EnumPlugin(typeid(T), utils::get_type_name<T>(), enum_values) {
     }
 };
 
