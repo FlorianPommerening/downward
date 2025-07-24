@@ -1,5 +1,7 @@
 #include "binding_static.h"
 
+#include "exception.h"
+
 #include "../abstract_task.h"
 #include "../operator_id.h"
 #include "../search_algorithm.h"
@@ -121,6 +123,7 @@ static void hacks(nb::module_ &m) {
 unordered_set<string> bind_basic_classes(nb::module_ &m) {
     unordered_set<string> manually_specified;
     hacks(m);
+    nb::exception<ConstructionError>(m, "ConstructionError");
     nb::class_<FactPair>(m, "FactPair")
         .def_rw("var", &FactPair::var)
         .def_rw("value", &FactPair::value);

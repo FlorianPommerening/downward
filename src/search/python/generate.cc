@@ -23,11 +23,32 @@ static string strip_namespace(const string &qualified_name) {
     }
 }
 
+static string to_upper(const string &value) {
+    string value_upper;
+    value_upper.reserve(value.size());
+    ranges::transform(value, back_inserter(value_upper), ::toupper);
+    return value_upper;
+}
+
 static void print_header() {
-    cout << "#include \"python/binding_generated.h\"" << endl
-         << endl
-         << "using namespace std;" << endl
-         << endl;
+    cout
+        << "#include \"python/binding_generated.h\"" << endl
+        << "#include \"python/exception.h\"" << endl
+        << endl
+        << "#include \"plugins/doc_printer.h\"" << endl
+        << endl
+        << "#include <sstream>" << endl
+        << endl
+        << "using namespace std;" << endl
+        << endl
+        << "static string get_doc(const plugins::Registry &registry, const string &name) {"
+        << endl
+        << "    std::ostringstream oss;" << endl
+        << "    unique_ptr<plugins::PlainPrinter> doc_printer = " << endl
+        << "make_unique<plugins::PlainPrinter>(oss, registry);" << endl
+        << "    doc_printer->print_feature(name);" << endl
+        << "    return oss.str();" << endl
+        << "}" << endl;
 }
 
 static void print_bind_feature_classes(const plugins::FeatureTypes &types) {
@@ -53,9 +74,7 @@ static void print_bind_enums(const vector<const plugins::Type *> &enum_types) {
         const plugins::EnumInfo &enum_info = type->get_documented_enum_values();
         for (const auto &entry : enum_info) {
             const string &value = entry.first;
-            string value_upper;
-            value_upper.reserve(value.size());
-            ranges::transform(value, back_inserter(value_upper), ::toupper);
+            string value_upper = to_upper(value);
             const string &doc = entry.second;
             cout << endl
                  << "        .value(\"" << value << "\", "
@@ -65,6 +84,65 @@ static void print_bind_enums(const vector<const plugins::Type *> &enum_types) {
         cout << ";" << endl;
     }
     cout << "}" << endl << endl;
+}
+
+static void print_feature_arg(const plugins::ArgumentInfo &info) {
+    cout << "        nb::arg(\"" << info.key << "\")";
+    if (info.has_default()) {
+        if (info.type.is_enum_type()) {
+            cout << " = " << info.type.fully_qualified_name()
+                 << "::" << to_upper(info.default_value);
+        } else if (info.type.is_list_type() && info.default_value == "[]") {
+            /*
+              TODO: this doesn't work. Maybe exposing the vector to nanobind
+              would help, but maybe we have to handle defaults in a different
+              way altogether.
+            */
+            //            cout << " = " << info.type.fully_qualified_name() <<
+            //            "()";
+        } else if (info.type.is_basic_type()) {
+            if (info.type.get_basic_type_index() == type_index(typeid(int))) {
+                if (info.default_value == "infinity") {
+                    cout << " = " << to_string(numeric_limits<int>::max());
+                } else {
+                    string value;
+                    bool valid = true;
+                    for (char c : info.default_value) {
+                        switch (tolower(c)) {
+                        case 'k':
+                            value += "000";
+                            break;
+                        case 'm':
+                            value += "000000";
+                            break;
+                        case 'g':
+                            value += "000000000";
+                            break;
+                        default:
+                            if (isdigit(c)) {
+                                value += c;
+                            } else {
+                                valid = false;
+                            }
+                            break;
+                        }
+                    }
+                    if (valid) {
+                        cout << " = " << value;
+                    }
+                }
+            } else if (
+                info.type.get_basic_type_index() ==
+                type_index(typeid(double))) {
+                if (info.default_value == "infinity") {
+                    cout << " = " << to_string(numeric_limits<double>::max());
+                }
+            } else {
+                // HACK: this will not work in all cases
+                cout << " = " << info.default_value;
+            }
+        }
+    }
 }
 
 static void print_bind_stub_for_feature(const plugins::Feature &feature) {
@@ -99,13 +177,14 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
          << "            return plugins::any_cast<" << pointer_type_name
          << ">(feature->construct(opts, context));" << endl
          << "        } catch (const utils::ContextError &e) {" << endl
-         << "            return " << pointer_type_name << "(nullptr);" << endl
+         << "            throw ConstructionError(e.get_message());" << endl
          << "        }" << endl
          << "    };" << endl
-         << "    m.def(\"" << key << "\", construct";
-    sep = ",\n";
+         << "    string doc = get_doc(registry, feature->get_key());" << endl
+         << "    m.def(\"" << key << "\", construct, doc.c_str()";
     for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
-        cout << sep << "        nb::arg(\"" << info.key << "\")";
+        cout << ",\n        ";
+        print_feature_arg(info);
     }
     cout << ");" << endl << "}" << endl << endl;
 }
