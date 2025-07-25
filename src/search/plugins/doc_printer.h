@@ -33,7 +33,7 @@ protected:
     virtual void print_category_footer() const = 0;
 
 public:
-    DocPrinter(std::ostream &out, Registry &registry);
+    DocPrinter(std::ostream &out, const Registry &registry);
     virtual ~DocPrinter() = default;
 
     void print_all() const;
@@ -55,7 +55,7 @@ protected:
     virtual void print_category_footer() const override;
 
 public:
-    Txt2TagsPrinter(std::ostream &out, Registry &registry);
+    Txt2TagsPrinter(std::ostream &out, const Registry &registry);
 };
 
 
@@ -76,7 +76,7 @@ protected:
     virtual void print_category_footer() const override;
 
 public:
-    PlainPrinter(std::ostream &out, Registry &registry, bool print_all = false);
+    PlainPrinter(std::ostream &out, const Registry &registry, bool print_all = false);
 };
 }
 
