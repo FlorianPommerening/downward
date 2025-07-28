@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <string_view>
 
@@ -30,6 +31,20 @@ static string to_upper(const string &value) {
     return value_upper;
 }
 
+static string convert_to_camel_case(const string &input) {
+    istringstream stream(input);
+    string word;
+    string result;
+    while (stream >> word) {
+        word[0] = toupper(word[0]);
+        for (size_t i = 1; i < word.length(); i++) {
+            word[i] = tolower(word[i]);
+        }
+        result += word;
+    }
+    return result;
+}
+
 static void print_header() {
     cout
         << "#include \"python/binding_generated.h\"" << endl
@@ -37,6 +52,9 @@ static void print_header() {
         << endl
         << "#include \"plugins/doc_printer.h\"" << endl
         << endl
+        << "#include <nanobind/stl/shared_ptr.h>" << endl
+        << "#include <nanobind/stl/string.h>" << endl
+        << "#include <nanobind/stl/bind_vector.h>" << endl
         << "#include <sstream>" << endl
         << endl
         << "using namespace std;" << endl
@@ -61,6 +79,18 @@ static void print_bind_feature_classes(const plugins::FeatureTypes &types) {
              << "        nb::class_<" << fully_qualified_name << ">(m, \""
              << type_name << "\");" << endl
              << "    }" << endl;
+    }
+    cout << "}" << endl << endl;
+}
+
+static void print_bind_list_classes(
+    const vector<const plugins::Type *> &types) {
+    cout << "void bind_list_classes(nb::module_ &m) {" << endl;
+    for (const plugins::Type *type : types) {
+        string type_name = convert_to_camel_case(type->name());
+        string fully_qualified_name = type->fully_qualified_name();
+        cout << "    nb::bind_vector<" << fully_qualified_name << ">(m, \""
+             << type_name << "\");" << endl;
     }
     cout << "}" << endl << endl;
 }
@@ -235,6 +265,9 @@ void create_python_binding_code() {
     print_bind_feature_classes(feature_types);
 
     plugins::TypeRegistry &type_registry = *plugins::TypeRegistry::instance();
+    vector<const plugins::Type *> list_types = type_registry.get_list_types();
+    print_bind_list_classes(list_types);
+
     vector<const plugins::Type *> enum_types = type_registry.get_enum_types();
     print_bind_enums(enum_types);
 

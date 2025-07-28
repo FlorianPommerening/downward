@@ -204,6 +204,15 @@ public:
         return enum_types;
     }
 
+    std::vector<const Type *> get_list_types() const {
+        std::vector<const Type *> list_types;
+        for (const auto &entry : registered_list_types) {
+            const Type *type = entry.second.get();
+            list_types.push_back(type);
+        }
+        return list_types;
+    }
+
     static TypeRegistry *instance() {
         static TypeRegistry instance_;
         return &instance_;
