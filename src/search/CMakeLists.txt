@@ -1008,15 +1008,7 @@ if (COMPILE_PYTHON_INTERFACE)
     else()
         set(DEV_MODULE Development.Module)
     endif()
-
     find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
-
-    # TODO: nanobind recommends this but if we need this, we should probably do it in a more central place.
-    if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-        set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
-    endif()
-
     execute_process(
         COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
         OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
@@ -1032,17 +1024,33 @@ if (COMPILE_PYTHON_INTERFACE)
         VERBATIM
     )
 
+    set(BINDING_GENERATED_PRIVATE_H "${CMAKE_CURRENT_BINARY_DIR}/binding_generated_private.h")
+    file(WRITE ${BINDING_GENERATED_PRIVATE_H} "")
+    get_target_property(DOWNWARD_LIBS downward_lib INTERFACE_LINK_LIBRARIES)
+    foreach(DOWNWARD_LIB IN LISTS DOWNWARD_LIBS)
+        get_target_property(SOURCES ${DOWNWARD_LIB} INTERFACE_SOURCES)
+        foreach(FILE IN LISTS SOURCES)
+            # TODO: This pattern is a placeholder matching all header files.
+            # Eventually, we want to have a naming convention for header files
+            # that are part of the public interface of a Feature/FeatureType
+            # and include only those here.
+            if(FILE MATCHES "^.*\.h$")
+                file(RELATIVE_PATH REL_PATH "${CMAKE_CURRENT_SOURCE_DIR}" "${FILE}")
+                file(APPEND ${BINDING_GENERATED_PRIVATE_H} "#include \"${REL_PATH}\"\n")
+            endif()
+        endforeach()
+    endforeach()
+
     nanobind_add_module(pydownward NB_STATIC
         python/binding.cc
         python/binding_static.h
         python/binding_static.cc
         python/binding_generated.h
+        ${BINDING_GENERATED_PRIVATE_H}
         ${BINDING_GENERATED_CC}
         python/exception.h
         python/exception.cc
     )
-
-    # TODO: Do we need this?
     target_link_libraries(pydownward PRIVATE downward_lib)
     target_include_directories(pydownward PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
