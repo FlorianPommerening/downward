@@ -31,7 +31,7 @@ static string to_upper(const string &value) {
     return value_upper;
 }
 
-static string convert_to_camel_case(const string &input) {
+static string to_camel_case(const string &input) {
     istringstream stream(input);
     string word;
     string result;
@@ -46,27 +46,32 @@ static string convert_to_camel_case(const string &input) {
 }
 
 static void print_header() {
-    cout
-        << "#include \"python/binding_generated.h\"" << endl
-        << "#include \"python/exception.h\"" << endl
-        << endl
-        << "#include \"plugins/doc_printer.h\"" << endl
-        << endl
-        << "#include <nanobind/stl/shared_ptr.h>" << endl
-        << "#include <nanobind/stl/string.h>" << endl
-        << "#include <nanobind/stl/bind_vector.h>" << endl
-        << "#include <sstream>" << endl
-        << endl
-        << "using namespace std;" << endl
-        << endl
-        << "static string get_doc(const plugins::Registry &registry, const string &name) {"
-        << endl
-        << "    std::ostringstream oss;" << endl
-        << "    unique_ptr<plugins::PlainPrinter> doc_printer = " << endl
-        << "make_unique<plugins::PlainPrinter>(oss, registry);" << endl
-        << "    doc_printer->print_feature(name);" << endl
-        << "    return oss.str();" << endl
-        << "}" << endl;
+    cout << "#include \"python/binding_generated.h\"" << endl
+         << "#include \"binding_generated_private.h\"" << endl
+         << endl
+         << "#include \"plugins/doc_printer.h\"" << endl
+         << "#include \"plugins/options.h\"" << endl
+         << "#include \"plugins/plugin.h\"" << endl
+         << "#include \"plugins/raw_registry.h\"" << endl
+         << "#include \"plugins/registry.h\"" << endl
+         << "#include \"python/exception.h\"" << endl
+         << "#include \"tasks/root_task.h\"" << endl
+         << endl
+         << "#include <nanobind/stl/shared_ptr.h>" << endl
+         << "#include <nanobind/stl/string.h>" << endl
+         << "#include <nanobind/stl/bind_vector.h>" << endl
+         << "#include <sstream>" << endl
+         << endl
+         << "using namespace std;" << endl
+         << endl
+         << "static string get_doc(const plugins::Registry &registry, "
+         << "const string &name) {" << endl
+         << "    std::ostringstream oss;" << endl
+         << "    unique_ptr<plugins::PlainPrinter> doc_printer = " << endl
+         << "make_unique<plugins::PlainPrinter>(oss, registry);" << endl
+         << "    doc_printer->print_feature(name);" << endl
+         << "    return oss.str();" << endl
+         << "}" << endl;
 }
 
 static void print_bind_feature_classes(const plugins::FeatureTypes &types) {
@@ -87,7 +92,7 @@ static void print_bind_list_classes(
     const vector<const plugins::Type *> &types) {
     cout << "void bind_list_classes(nb::module_ &m) {" << endl;
     for (const plugins::Type *type : types) {
-        string type_name = convert_to_camel_case(type->name());
+        string type_name = to_camel_case(type->name());
         string fully_qualified_name = type->fully_qualified_name();
         cout << "    nb::bind_vector<" << fully_qualified_name << ">(m, \""
              << type_name << "\");" << endl;
