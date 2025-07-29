@@ -90,51 +90,6 @@ option(
     TRUE
 )
 
-if (COMPILE_PYTHON_INTERFACE)
-    if (CMAKE_VERSION VERSION_LESS 3.18)
-        set(DEV_MODULE Development)
-    else()
-        set(DEV_MODULE Development.Module)
-    endif()
-
-    find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
-
-    # TODO: nanobind recommends this but if we need this, we should probably do it in a more central place.
-    if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-        set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
-    endif()
-
-    execute_process(
-        COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
-        OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
-    find_package(nanobind CONFIG REQUIRED)
-
-    set(BINDING_GENERATED_CC "${CMAKE_CURRENT_BINARY_DIR}/binding_generated.cc")
-    add_custom_command(
-        OUTPUT ${BINDING_GENERATED_CC}
-        COMMAND downward --create-python-binding-code > ${BINDING_GENERATED_CC}
-        DEPENDS
-            downward
-        COMMENT "Generating Python interface"
-        VERBATIM
-    )
-
-    nanobind_add_module(pydownward NB_STATIC
-        python/binding.cc
-        python/binding_static.h
-        python/binding_static.cc
-        python/binding_generated.h
-        ${BINDING_GENERATED_CC}
-        python/exception.h
-        python/exception.cc
-    )
-
-    # TODO: Do we need this?
-    target_link_libraries(pydownward PRIVATE downward_lib)
-    target_include_directories(pydownward PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
-
 
 # In the following, we include all source files, grouped into libraries with
 # dependencies among each other.
@@ -1045,3 +1000,49 @@ create_fast_downward_library(
         algorithms/sccs
     DEPENDENCY_ONLY
 )
+
+
+if (COMPILE_PYTHON_INTERFACE)
+    if (CMAKE_VERSION VERSION_LESS 3.18)
+        set(DEV_MODULE Development)
+    else()
+        set(DEV_MODULE Development.Module)
+    endif()
+
+    find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+
+    # TODO: nanobind recommends this but if we need this, we should probably do it in a more central place.
+    if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+        set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+    endif()
+
+    execute_process(
+        COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+        OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
+    find_package(nanobind CONFIG REQUIRED)
+
+    set(BINDING_GENERATED_CC "${CMAKE_CURRENT_BINARY_DIR}/binding_generated.cc")
+    add_custom_command(
+        OUTPUT ${BINDING_GENERATED_CC}
+        COMMAND downward --create-python-binding-code > ${BINDING_GENERATED_CC}
+        DEPENDS
+            downward
+        COMMENT "Generating Python interface"
+        VERBATIM
+    )
+
+    nanobind_add_module(pydownward NB_STATIC
+        python/binding.cc
+        python/binding_static.h
+        python/binding_static.cc
+        python/binding_generated.h
+        ${BINDING_GENERATED_CC}
+        python/exception.h
+        python/exception.cc
+    )
+
+    # TODO: Do we need this?
+    target_link_libraries(pydownward PRIVATE downward_lib)
+    target_include_directories(pydownward PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
