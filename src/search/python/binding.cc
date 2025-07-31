@@ -1,5 +1,5 @@
-#include "binding_static.h"
 #include "binding_generated.h"
+#include "binding_static.h"
 
 namespace nb = nanobind;
 

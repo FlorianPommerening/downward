@@ -31,7 +31,7 @@ static string to_upper(const string &value) {
     return value_upper;
 }
 
-static string to_camel_case(const string& input) {
+static string to_camel_case(const string &input) {
     istringstream stream(input);
     string word;
     string result;
@@ -81,21 +81,21 @@ static void print_bind_feature_classes(const plugins::FeatureTypes &types) {
         string type_name = type->name();
         string fully_qualified_name = type->fully_qualified_name();
         cout << "    if (!skip.count(\"" << type_name << "\")) {" << endl
-             << "        nb::class_<" << fully_qualified_name
-             << ">(m, \"" << type_name << "\");" << endl
+             << "        nb::class_<" << fully_qualified_name << ">(m, \""
+             << type_name << "\");" << endl
              << "    }" << endl;
     }
     cout << "}" << endl << endl;
 }
 
-static void print_bind_list_classes(const vector<const plugins::Type *> &types) {
+static void print_bind_list_classes(
+    const vector<const plugins::Type *> &types) {
     cout << "void bind_list_classes(nb::module_ &m) {" << endl;
     for (const plugins::Type *type : types) {
         string type_name = to_camel_case(type->name());
         string fully_qualified_name = type->fully_qualified_name();
-        cout << "    nb::bind_vector<" << fully_qualified_name
-             << ">(m, \"" << type_name << "\");" << endl
-             ;
+        cout << "    nb::bind_vector<" << fully_qualified_name << ">(m, \""
+             << type_name << "\");" << endl;
     }
     cout << "}" << endl << endl;
 }
@@ -111,10 +111,10 @@ static void print_bind_enums(const vector<const plugins::Type *> &enum_types) {
             const string &value = entry.first;
             string value_upper = to_upper(value);
             const string &doc = entry.second;
-            cout << endl << "        .value(\""
-                 << value << "\", "
-                 << fully_qualified_name << "::" << value_upper << ", \""
-                 << doc << "\")";
+            cout << endl
+                 << "        .value(\"" << value << "\", "
+                 << fully_qualified_name << "::" << value_upper << ", \"" << doc
+                 << "\")";
         }
         cout << ";" << endl;
     }
@@ -125,15 +125,16 @@ static void print_feature_arg(const plugins::ArgumentInfo &info) {
     cout << "        nb::arg(\"" << info.key << "\")";
     if (info.has_default()) {
         if (info.type.is_enum_type()) {
-            cout << " = " << info.type.fully_qualified_name() << "::"
-                 << to_upper(info.default_value);
+            cout << " = " << info.type.fully_qualified_name()
+                 << "::" << to_upper(info.default_value);
         } else if (info.type.is_list_type() && info.default_value == "[]") {
             /*
               TODO: this doesn't work. Maybe exposing the vector to nanobind
               would help, but maybe we have to handle defaults in a different
               way altogether.
             */
-//            cout << " = " << info.type.fully_qualified_name() << "()";
+            //            cout << " = " << info.type.fully_qualified_name() <<
+            //            "()";
         } else if (info.type.is_basic_type()) {
             if (info.type.get_basic_type_index() == type_index(typeid(int))) {
                 if (info.default_value == "infinity") {
@@ -165,7 +166,9 @@ static void print_feature_arg(const plugins::ArgumentInfo &info) {
                         cout << " = " << value;
                     }
                 }
-            } else if (info.type.get_basic_type_index() == type_index(typeid(double))) {
+            } else if (
+                info.type.get_basic_type_index() ==
+                type_index(typeid(double))) {
                 if (info.default_value == "infinity") {
                     cout << " = " << to_string(numeric_limits<double>::max());
                 }
@@ -179,8 +182,8 @@ static void print_feature_arg(const plugins::ArgumentInfo &info) {
 
 static void print_bind_stub_for_feature(const plugins::Feature &feature) {
     string key = feature.get_key();
-    string pointer_type_name = "shared_ptr<" +
-                               feature.get_type().fully_qualified_name() + ">";
+    string pointer_type_name =
+        "shared_ptr<" + feature.get_type().fully_qualified_name() + ">";
 
     cout << "static void bind_" << key
          << "(nb::module_ &m, const plugins::Registry &registry) {" << endl
@@ -191,17 +194,18 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
     for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
         cout << sep << "        ";
         if (info.type.is_feature_type()) {
-            cout << "std::shared_ptr<" << info.type.fully_qualified_name() << ">";
+            cout << "std::shared_ptr<" << info.type.fully_qualified_name()
+                 << ">";
         } else {
             cout << info.type.fully_qualified_name();
         }
         cout << " " << info.key;
         sep = ",\n";
     }
-    cout << ") {" << endl
-         << "        plugins::Options opts;" << endl;
+    cout << ") {" << endl << "        plugins::Options opts;" << endl;
     for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
-        cout << "        opts.set(\"" << info.key << "\", " << info.key << ");" << endl;
+        cout << "        opts.set(\"" << info.key << "\", " << info.key << ");"
+             << endl;
     }
     cout << "        utils::Context context;" << endl
          << "        try {" << endl
@@ -217,24 +221,25 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
         cout << ",\n        ";
         print_feature_arg(info);
     }
-    cout << ");" << endl
-         << "}" << endl << endl;
+    cout << ");" << endl << "}" << endl << endl;
 }
 
 static void print_bind_stubs_for_category(
     const plugins::Registry &registry, const plugins::FeatureType &type,
     vector<string> &keys) {
     vector<const plugins::Feature *> features;
-    for (const shared_ptr<const plugins::Feature> &feature: registry.get_features()) {
+    for (const shared_ptr<const plugins::Feature> &feature :
+         registry.get_features()) {
         if (feature->get_type() == type) {
             keys.push_back(feature->get_key());
             features.push_back(feature.get());
         }
     }
-    sort(features.begin(), features.end(),
-         [](const plugins::Feature *p1, const plugins::Feature *p2) {
-             return p1->get_key() < p2->get_key();
-         });
+    sort(
+        features.begin(), features.end(),
+        [](const plugins::Feature *p1, const plugins::Feature *p2) {
+            return p1->get_key() < p2->get_key();
+        });
 
     for (const plugins::Feature *feature : features) {
         print_bind_stub_for_feature(*feature);
@@ -246,7 +251,7 @@ static void print_bind_features(const vector<string> &keys) {
          << "    plugins::Registry registry = "
          << "plugins::RawRegistry::instance()->construct_registry();" << endl;
 
-    for (const string &key: keys){
+    for (const string &key : keys) {
         cout << "    bind_" << key << "(m, registry);" << endl;
     }
     cout << "}" << endl << endl;
@@ -254,12 +259,14 @@ static void print_bind_features(const vector<string> &keys) {
 
 void create_python_binding_code() {
     print_header();
-    plugins::Registry registry = plugins::RawRegistry::instance()->construct_registry();
+    plugins::Registry registry =
+        plugins::RawRegistry::instance()->construct_registry();
     plugins::FeatureTypes feature_types = registry.get_feature_types();
-    sort(feature_types.begin(), feature_types.end(),
-         [](const plugins::FeatureType *t1, const plugins::FeatureType *t2) {
-             return t1->name() < t2->name();
-         });
+    sort(
+        feature_types.begin(), feature_types.end(),
+        [](const plugins::FeatureType *t1, const plugins::FeatureType *t2) {
+            return t1->name() < t2->name();
+        });
     print_bind_feature_classes(feature_types);
 
     plugins::TypeRegistry &type_registry = *plugins::TypeRegistry::instance();

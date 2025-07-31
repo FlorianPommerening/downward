@@ -7,8 +7,8 @@
 class ConstructionError : public std::exception {
     std::string message;
 public:
-    explicit ConstructionError(const std::string& message);
-    const char* what() const noexcept override;
+    explicit ConstructionError(const std::string &message);
+    const char *what() const noexcept override;
 };
 
 #endif
