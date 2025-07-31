@@ -50,8 +50,8 @@ FeatureTypes RawRegistry::collect_types(vector<string> &errors) const {
             feature_types.push_back(&type);
         }
         names.push_back(
-            "CategoryPlugin(" + category_plugin->get_class_name() + ", " +
-            category_plugin->get_category_name() + ")");
+            "CategoryPlugin(" + category_plugin->get_pointer_class_name() +
+            ", " + category_plugin->get_category_name() + ")");
     }
 
     // Check that each type index is only used once for either an enum or a
@@ -71,7 +71,7 @@ void RawRegistry::validate_category_names(vector<string> &errors) const {
     unordered_map<string, vector<string>> category_name_to_class_names;
     unordered_map<string, vector<string>> class_name_to_category_names;
     for (const CategoryPlugin *category_plugin : category_plugins) {
-        string class_name = category_plugin->get_class_name();
+        string class_name = category_plugin->get_pointer_class_name();
         string category_name = category_plugin->get_category_name();
         category_name_to_class_names[category_name].push_back(class_name);
         class_name_to_category_names[class_name].push_back(category_name);

@@ -95,15 +95,21 @@ string BasicType::name() const {
     return class_name;
 }
 
+string BasicType::fully_qualified_name() const {
+    return class_name;
+}
+
 size_t BasicType::get_hash() const {
     return hash<type_index>()(type);
 }
 
 FeatureType::FeatureType(
-    type_index pointer_type, const string &type_name, const string &synopsis,
+    type_index pointer_type, const string &type_name,
+    const string &fully_qualified_type_name, const string &synopsis,
     bool supports_variable_binding)
     : pointer_type(pointer_type),
       type_name(type_name),
+      fully_qualified_type_name(fully_qualified_type_name),
       synopsis(synopsis),
       can_be_bound_to_variable(supports_variable_binding) {
 }
@@ -127,6 +133,10 @@ string FeatureType::get_synopsis() const {
 
 string FeatureType::name() const {
     return type_name;
+}
+
+string FeatureType::fully_qualified_name() const {
+    return fully_qualified_type_name;
 }
 
 size_t FeatureType::get_hash() const {
@@ -163,6 +173,14 @@ string ListType::name() const {
     return "list of " + nested_type.name();
 }
 
+string ListType::fully_qualified_name() const {
+    string nested_type_name = nested_type.fully_qualified_name();
+    if (nested_type.is_feature_type()) {
+        nested_type_name = "std::shared_ptr<" + nested_type_name + ">";
+    }
+    return "std::vector<" + nested_type_name + ">";
+}
+
 size_t ListType::get_hash() const {
     return hash<type_index>()(typeid(ListType)) ^ nested_type.get_hash();
 }
@@ -185,12 +203,21 @@ string EmptyListType::name() const {
     return "empty list";
 }
 
+string EmptyListType::fully_qualified_name() const {
+    ABORT("EmptyListType does not have a corresponding C++ type and should "
+          "not be used in contexts where its fully qualified name is needed.");
+}
+
 size_t EmptyListType::get_hash() const {
     return hash<type_index>()(typeid(EmptyListType));
 }
 
-EnumType::EnumType(type_index type, const EnumInfo &documented_values)
-    : type(type), documented_values(documented_values) {
+EnumType::EnumType(
+    type_index type, const string &fully_qualified_type_name,
+    const EnumInfo &documented_values)
+    : type(type),
+      fully_qualified_type_name(fully_qualified_type_name),
+      documented_values(documented_values) {
     values.reserve(documented_values.size());
     for (const auto &value_and_doc : documented_values) {
         values.push_back(utils::tolower(value_and_doc.first));
@@ -227,6 +254,10 @@ string EnumType::name() const {
     return "{" + utils::join(values, ", ") + "}";
 }
 
+string EnumType::fully_qualified_name() const {
+    return fully_qualified_type_name;
+}
+
 size_t EnumType::get_hash() const {
     size_t hash_value = 0;
     for (const string &value : values) {
@@ -249,6 +280,11 @@ bool SymbolType::can_convert_into(const Type &other) const {
 
 string SymbolType::name() const {
     return "symbol";
+}
+
+string SymbolType::fully_qualified_name() const {
+    ABORT("SymbolType does not have a corresponding C++ type and should "
+          "not be used in contexts where its fully qualified name is needed.");
 }
 
 size_t SymbolType::get_hash() const {
@@ -325,13 +361,14 @@ const FeatureType &TypeRegistry::create_feature_type(
     type_index type = plugin.get_pointer_type();
     if (registered_types.count(type)) {
         ABORT(
-            "Creating the FeatureType '" + plugin.get_class_name() +
+            "Creating the FeatureType '" + plugin.get_pointer_class_name() +
             "' but the type '" + registered_types[type]->name() +
             "' already exists and has the same type_index.");
     }
     unique_ptr<FeatureType> type_ptr = make_unique<FeatureType>(
         plugin.get_pointer_type(), plugin.get_category_name(),
-        plugin.get_synopsis(), plugin.supports_variable_binding());
+        plugin.get_class_name(), plugin.get_synopsis(),
+        plugin.supports_variable_binding());
     const FeatureType &type_ref = *type_ptr;
     registered_types[type] = move(type_ptr);
     return type_ref;
@@ -339,6 +376,7 @@ const FeatureType &TypeRegistry::create_feature_type(
 
 const EnumType &TypeRegistry::create_enum_type(const EnumPlugin &plugin) {
     type_index type = plugin.get_type();
+    const std::string &fully_qualified_type_name = plugin.get_class_name();
     const EnumInfo &values = plugin.get_enum_info();
     if (registered_types.count(type)) {
         ABORT(
@@ -346,7 +384,8 @@ const EnumType &TypeRegistry::create_enum_type(const EnumPlugin &plugin) {
             "' but the type '" + registered_types[type]->name() +
             "' already exists and has the same type_index.");
     }
-    unique_ptr<EnumType> type_ptr = make_unique<EnumType>(type, values);
+    unique_ptr<EnumType> type_ptr =
+        make_unique<EnumType>(type, fully_qualified_type_name, values);
     const EnumType &type_ref = *type_ptr;
     registered_types[type] = move(type_ptr);
     return type_ref;
