@@ -23,8 +23,9 @@ This will first build the planner, and then the Python interface. The second
 build is enabled by a CMake option that is true by default in this prototype but
 probably should be false by default once we merge.
 
-The created file (`pydownward.cpython-312-x86_64-linux-gnu.so`) is inside the
-build directory, in the long run, we'll have to install it in some way that
+The created file
+(`builds/release/search/pydownward.cpython-312-x86_64-linux-gnu.so`) is inside
+the build directory, in the long run, we'll have to install it in some way that
 Python can find it. For now, we can just start the Python session in the right
 place. Before that, use the translator to get a `*.sas` file.
 ```bash
