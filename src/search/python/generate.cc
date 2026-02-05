@@ -1,5 +1,7 @@
 #include "generate.h"
 
+#include "binding_utils.h"
+
 #include "../plugins/plugin.h"
 #include "../plugins/raw_registry.h"
 #include "../plugins/registry.h"
@@ -113,61 +115,52 @@ static void print_bind_enums(const vector<const plugins::Type *> &enum_types) {
     cout << "}" << endl << endl;
 }
 
+static bool has_basic_default_value(const plugins::ArgumentInfo &info) {
+    return info.has_default() && info.type.is_basic_type();
+}
+
+static bool has_enum_default_value(const plugins::ArgumentInfo &info) {
+    return info.has_default() && info.type.is_enum_type();
+}
+
+static bool has_pointer_default_value(const plugins::ArgumentInfo &info) {
+    return info.has_default() && info.type.is_feature_type();
+}
+
+static bool has_complex_default_value(const plugins::ArgumentInfo &info) {
+    return info.has_default() && !(has_basic_default_value(info) || has_enum_default_value(info) || has_pointer_default_value(info));
+}
+
 static void print_feature_arg(const plugins::ArgumentInfo &info) {
     cout << "        nb::arg(\"" << info.key << "\")";
     if (info.has_default()) {
-        if (info.type.is_enum_type()) {
-            cout << " = " << info.type.fully_qualified_name()
-                 << "::" << to_upper(info.default_value);
-        } else if (info.type.is_list_type() && info.default_value == "[]") {
-            /*
-              TODO: this doesn't work. Maybe exposing the vector to nanobind
-              would help, but maybe we have to handle defaults in a different
-              way altogether.
-            */
-            //            cout << " = " << info.type.fully_qualified_name() <<
-            //            "()";
-        } else if (info.type.is_basic_type()) {
+        cout << " = ";
+        if (info.type.is_basic_type()) {
             if (info.type.get_basic_type_index() == type_index(typeid(int))) {
-                if (info.default_value == "infinity") {
-                    cout << " = " << to_string(numeric_limits<int>::max());
-                } else {
-                    string value;
-                    bool valid = true;
-                    for (char c : info.default_value) {
-                        switch (tolower(c)) {
-                        case 'k':
-                            value += "000";
-                            break;
-                        case 'm':
-                            value += "000000";
-                            break;
-                        case 'g':
-                            value += "000000000";
-                            break;
-                        default:
-                            if (isdigit(c)) {
-                                value += c;
-                            } else {
-                                valid = false;
-                            }
-                            break;
-                        }
-                    }
-                    if (valid) {
-                        cout << " = " << value;
-                    }
-                }
-            } else if (
-                info.type.get_basic_type_index() ==
-                type_index(typeid(double))) {
-                if (info.default_value == "infinity") {
-                    cout << " = " << to_string(numeric_limits<double>::max());
-                }
+                utils::Context context;
+                utils::TraceBlock block(context, "Adding default values of argument '"
+                                                     + info.key + "'");
+                plugins::Any value = parse_as(info.default_value, info.type, context);
+                cout << any_cast<int>(value);
+            } else if (info.type.get_basic_type_index() == type_index(typeid(double))) {
+                utils::Context context;
+                utils::TraceBlock block(context, "Adding default values of argument '"
+                                                     + info.key + "'");
+                plugins::Any value = parse_as(info.default_value, info.type, context);
+                cout << any_cast<double>(value);
+            } else if (info.type.get_basic_type_index() == type_index(typeid(bool))
+                       || info.type.get_basic_type_index() == type_index(typeid(string))) {
+                cout << info.default_value;
             } else {
-                // HACK: this will not work in all cases
-                cout << " = " << info.default_value;
+                ABORT("Unknown basic type");
             }
+        } else if (info.type.is_enum_type()) {
+            cout << info.type.fully_qualified_name()
+                 << "::" << to_upper(info.default_value);
+        } else if (info.type.is_feature_type()) {
+            cout << "nullptr";
+        } else {
+            cout << "nullopt";
         }
     }
 }
@@ -185,7 +178,11 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
     string sep = "";
     for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
         cout << sep << "        ";
-        if (info.type.is_feature_type()) {
+        if (has_complex_default_value(info)) {
+            cout << "std::optional<" << info.type.fully_qualified_name()
+                 << ">";
+        }
+        else if (info.type.is_feature_type()) {
             cout << "std::shared_ptr<" << info.type.fully_qualified_name()
                  << ">";
         } else {
@@ -194,10 +191,25 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
         cout << " " << info.key;
         sep = ",\n";
     }
-    cout << ") {" << endl << "        plugins::Options opts;" << endl;
+    cout << ") {"
+         << endl
+         << "        plugins::Options opts;" << endl;
     for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
-        cout << "        opts.set(\"" << info.key << "\", " << info.key << ");"
-             << endl;
+        if (has_pointer_default_value(info)) {
+            cout << "        if(" << info.key << ") {" << endl
+                 << "            opts.set(\"" << info.key << "\", " << info.key << ");"
+                 << endl
+                 << "        }";
+        } else if (has_complex_default_value(info)) {
+            cout << "        if(" << info.key << ") {" << endl
+                 << "            opts.set(\"" << info.key << "\", " << info.key
+                 << ".value());"
+                 << endl
+                 << "        }";
+        } else {
+            cout << "        opts.set(\"" << info.key << "\", " << info.key << ");"
+                 << endl;
+        }
     }
     cout << "        utils::Context context;" << endl
          << "        add_default_values(opts, *feature, context);" << endl

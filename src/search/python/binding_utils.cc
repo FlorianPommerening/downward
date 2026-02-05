@@ -8,13 +8,16 @@
 #include "../plugins/raw_registry.h"
 #include "../plugins/registry.h"
 
+#include "../parser/lexical_analyzer.h"
+#include "../parser/syntax_analyzer.h"
+
 #include <sstream>
 
 using namespace std;
-static plugins::Any parse_as(const string &value, const plugins::Type &type, utils::Context context) {
+plugins::Any parse_as(const string &value, const plugins::Type &type, utils::Context context) {
     parser::TokenStream tokens = parser::split_tokens(value);
     parser::ASTNodePtr parsed = parser::parse(tokens);
-    plugins::Type from_type = parsed.get_type();
+    plugins::Type &from_type = parsed->get_type(context);
     parser::DecoratedASTNodePtr decorated = parsed->decorate();
     plugins::Any parsed_value = decorated->construct();
     return plugins::convert(parsed_value, from_type, type, context);

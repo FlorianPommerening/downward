@@ -117,6 +117,7 @@ create_fast_downward_library(
         plan_manager
         pruning_method
         python/generate
+        python/binding_utils
         search_algorithm
         search_node_info
         search_progress
@@ -1045,6 +1046,8 @@ if (COMPILE_PYTHON_INTERFACE)
         python/binding.cc
         python/binding_static.h
         python/binding_static.cc
+        python/binding_utils.h
+        python/binding_utils.cc
         python/binding_generated.h
         ${BINDING_GENERATED_PRIVATE_H}
         ${BINDING_GENERATED_CC}
