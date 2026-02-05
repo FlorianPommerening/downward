@@ -47,9 +47,9 @@ static string to_camel_case(const string &input) {
 
 static void print_header() {
     cout << "#include \"python/binding_generated.h\"" << endl
+         << "#include \"python/binding_utils.h\"" << endl
          << "#include \"binding_generated_private.h\"" << endl
          << endl
-         << "#include \"plugins/doc_printer.h\"" << endl
          << "#include \"plugins/options.h\"" << endl
          << "#include \"plugins/plugin.h\"" << endl
          << "#include \"plugins/raw_registry.h\"" << endl
@@ -63,15 +63,7 @@ static void print_header() {
          << "#include <sstream>" << endl
          << endl
          << "using namespace std;" << endl
-         << endl
-         << "static string get_doc(const plugins::Registry &registry, "
-         << "const string &name) {" << endl
-         << "    std::ostringstream oss;" << endl
-         << "    unique_ptr<plugins::PlainPrinter> doc_printer = " << endl
-         << "make_unique<plugins::PlainPrinter>(oss, registry);" << endl
-         << "    doc_printer->print_feature(name);" << endl
-         << "    return oss.str();" << endl
-         << "}" << endl;
+         << endl;
 }
 
 static void print_bind_feature_classes(const plugins::FeatureTypes &types) {
@@ -208,6 +200,8 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
              << endl;
     }
     cout << "        utils::Context context;" << endl
+         << "        add_default_values(opts, *feature, context);" << endl
+         << "        check_bounds(opts, *feature, context);" << endl
          << "        try {" << endl
          << "            return plugins::any_cast<" << pointer_type_name
          << ">(feature->construct(opts, context));" << endl
