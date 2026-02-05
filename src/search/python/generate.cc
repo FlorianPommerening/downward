@@ -1,11 +1,11 @@
 #include "generate.h"
 
-#include "binding_utils.h"
-
 #include "../plugins/plugin.h"
 #include "../plugins/raw_registry.h"
 #include "../plugins/registry.h"
 #include "../plugins/types.h"
+
+#include "../parser/abstract_syntax_tree.h"
 
 #include <algorithm>
 #include <fstream>
@@ -59,9 +59,12 @@ static void print_header() {
          << "#include \"python/exception.h\"" << endl
          << "#include \"tasks/root_task.h\"" << endl
          << endl
+         << "#include <limits>" << endl
+         << "#include <nanobind/stl/optional.h>" << endl
          << "#include <nanobind/stl/shared_ptr.h>" << endl
          << "#include <nanobind/stl/string.h>" << endl
          << "#include <nanobind/stl/bind_vector.h>" << endl
+         << "#include <optional>" << endl
          << "#include <sstream>" << endl
          << endl
          << "using namespace std;" << endl
@@ -140,14 +143,28 @@ static void print_feature_arg(const plugins::ArgumentInfo &info) {
                 utils::Context context;
                 utils::TraceBlock block(context, "Adding default values of argument '"
                                                      + info.key + "'");
-                plugins::Any value = parse_as(info.default_value, info.type, context);
-                cout << any_cast<int>(value);
+                plugins::Any value_any = parser::parse_as(info.default_value, info.type);
+                int value = any_cast<int>(value_any);
+                if (value == numeric_limits<int>::max()) {
+                    cout << "numeric_limits<int>::max()";
+                } else if (value == numeric_limits<int>::min()) {
+                    cout << "numeric_limits<int>::min()";
+                } else {
+                    cout << value;
+                }
             } else if (info.type.get_basic_type_index() == type_index(typeid(double))) {
                 utils::Context context;
                 utils::TraceBlock block(context, "Adding default values of argument '"
                                                      + info.key + "'");
-                plugins::Any value = parse_as(info.default_value, info.type, context);
-                cout << any_cast<double>(value);
+                plugins::Any value_any = parser::parse_as(info.default_value, info.type);
+                double value = any_cast<double>(value_any);
+                if (value == numeric_limits<double>::infinity()) {
+                    cout << "numeric_limits<double>::infinity()";
+                } else if (value == -numeric_limits<double>::infinity()) {
+                        cout << "-numeric_limits<double>::infinity()";
+                } else {
+                    cout << value;
+                }
             } else if (info.type.get_basic_type_index() == type_index(typeid(bool))
                        || info.type.get_basic_type_index() == type_index(typeid(string))) {
                 cout << info.default_value;
@@ -160,7 +177,7 @@ static void print_feature_arg(const plugins::ArgumentInfo &info) {
         } else if (info.type.is_feature_type()) {
             cout << "nullptr";
         } else {
-            cout << "nullopt";
+            cout << "nb::none()";
         }
     }
 }
@@ -199,22 +216,22 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
             cout << "        if(" << info.key << ") {" << endl
                  << "            opts.set(\"" << info.key << "\", " << info.key << ");"
                  << endl
-                 << "        }";
+                 << "        }" << endl;
         } else if (has_complex_default_value(info)) {
             cout << "        if(" << info.key << ") {" << endl
                  << "            opts.set(\"" << info.key << "\", " << info.key
                  << ".value());"
                  << endl
-                 << "        }";
+                 << "        }" << endl;
         } else {
             cout << "        opts.set(\"" << info.key << "\", " << info.key << ");"
                  << endl;
         }
     }
     cout << "        utils::Context context;" << endl
-         << "        add_default_values(opts, *feature, context);" << endl
-         << "        check_bounds(opts, *feature, context);" << endl
          << "        try {" << endl
+         << "            add_default_values(opts, *feature, context);" << endl
+         << "            check_bounds(opts, *feature, context);" << endl
          << "            return plugins::any_cast<" << pointer_type_name
          << ">(feature->construct(opts, context));" << endl
          << "        } catch (const utils::ContextError &e) {" << endl
@@ -265,7 +282,7 @@ static void print_bind_features(const vector<string> &keys) {
 
 void create_python_binding_code() {
     print_header();
-    plugins::Registry registry =
+    const plugins::Registry &registry =
         plugins::RawRegistry::instance()->construct_registry();
     plugins::FeatureTypes feature_types = registry.get_feature_types();
     sort(

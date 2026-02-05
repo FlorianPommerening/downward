@@ -8,20 +8,14 @@
 #include "../plugins/raw_registry.h"
 #include "../plugins/registry.h"
 
+#include "../parser/abstract_syntax_tree.h"
 #include "../parser/lexical_analyzer.h"
 #include "../parser/syntax_analyzer.h"
 
 #include <sstream>
 
 using namespace std;
-plugins::Any parse_as(const string &value, const plugins::Type &type, utils::Context context) {
-    parser::TokenStream tokens = parser::split_tokens(value);
-    parser::ASTNodePtr parsed = parser::parse(tokens);
-    plugins::Type &from_type = parsed->get_type(context);
-    parser::DecoratedASTNodePtr decorated = parsed->decorate();
-    plugins::Any parsed_value = decorated->construct();
-    return plugins::convert(parsed_value, from_type, type, context);
-}
+
 
 void add_default_values(plugins::Options &opts, const plugins::Feature &feature, utils::Context &context) {
     utils::TraceBlock block(context, "Adding default values of feature '"
@@ -29,10 +23,10 @@ void add_default_values(plugins::Options &opts, const plugins::Feature &feature,
     for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
         if (!opts.contains(info.key)) {
             if (info.is_optional()) {
-                continue;
-            } else if (info.has_default()) {
-                plugins::Any default_value = parse_as(info.default_value, info.type, context);
-                opts.set(info.key, default_value);
+                if (info.has_default()) {
+                    plugins::Any default_value = parser::parse_as(info.default_value, info.type);
+                    opts.set(info.key, default_value);
+                }
             } else {
                 context.error(
                     "Required argument '" + info.key + "' of feature '"
@@ -54,12 +48,12 @@ void check_bounds(const plugins::Options &opts, const plugins::Feature &feature,
             plugins::Any min_value;
             {
                 utils::TraceBlock block(context, "Constructing min value");
-                min_value = parse_as(info.bounds.min, info.type, context);
+                min_value = parser::parse_as(info.bounds.min, info.type);
             }
             plugins::Any max_value;
             {
                 utils::TraceBlock block(context, "Constructing max value");
-                max_value  = parse_as(info.bounds.max, info.type, context);
+                max_value  = parser::parse_as(info.bounds.max, info.type);
             }
 
             bool bound_satisfied;

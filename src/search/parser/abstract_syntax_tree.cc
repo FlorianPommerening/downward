@@ -17,7 +17,7 @@ using namespace std;
 
 namespace parser {
 class DecorateContext : public utils::Context {
-    const plugins::Registry registry;
+    const plugins::Registry &registry;
     unordered_map<string, const plugins::Type *> variables;
 
 public:
@@ -71,6 +71,32 @@ DecoratedASTNodePtr ASTNode::decorate() const {
     DecorateContext context;
     utils::TraceBlock block(context, "Start semantic analysis");
     return decorate(context);
+}
+
+DecoratedASTNodePtr ASTNode::decorate_and_convert(const plugins::Type &to_type) const {
+    DecorateContext context;
+    utils::TraceBlock block(context, "Start semantic analysis");
+    return decorate_and_convert(to_type, context);
+}
+
+DecoratedASTNodePtr ASTNode::decorate_and_convert(
+    const plugins::Type &target_type, DecorateContext &context) const {
+    const plugins::Type &node_type = get_type(context);
+    DecoratedASTNodePtr decorated_node = decorate(context);
+
+    if (node_type != target_type) {
+        utils::TraceBlock block(context, "Adding casting node");
+        if (node_type.can_convert_into(target_type)) {
+            return make_unique<ConvertNode>(
+                move(decorated_node), node_type, target_type);
+        } else {
+            ostringstream message;
+            message << "Cannot convert from type '" << node_type.name()
+                    << "' to type '" << target_type.name() << "'" << endl;
+            context.error(message.str());
+        }
+    }
+    return decorated_node;
 }
 
 LetNode::LetNode(
@@ -132,27 +158,6 @@ FunctionCallNode::FunctionCallNode(
       unparsed_config(unparsed_config) {
 }
 
-static DecoratedASTNodePtr decorate_and_convert(
-    const ASTNode &node, const plugins::Type &target_type,
-    DecorateContext &context) {
-    const plugins::Type &node_type = node.get_type(context);
-    DecoratedASTNodePtr decorated_node = node.decorate(context);
-
-    if (node_type != target_type) {
-        utils::TraceBlock block(context, "Adding casting node");
-        if (node_type.can_convert_into(target_type)) {
-            return make_unique<ConvertNode>(
-                move(decorated_node), node_type, target_type);
-        } else {
-            ostringstream message;
-            message << "Cannot convert from type '" << node_type.name()
-                    << "' to type '" << target_type.name() << "'" << endl;
-            context.error(message.str());
-        }
-    }
-    return decorated_node;
-}
-
 bool FunctionCallNode::collect_argument(
     const ASTNode &arg, const plugins::ArgumentInfo &arg_info,
     DecorateContext &context, CollectedArguments &arguments) const {
@@ -162,7 +167,7 @@ bool FunctionCallNode::collect_argument(
     }
 
     DecoratedASTNodePtr decorated_arg =
-        decorate_and_convert(arg, arg_info.type, context);
+        arg.decorate_and_convert(arg_info.type, context);
 
     if (arg_info.bounds.has_bound()) {
         DecoratedASTNodePtr decorated_min_node;
@@ -170,14 +175,14 @@ bool FunctionCallNode::collect_argument(
             utils::TraceBlock block(context, "Handling lower bound");
             ASTNodePtr min_node = parse_ast_node(arg_info.bounds.min, context);
             decorated_min_node =
-                decorate_and_convert(*min_node, arg_info.type, context);
+                min_node->decorate_and_convert(arg_info.type, context);
         }
         DecoratedASTNodePtr decorated_max_node;
         {
             utils::TraceBlock block(context, "Handling upper bound");
             ASTNodePtr max_node = parse_ast_node(arg_info.bounds.max, context);
             decorated_max_node =
-                decorate_and_convert(*max_node, arg_info.type, context);
+                max_node->decorate_and_convert(arg_info.type, context);
         }
         decorated_arg = make_unique<CheckBoundsNode>(
             move(decorated_arg), move(decorated_min_node),
@@ -483,4 +488,13 @@ const plugins::Type &LiteralNode::get_type(DecorateContext &context) const {
             token_type_name(value.type) + "'.");
     }
 }
+
+// TODO move to its own file
+plugins::Any parse_as(const string &value, const plugins::Type &type) {
+    TokenStream tokens = split_tokens(value);
+    ASTNodePtr parsed = parse(tokens);
+    DecoratedASTNodePtr decorated = parsed->decorate_and_convert(type);
+    return decorated->construct();
+}
+
 }

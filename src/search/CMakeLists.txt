@@ -117,7 +117,6 @@ create_fast_downward_library(
         plan_manager
         pruning_method
         python/generate
-        python/binding_utils
         search_algorithm
         search_node_info
         search_progress

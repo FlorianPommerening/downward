@@ -1,7 +1,6 @@
 #include "raw_registry.h"
 
 #include "plugin.h"
-#include "registry.h"
 
 #include "../utils/collections.h"
 #include "../utils/strings.h"
@@ -194,23 +193,26 @@ Features RawRegistry::collect_features(
     return features;
 }
 
-Registry RawRegistry::construct_registry() const {
-    vector<string> errors;
-    FeatureTypes feature_types = collect_types(errors);
-    validate_category_names(errors);
-    SubcategoryPlugins subcategory_plugins =
-        collect_subcategory_plugins(errors);
-    Features features = collect_features(subcategory_plugins, errors);
+const Registry &RawRegistry::construct_registry() {
+    if (!registry) {
+        vector<string> errors;
+        FeatureTypes feature_types = collect_types(errors);
+        validate_category_names(errors);
+        SubcategoryPlugins subcategory_plugins =
+            collect_subcategory_plugins(errors);
+        Features features = collect_features(subcategory_plugins, errors);
 
-    if (!errors.empty()) {
-        sort(errors.begin(), errors.end());
-        cerr << "Internal registry error(s):" << endl;
-        for (const string &error : errors) {
-            cerr << error << endl;
+        if (!errors.empty()) {
+            sort(errors.begin(), errors.end());
+            cerr << "Internal registry error(s):" << endl;
+            for (const string &error : errors) {
+                cerr << error << endl;
+            }
+            utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
         }
-        utils::exit_with(utils::ExitCode::SEARCH_CRITICAL_ERROR);
+        registry = make_unique<Registry>(
+            move(feature_types), move(subcategory_plugins), move(features));
     }
-    return Registry(
-        move(feature_types), move(subcategory_plugins), move(features));
+    return *registry;
 }
 }

@@ -48,8 +48,8 @@ from pydownward import *
 help(lmcut) # press Q to exit help view
 
 read_task("output.sas")
-hff = ff(transform=no_transform())
-s = eager_greedy([hff], [], pruning=null())
+hff = ff()
+s = eager_greedy([hff])
 s.search()
 plan = s.get_plan()
 task = no_transform()
