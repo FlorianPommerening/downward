@@ -75,14 +75,20 @@ rm -rf soplex build
 
 ## Changes in the Existing Planner
 
-The planner got new files `python/generate.{h,cc}` and has minor changes in
-`planner.cc` to generate the Python binding code. The remaining changes in the
-planner are mostly concerned with getting names from registered types. Those
-changes should be considered again before merging (see TODO in the diff) but are
-non-intrusive. There are also new methods in the type registry to access
-registered list and enum types. Finally, the method `get_type_name` changed
-because it returned typenames relative to its own namespace (e.g. `Verbosity`
-instead of `utils::Verbosity` because `get_type_name` was also in `utils`).
+* The planner got new files `python/generate.{h,cc}` and has minor changes in
+  `planner.cc` and a new command line option `--create-python-binding-code` to
+  generate the Python binding code.
+* The parser exposes new functionality to parse a value and convert it into a
+  given type.
+* The registry is now stored in the RawRegistry to avoid constructing it twice
+  (we will split this off as its own issue).
+* The remaining changes in the planner are mostly concerned with getting names
+  from registered types. Those changes should be considered again before merging
+  (see TODO in the diff) but are non-intrusive. There are also new methods in
+  the type registry to access registered list and enum types. Finally, the
+  method `get_type_name` changed because it returned typenames relative to its
+  own namespace (e.g. `Verbosity` instead of `utils::Verbosity` because
+  `get_type_name` was also in `utils`).
 
 The planner remains independent of nanobind, so if the option to build the
 Python interface is disabled, the planner can be build as usual, even without
@@ -135,6 +141,9 @@ files that will be stored in the builds directory (see above).
 * `src/search/python/exception.{h,cc}` contains an exception class that is also
   exported in the static code above. With it, the C++ binding code can throw
   exceptions that are then raised as Python exceptions in the Python session.
+* `src/search/python/binding_utils.{h,cc}` contains functions to access default
+  values, bounds, and documentation of features. These are used in the generated
+  code.
 * `src/search/python/binding_generated.h` contains the interface to the code
   generated on the fly. This generated code has four functions:
   1. `bind_feature_classes()` will expose base classes of our features to Python
