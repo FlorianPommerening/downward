@@ -126,6 +126,7 @@ create_fast_downward_library(
         state_registry
         task_id
         task_proxy
+        heuristics/demo
     DEPENDS
         causal_graph
         int_hash_set
