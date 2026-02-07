@@ -118,74 +118,98 @@ static void print_bind_enums(const vector<const plugins::Type *> &enum_types) {
     cout << "}" << endl << endl;
 }
 
-static bool has_basic_default_value(const plugins::ArgumentInfo &info) {
-    return info.has_default() && info.type.is_basic_type();
-}
-
-static bool has_enum_default_value(const plugins::ArgumentInfo &info) {
-    return info.has_default() && info.type.is_enum_type();
+static bool has_simple_default_value(const plugins::ArgumentInfo &info) {
+    return info.has_default() && (info.type.is_basic_type() || info.type.is_enum_type());
 }
 
 static bool has_pointer_default_value(const plugins::ArgumentInfo &info) {
-    return info.has_default() && info.type.is_feature_type();
+    return info.is_optional() && info.type.is_feature_type();
 }
 
 static bool has_complex_default_value(const plugins::ArgumentInfo &info) {
-    return info.has_default() && !(has_basic_default_value(info) || has_enum_default_value(info) || has_pointer_default_value(info));
+    return info.is_optional() && !has_simple_default_value(info) && !has_pointer_default_value(info);
 }
 
-static void print_feature_arg(const plugins::ArgumentInfo &info) {
-    cout << "        nb::arg(\"" << info.key << "\")";
-    if (info.has_default()) {
-        cout << " = ";
-        if (info.type.is_basic_type()) {
-            if (info.type.get_basic_type_index() == type_index(typeid(int))) {
-                utils::Context context;
-                utils::TraceBlock block(context, "Adding default values of argument '"
-                                                     + info.key + "'");
-                plugins::Any value_any = parser::parse_as(info.default_value, info.type);
-                int value = any_cast<int>(value_any);
-                if (value == numeric_limits<int>::max()) {
-                    cout << "numeric_limits<int>::max()";
-                } else if (value == numeric_limits<int>::min()) {
-                    cout << "numeric_limits<int>::min()";
-                } else {
-                    cout << value;
-                }
-            } else if (info.type.get_basic_type_index() == type_index(typeid(double))) {
-                utils::Context context;
-                utils::TraceBlock block(context, "Adding default values of argument '"
-                                                     + info.key + "'");
-                plugins::Any value_any = parser::parse_as(info.default_value, info.type);
-                double value = any_cast<double>(value_any);
-                if (value == numeric_limits<double>::infinity()) {
-                    cout << "numeric_limits<double>::infinity()";
-                } else if (value == -numeric_limits<double>::infinity()) {
-                        cout << "-numeric_limits<double>::infinity()";
-                } else {
-                    cout << value;
-                }
-            } else if (info.type.get_basic_type_index() == type_index(typeid(bool))
-                       || info.type.get_basic_type_index() == type_index(typeid(string))) {
-                cout << info.default_value;
+static string get_nanobind_default_value(const plugins::ArgumentInfo &info) {
+    if (has_complex_default_value(info)) {
+        return "nb::none()";
+    } else if (has_pointer_default_value(info)) {
+        return "nullptr";
+    } else if (info.type.is_basic_type()) {
+        if (info.type.get_basic_type_index() == type_index(typeid(int))) {
+            plugins::Any value_any = parser::parse_as(info.default_value, info.type);
+            int value = any_cast<int>(value_any);
+            if (value == numeric_limits<int>::max()) {
+                return "numeric_limits<int>::max()";
             } else {
-                ABORT("Unknown basic type");
+                return to_string(value);
             }
-        } else if (info.type.is_enum_type()) {
-            cout << info.type.fully_qualified_name()
-                 << "::" << to_upper(info.default_value);
-        } else if (info.type.is_feature_type()) {
-            cout << "nullptr";
+        } else if (info.type.get_basic_type_index() == type_index(typeid(double))) {
+            plugins::Any value_any = parser::parse_as(info.default_value, info.type);
+            double value = any_cast<double>(value_any);
+            if (value == numeric_limits<double>::infinity()) {
+                return "numeric_limits<double>::infinity()";
+            } else {
+                return to_string(value);
+            }
+        } else if (info.type.get_basic_type_index() == type_index(typeid(bool))
+                   || info.type.get_basic_type_index() == type_index(typeid(string))) {
+            return info.default_value;
         } else {
-            cout << "nb::none()";
+            ABORT("Unknown basic type");
         }
+    } else if (info.type.is_enum_type()) {
+        return info.type.fully_qualified_name() + "::" + to_upper(info.default_value);
+    } else {
+        ABORT("Unknown type for default value computation");
+    }
+}
+
+static string get_pointer_type_name(const plugins::Type &type) {
+    string name = type.fully_qualified_name();
+    if (type.is_feature_type()) {
+        name = "std::shared_ptr<" + name + ">";
+    }
+    return name;
+}
+
+static string get_feature_arg_cpp_type_name(const plugins::ArgumentInfo &info) {
+    string name = get_pointer_type_name(info.type);
+    if (has_complex_default_value(info)) {
+        name = "std::optional<" + name + ">";
+    }
+    return name;
+}
+
+static void print_set_arg_to_options(const plugins::ArgumentInfo &info) {
+    if (has_pointer_default_value(info)) {
+        cout << "        if(" << info.key << ") {" << endl
+             << "            opts.set(\"" << info.key << "\", " << info.key << ");"
+             << endl
+             << "        }" << endl;
+    } else if (has_complex_default_value(info)) {
+        cout << "        if(" << info.key << ") {" << endl
+             << "            opts.set(\"" << info.key << "\", " << info.key
+             << ".value());"
+             << endl
+             << "        }" << endl;
+    } else {
+        cout << "        opts.set(\"" << info.key << "\", " << info.key << ");"
+             << endl;
+    }
+}
+
+static void print_feature_arg_nanobind_def(const plugins::ArgumentInfo &info) {
+    cout << "        nb::arg(\"" << info.key << "\")";
+    if (info.is_optional()) {
+        cout << " = " << get_nanobind_default_value(info);
     }
 }
 
 static void print_bind_stub_for_feature(const plugins::Feature &feature) {
     string key = feature.get_key();
-    string pointer_type_name =
-        "shared_ptr<" + feature.get_type().fully_qualified_name() + ">";
+    string pointer_type_name = get_pointer_type_name(feature.get_type());
+    const std::vector<plugins::ArgumentInfo> &args = feature.get_arguments();
 
     cout << "static void bind_" << key
          << "(nb::module_ &m, const plugins::Registry &registry) {" << endl
@@ -193,40 +217,16 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
          << "registry.get_feature(\"" << key << "\");" << endl
          << "    auto construct = [feature](" << endl;
     string sep = "";
-    for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
-        cout << sep << "        ";
-        if (has_complex_default_value(info)) {
-            cout << "std::optional<" << info.type.fully_qualified_name()
-                 << ">";
-        }
-        else if (info.type.is_feature_type()) {
-            cout << "std::shared_ptr<" << info.type.fully_qualified_name()
-                 << ">";
-        } else {
-            cout << info.type.fully_qualified_name();
-        }
-        cout << " " << info.key;
+    for (const plugins::ArgumentInfo &info : args) {
+        cout << sep << "        " << get_feature_arg_cpp_type_name(info)
+             << " " << info.key;
         sep = ",\n";
     }
     cout << ") {"
          << endl
          << "        plugins::Options opts;" << endl;
-    for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
-        if (has_pointer_default_value(info)) {
-            cout << "        if(" << info.key << ") {" << endl
-                 << "            opts.set(\"" << info.key << "\", " << info.key << ");"
-                 << endl
-                 << "        }" << endl;
-        } else if (has_complex_default_value(info)) {
-            cout << "        if(" << info.key << ") {" << endl
-                 << "            opts.set(\"" << info.key << "\", " << info.key
-                 << ".value());"
-                 << endl
-                 << "        }" << endl;
-        } else {
-            cout << "        opts.set(\"" << info.key << "\", " << info.key << ");"
-                 << endl;
-        }
+    for (const plugins::ArgumentInfo &info : args) {
+        print_set_arg_to_options(info);
     }
     cout << "        utils::Context context;" << endl
          << "        try {" << endl
@@ -240,9 +240,9 @@ static void print_bind_stub_for_feature(const plugins::Feature &feature) {
          << "    };" << endl
          << "    string doc = get_doc(registry, feature->get_key());" << endl
          << "    m.def(\"" << key << "\", construct, doc.c_str()";
-    for (const plugins::ArgumentInfo &info : feature.get_arguments()) {
+    for (const plugins::ArgumentInfo &info : args) {
         cout << ",\n        ";
-        print_feature_arg(info);
+        print_feature_arg_nanobind_def(info);
     }
     cout << ");" << endl << "}" << endl << endl;
 }
