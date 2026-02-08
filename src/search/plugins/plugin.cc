@@ -97,6 +97,10 @@ string CategoryPlugin::get_class_name() const {
     return class_name;
 }
 
+string CategoryPlugin::get_pointer_class_name() const {
+    return "std::shared_ptr<" + class_name + ">";
+}
+
 string CategoryPlugin::get_synopsis() const {
     return synopsis;
 }

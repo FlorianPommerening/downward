@@ -199,8 +199,28 @@ public:
     void allow_variable_binding();
 
     std::type_index get_pointer_type() const;
+    /*
+      TODO (issue757): we should rethink which names we want to get from a type.
+      Before merging this, we should look at all changes again and check if they
+      make sense as an overall concept.
+
+      At different places, we want different names, for example:
+        * LMCutHeuristic
+        * lm_cut_heuristic::LMCutHeuristic
+        * std::shared_ptr<lm_cut_heuristic::LMCutHeuristic>
+        * Evaluator
+      For enum types (see changes in the Type class)
+        * {silent, normal, verbose, debug}
+        * Verbosity
+        * namespace::Verbosity
+      For list types (see changes in the Type class)
+        * list of evaluator
+        * ListOfEvaluator
+        * std::vector<std::shared_ptr<Evaluator>>
+    */
     std::string get_category_name() const;
     std::string get_class_name() const;
+    std::string get_pointer_class_name() const;
     std::string get_synopsis() const;
     bool supports_variable_binding() const;
 };
@@ -210,8 +230,8 @@ class TypedCategoryPlugin : public CategoryPlugin {
 public:
     TypedCategoryPlugin(const std::string &category_name)
         : CategoryPlugin(
-              typeid(std::shared_ptr<T>),
-              utils::get_type_name<std::shared_ptr<T>>(), category_name) {
+              typeid(std::shared_ptr<T>), utils::get_type_name<T>(),
+              category_name) {
     }
 };
 
@@ -249,9 +269,7 @@ class TypedEnumPlugin : public EnumPlugin {
 public:
     TypedEnumPlugin(
         std::initializer_list<std::pair<std::string, std::string>> enum_values)
-        : EnumPlugin(
-              typeid(T), utils::get_type_name<std::shared_ptr<T>>(),
-              enum_values) {
+        : EnumPlugin(typeid(T), utils::get_type_name<T>(), enum_values) {
     }
 };
 

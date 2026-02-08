@@ -10,13 +10,13 @@
 #define NO_RETURN __attribute__((noreturn))
 #endif
 
-namespace utils {
+/*
+  Note that the following function is intentionally not in the namespace utils.
+  If we put it there, the resulting type names will not contain the namespace
+  for types inside the namespace utils.
+*/
 template<typename T>
-void unused_variable(const T &) {
-}
-
-template<typename T>
-static std::string get_type_name() {
+static std::string _get_type_name() {
     bool unsupported_compiler = false;
 #if defined(__clang__)
     std::string prefix = "[T = ";
@@ -41,6 +41,16 @@ static std::string get_type_name() {
         const auto size = end - start;
         return function.substr(start, size);
     }
+}
+
+namespace utils {
+template<typename T>
+void unused_variable(const T &) {
+}
+
+template<typename T>
+static std::string get_type_name() {
+    return _get_type_name<T>();
 }
 }
 

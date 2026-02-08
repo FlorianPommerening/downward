@@ -45,6 +45,8 @@ set_up_options()
 
 project(downward LANGUAGES CXX)
 add_executable(downward planner.cc)
+add_library(downward_lib INTERFACE)
+target_link_libraries(downward PUBLIC downward_lib)
 
 # obtain git SHA1 hash
 execute_process(
@@ -75,12 +77,19 @@ message(NOTICE "Git revision: \"${GIT_REVISION}\"")
 
 configure_file(git_revision.h.in git_revision.h)
 # The header is generated in ${PROJECT_BINARY_DIR}. Add it to the include path.
-target_include_directories(downward PUBLIC "${PROJECT_BINARY_DIR}")
+target_include_directories(downward_lib INTERFACE "${PROJECT_BINARY_DIR}")
 
 # On Windows we have to copy all DLLs next to the generated binary.
 if (WIN32)
-    copy_dlls_to_binary_dir_after_build(downward)
+    copy_dlls_to_binary_dir_after_build(downward_lib)
 endif()
+
+option(
+    COMPILE_PYTHON_INTERFACE
+    "Compile Python bindings for the Fast Downward search code"
+    TRUE
+)
+
 
 # In the following, we include all source files, grouped into libraries with
 # dependencies among each other.
@@ -107,6 +116,7 @@ create_fast_downward_library(
         per_task_information
         plan_manager
         pruning_method
+        python/generate
         search_algorithm
         search_node_info
         search_progress
@@ -116,6 +126,7 @@ create_fast_downward_library(
         state_registry
         task_id
         task_proxy
+        heuristics/demo
     DEPENDS
         causal_graph
         int_hash_set
@@ -990,3 +1001,59 @@ create_fast_downward_library(
         algorithms/sccs
     DEPENDENCY_ONLY
 )
+
+
+if (COMPILE_PYTHON_INTERFACE)
+    if (CMAKE_VERSION VERSION_LESS 3.18)
+        set(DEV_MODULE Development)
+    else()
+        set(DEV_MODULE Development.Module)
+    endif()
+    find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+    execute_process(
+        COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+        OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
+    find_package(nanobind CONFIG REQUIRED)
+
+    set(BINDING_GENERATED_CC "${CMAKE_CURRENT_BINARY_DIR}/binding_generated.cc")
+    add_custom_command(
+        OUTPUT ${BINDING_GENERATED_CC}
+        COMMAND downward --create-python-binding-code > ${BINDING_GENERATED_CC}
+        DEPENDS
+            downward
+        COMMENT "Generating Python interface"
+        VERBATIM
+    )
+
+    set(BINDING_GENERATED_PRIVATE_H "${CMAKE_CURRENT_BINARY_DIR}/binding_generated_private.h")
+    file(WRITE ${BINDING_GENERATED_PRIVATE_H} "")
+    get_target_property(DOWNWARD_LIBS downward_lib INTERFACE_LINK_LIBRARIES)
+    foreach(DOWNWARD_LIB IN LISTS DOWNWARD_LIBS)
+        get_target_property(SOURCES ${DOWNWARD_LIB} INTERFACE_SOURCES)
+        foreach(FILE IN LISTS SOURCES)
+            # TODO: This pattern is a placeholder matching all header files.
+            # Eventually, we want to have a naming convention for header files
+            # that are part of the public interface of a Feature/FeatureType
+            # and include only those here.
+            if(FILE MATCHES "^.*\.h$")
+                file(RELATIVE_PATH REL_PATH "${CMAKE_CURRENT_SOURCE_DIR}" "${FILE}")
+                file(APPEND ${BINDING_GENERATED_PRIVATE_H} "#include \"${REL_PATH}\"\n")
+            endif()
+        endforeach()
+    endforeach()
+
+    nanobind_add_module(pydownward NB_STATIC
+        python/binding.cc
+        python/binding_static.h
+        python/binding_static.cc
+        python/binding_utils.h
+        python/binding_utils.cc
+        python/binding_generated.h
+        ${BINDING_GENERATED_PRIVATE_H}
+        ${BINDING_GENERATED_CC}
+        python/exception.h
+        python/exception.cc
+    )
+    target_link_libraries(pydownward PRIVATE downward_lib)
+    target_include_directories(pydownward PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
