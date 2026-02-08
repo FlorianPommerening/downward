@@ -1,7 +1,6 @@
 #include "generate.h"
 
 #include "../plugins/plugin.h"
-#include "../plugins/raw_registry.h"
 #include "../plugins/registry.h"
 #include "../plugins/types.h"
 
@@ -271,8 +270,8 @@ static void print_bind_stubs_for_category(
 
 static void print_bind_features(const vector<string> &keys) {
     cout << "void bind_features(nb::module_ &m) {" << endl
-         << "    plugins::Registry registry = "
-         << "plugins::RawRegistry::instance()->construct_registry();" << endl;
+         << "    const plugins::Registry &registry = "
+         << "*plugins::Registry::instance();" << endl;
 
     for (const string &key : keys) {
         cout << "    bind_" << key << "(m, registry);" << endl;
@@ -282,8 +281,7 @@ static void print_bind_features(const vector<string> &keys) {
 
 void create_python_binding_code() {
     print_header();
-    const plugins::Registry &registry =
-        plugins::RawRegistry::instance()->construct_registry();
+    const plugins::Registry &registry = *plugins::Registry::instance();
     plugins::FeatureTypes feature_types = registry.get_feature_types();
     sort(
         feature_types.begin(), feature_types.end(),
