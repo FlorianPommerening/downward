@@ -1,6 +1,10 @@
 #ifndef MERGE_AND_SHRINK_LABEL_REDUCTION_H
 #define MERGE_AND_SHRINK_LABEL_REDUCTION_H
 
+#include "../component.h"
+
+#include "../tasks/root_task.h" // issue559 remove
+
 #include <memory>
 #include <vector>
 
@@ -53,7 +57,7 @@ enum class LabelReductionSystemOrder {
     RANDOM
 };
 
-class LabelReduction {
+class LabelReduction : public TaskSpecificComponent {
     // Options for label reduction
     std::vector<int> transition_system_order;
     bool lr_before_shrinking;
@@ -75,7 +79,8 @@ class LabelReduction {
         int ts_index, const FactoredTransitionSystem &fts) const;
 public:
     LabelReduction(
-        bool before_shrinking, bool before_merging, LabelReductionMethod method,
+        const std::shared_ptr<AbstractTask> &task, bool before_shrinking,
+        bool before_merging, LabelReductionMethod method,
         LabelReductionSystemOrder system_order, int random_seed);
     void initialize(const TaskProxy &task_proxy);
     bool reduce(

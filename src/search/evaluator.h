@@ -1,8 +1,10 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
+#include "component.h"
 #include "evaluation_result.h"
 
+#include "tasks/root_task.h" // issue559 remove
 #include "utils/logging.h"
 
 #include <set>
@@ -14,7 +16,7 @@ namespace plugins {
 class Options;
 }
 
-class Evaluator {
+class Evaluator : public TaskSpecificComponent {
     const std::string description;
     const bool use_for_reporting_minima;
     const bool use_for_boosting;
@@ -23,10 +25,9 @@ protected:
     mutable utils::LogProxy log;
 public:
     Evaluator(
-        bool use_for_reporting_minima, bool use_for_boosting,
-        bool use_for_counting_evaluations, const std::string &description,
-        utils::Verbosity verbosity);
-    virtual ~Evaluator() = default;
+        const std::shared_ptr<AbstractTask> task, bool use_for_reporting_minima,
+        bool use_for_boosting, bool use_for_counting_evaluations,
+        const std::string &description, utils::Verbosity verbosity);
 
     /*
       dead_ends_are_reliable should return true if the evaluator is

@@ -37,6 +37,7 @@ public:
     virtual shared_ptr<eager_search::EagerSearch> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<eager_search::EagerSearch>(
+            tasks::g_root_task,
             search_common::create_wastar_open_list_factory(
                 opts.get_list<shared_ptr<Evaluator>>("evals"),
                 opts.get_list<shared_ptr<Evaluator>>("preferred"),

@@ -10,8 +10,9 @@ using namespace std;
 
 namespace merge_and_shrink {
 MergeStrategyFactoryPrecomputed::MergeStrategyFactoryPrecomputed(
+    const std::shared_ptr<AbstractTask> &task,
     const shared_ptr<MergeTreeFactory> &merge_tree, utils::Verbosity verbosity)
-    : MergeStrategyFactory(verbosity), merge_tree_factory(merge_tree) {
+    : MergeStrategyFactory(task, verbosity), merge_tree_factory(merge_tree) {
 }
 
 unique_ptr<MergeStrategy>
@@ -71,6 +72,7 @@ public:
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<
             MergeStrategyFactoryPrecomputed>(
+            tasks::g_root_task,
             opts.get<shared_ptr<MergeTreeFactory>>("merge_tree"),
             get_merge_strategy_arguments_from_options(opts));
     }

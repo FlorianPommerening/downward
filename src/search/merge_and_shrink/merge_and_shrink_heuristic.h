@@ -26,6 +26,7 @@ protected:
     virtual int compute_heuristic(const State &ancestor_state) override;
 public:
     MergeAndShrinkHeuristic(
+        const std::shared_ptr<AbstractTask> &task,
         const std::shared_ptr<MergeStrategyFactory> &merge_strategy,
         const std::shared_ptr<ShrinkStrategy> &shrink_strategy,
         const std::shared_ptr<LabelReduction> &label_reduction,

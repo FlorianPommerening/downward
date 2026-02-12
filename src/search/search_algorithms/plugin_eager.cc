@@ -28,7 +28,7 @@ public:
     virtual shared_ptr<eager_search::EagerSearch> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<eager_search::EagerSearch>(
-            opts.get<shared_ptr<OpenListFactory>>("open"),
+            tasks::g_root_task, opts.get<shared_ptr<OpenListFactory>>("open"),
             opts.get<bool>("reopen_closed"),
             opts.get<shared_ptr<Evaluator>>("f_eval", nullptr),
             opts.get_list<shared_ptr<Evaluator>>("preferred"),

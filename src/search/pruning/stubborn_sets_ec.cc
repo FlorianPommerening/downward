@@ -101,8 +101,9 @@ static void get_conflicting_vars(
     }
 }
 
-StubbornSetsEC::StubbornSetsEC(utils::Verbosity verbosity)
-    : StubbornSetsActionCentric(verbosity) {
+StubbornSetsEC::StubbornSetsEC(
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+    : StubbornSetsActionCentric(task, verbosity) {
 }
 
 void StubbornSetsEC::initialize(const shared_ptr<AbstractTask> &task) {
@@ -356,7 +357,7 @@ public:
     virtual shared_ptr<StubbornSetsEC> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<StubbornSetsEC>(
-            get_pruning_arguments_from_options(opts));
+            tasks::g_root_task, get_pruning_arguments_from_options(opts));
     }
 };
 

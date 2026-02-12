@@ -8,9 +8,10 @@ using namespace std;
 
 namespace goal_count_heuristic {
 GoalCountHeuristic::GoalCountHeuristic(
+    const shared_ptr<AbstractTask> &task,
     const shared_ptr<AbstractTask> &transform, bool cache_estimates,
     const string &description, utils::Verbosity verbosity)
-    : Heuristic(transform, cache_estimates, description, verbosity) {
+    : Heuristic(task, transform, cache_estimates, description, verbosity) {
     if (log.is_at_least_normal()) {
         log << "Initializing goal count heuristic..." << endl;
     }
@@ -50,7 +51,7 @@ public:
     virtual shared_ptr<GoalCountHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<GoalCountHeuristic>(
-            get_heuristic_arguments_from_options(opts));
+            tasks::g_root_task, get_heuristic_arguments_from_options(opts));
     }
 };
 

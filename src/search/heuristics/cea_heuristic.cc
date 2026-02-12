@@ -411,9 +411,11 @@ int ContextEnhancedAdditiveHeuristic::compute_heuristic(
 }
 
 ContextEnhancedAdditiveHeuristic::ContextEnhancedAdditiveHeuristic(
-    tasks::AxiomHandlingType axioms, const shared_ptr<AbstractTask> &transform,
-    bool cache_estimates, const string &description, utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, tasks::AxiomHandlingType axioms,
+    const shared_ptr<AbstractTask> &transform, bool cache_estimates,
+    const string &description, utils::Verbosity verbosity)
     : Heuristic(
+          task,
           tasks::get_default_value_axioms_task_if_needed(transform, axioms),
           cache_estimates, description, verbosity),
       min_action_cost(task_properties::get_min_operator_cost(task_proxy)) {
@@ -473,7 +475,7 @@ public:
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<
             ContextEnhancedAdditiveHeuristic>(
-            tasks::get_axioms_arguments_from_options(opts),
+            tasks::g_root_task, tasks::get_axioms_arguments_from_options(opts),
             get_heuristic_arguments_from_options(opts));
     }
 };

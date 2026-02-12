@@ -141,9 +141,13 @@ bool TieBreakingOpenList<Entry>::is_reliable_dead_end(
 }
 
 TieBreakingOpenListFactory::TieBreakingOpenListFactory(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<Evaluator>> &evals, bool unsafe_pruning,
     bool pref_only)
-    : evals(evals), unsafe_pruning(unsafe_pruning), pref_only(pref_only) {
+    : OpenListFactory(task),
+      evals(evals),
+      unsafe_pruning(unsafe_pruning),
+      pref_only(pref_only) {
     utils::verify_list_not_empty(evals, "evals");
 }
 
@@ -176,7 +180,7 @@ public:
     virtual shared_ptr<TieBreakingOpenListFactory> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<TieBreakingOpenListFactory>(
-            opts.get_list<shared_ptr<Evaluator>>("evals"),
+            tasks::g_root_task, opts.get_list<shared_ptr<Evaluator>>("evals"),
             opts.get<bool>("unsafe_pruning"),
             get_open_list_arguments_from_options(opts));
     }

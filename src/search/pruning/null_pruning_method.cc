@@ -6,8 +6,9 @@
 using namespace std;
 
 namespace null_pruning_method {
-NullPruningMethod::NullPruningMethod(utils::Verbosity verbosity)
-    : PruningMethod(verbosity) {
+NullPruningMethod::NullPruningMethod(
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+    : PruningMethod(task, verbosity) {
 }
 
 void NullPruningMethod::initialize(const shared_ptr<AbstractTask> &task) {
@@ -31,7 +32,7 @@ public:
     virtual shared_ptr<NullPruningMethod> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<NullPruningMethod>(
-            get_pruning_arguments_from_options(opts));
+            tasks::g_root_task, get_pruning_arguments_from_options(opts));
     }
 };
 

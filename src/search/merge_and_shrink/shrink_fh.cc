@@ -19,8 +19,12 @@
 using namespace std;
 
 namespace merge_and_shrink {
-ShrinkFH::ShrinkFH(HighLow shrink_f, HighLow shrink_h, int random_seed)
-    : ShrinkBucketBased(random_seed), f_start(shrink_f), h_start(shrink_h) {
+ShrinkFH::ShrinkFH(
+    const shared_ptr<AbstractTask> &task, HighLow shrink_f, HighLow shrink_h,
+    int random_seed)
+    : ShrinkBucketBased(task, random_seed),
+      f_start(shrink_f),
+      h_start(shrink_h) {
 }
 
 vector<ShrinkBucketBased::Bucket> ShrinkFH::partition_into_buckets(
@@ -238,7 +242,7 @@ public:
     virtual shared_ptr<ShrinkFH> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<ShrinkFH>(
-            opts.get<ShrinkFH::HighLow>("shrink_f"),
+            tasks::g_root_task, opts.get<ShrinkFH::HighLow>("shrink_f"),
             opts.get<ShrinkFH::HighLow>("shrink_h"),
             get_shrink_bucket_arguments_from_options(opts));
     }

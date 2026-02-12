@@ -25,12 +25,13 @@ static shared_ptr<OpenListFactory> create_ehc_open_list_factory(
       ignore costs since EHC is supposed to implement a breadth-first
       search, not a uniform-cost search. So this seems to be a bug.
     */
-    shared_ptr<Evaluator> g_evaluator =
-        make_shared<GEval>("ehc.g_eval", verbosity);
+    shared_ptr<Evaluator> g_evaluator = make_shared<GEval>(
+        tasks::g_root_task, "ehc.g_eval", verbosity); // issue559 TODO
 
     if (!use_preferred ||
         preferred_usage == PreferredUsage::PRUNE_BY_PREFERRED) {
         return make_shared<standard_scalar_open_list::BestFirstOpenListFactory>(
+            tasks::g_root_task, // issue559
             g_evaluator, false);
     } else {
         /*
@@ -42,18 +43,22 @@ static shared_ptr<OpenListFactory> create_ehc_open_list_factory(
           open list code.
         */
         vector<shared_ptr<Evaluator>> evals = {
-            g_evaluator, make_shared<PrefEval>("ehc.pref_eval", verbosity)};
+            g_evaluator, make_shared<PrefEval>(
+                             tasks::g_root_task, "ehc.pref_eval",
+                             verbosity)}; // issue559 TODO
         return make_shared<tiebreaking_open_list::TieBreakingOpenListFactory>(
+            tasks::g_root_task, // issue559
             evals, false, true);
     }
 }
 
 EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
-    const shared_ptr<Evaluator> &h, PreferredUsage preferred_usage,
+    const shared_ptr<AbstractTask> &task, const shared_ptr<Evaluator> &h,
+    PreferredUsage preferred_usage,
     const vector<shared_ptr<Evaluator>> &preferred, OperatorCost cost_type,
     int bound, double max_time, const string &description,
     utils::Verbosity verbosity)
-    : SearchAlgorithm(cost_type, bound, max_time, description, verbosity),
+    : SearchAlgorithm(task, cost_type, bound, max_time, description, verbosity),
       evaluator(h),
       preferred_operator_evaluators(preferred),
       preferred_usage(preferred_usage),
@@ -279,7 +284,7 @@ public:
     virtual shared_ptr<EnforcedHillClimbingSearch> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<EnforcedHillClimbingSearch>(
-            opts.get<shared_ptr<Evaluator>>("h"),
+            tasks::g_root_task, opts.get<shared_ptr<Evaluator>>("h"),
             opts.get<PreferredUsage>("preferred_usage"),
             opts.get_list<shared_ptr<Evaluator>>("preferred"),
             get_search_algorithm_arguments_from_options(opts));

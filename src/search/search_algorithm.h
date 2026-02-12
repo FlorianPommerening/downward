@@ -1,6 +1,7 @@
 #ifndef SEARCH_ALGORITHM_H
 #define SEARCH_ALGORITHM_H
 
+#include "component.h"
 #include "operator_cost.h"
 #include "operator_id.h"
 #include "plan_manager.h"
@@ -10,6 +11,7 @@
 #include "state_registry.h"
 #include "task_proxy.h"
 
+#include "tasks/root_task.h" // issue559 remove
 #include "utils/logging.h"
 
 #include <vector>
@@ -35,7 +37,7 @@ enum SearchStatus {
     SOLVED
 };
 
-class SearchAlgorithm {
+class SearchAlgorithm : public TaskSpecificComponent {
     std::string description;
     SearchStatus status;
     bool solution_found;
@@ -68,13 +70,14 @@ protected:
     int get_adjusted_cost(const OperatorProxy &op) const;
 public:
     SearchAlgorithm(
-        OperatorCost cost_type, int bound, double max_time,
-        const std::string &description, utils::Verbosity verbosity);
-    explicit SearchAlgorithm(
+        const std::shared_ptr<AbstractTask> &task, OperatorCost cost_type,
+        int bound, double max_time, const std::string &description,
+        utils::Verbosity verbosity);
+    SearchAlgorithm(
+        const std::shared_ptr<AbstractTask> &task,
         const plugins::Options
             &opts); // TODO options object is needed for iterated search, the
                     // prototype for issue559 resolves this
-    virtual ~SearchAlgorithm();
     virtual void print_statistics() const = 0;
     virtual void save_plan_if_necessary();
     bool found_solution() const;

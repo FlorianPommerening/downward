@@ -9,8 +9,9 @@
 using namespace std;
 
 namespace iterated_search {
-IteratedSearch::IteratedSearch(const plugins::Options &opts)
-    : SearchAlgorithm(opts),
+IteratedSearch::IteratedSearch(
+    const std::shared_ptr<AbstractTask> &task, const plugins::Options &opts)
+    : SearchAlgorithm(task, opts),
       algorithm_configs(opts.get_list<parser::LazyValue>("algorithm_configs")),
       pass_bound(opts.get<bool>("pass_bound")),
       repeat_last_phase(opts.get<bool>("repeat_last")),
@@ -198,7 +199,7 @@ public:
             opts.get<parser::LazyValue>("algorithm_configs")
                 .construct_lazy_list();
         options_copy.set("algorithm_configs", algorithm_configs);
-        return make_shared<IteratedSearch>(options_copy);
+        return make_shared<IteratedSearch>(tasks::g_root_task, options_copy);
     }
 };
 

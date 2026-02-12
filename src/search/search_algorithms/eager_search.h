@@ -46,6 +46,7 @@ protected:
 
 public:
     explicit EagerSearch(
+        const std::shared_ptr<AbstractTask> &task,
         const std::shared_ptr<OpenListFactory> &open, bool reopen_closed,
         const std::shared_ptr<Evaluator> &f_eval,
         const std::vector<std::shared_ptr<Evaluator>> &preferred,

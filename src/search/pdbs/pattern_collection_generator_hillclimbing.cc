@@ -115,10 +115,10 @@ static vector<vector<int>> compute_relevant_neighbours(
 }
 
 PatternCollectionGeneratorHillclimbing::PatternCollectionGeneratorHillclimbing(
-    int pdb_max_size, int collection_max_size, int num_samples,
-    int min_improvement, double max_time, int random_seed,
-    utils::Verbosity verbosity)
-    : PatternCollectionGenerator(verbosity),
+    const shared_ptr<AbstractTask> &task, int pdb_max_size,
+    int collection_max_size, int num_samples, int min_improvement,
+    double max_time, int random_seed, utils::Verbosity verbosity)
+    : PatternCollectionGenerator(task, verbosity),
       pdb_max_size(pdb_max_size),
       collection_max_size(collection_max_size),
       num_samples(num_samples),
@@ -601,7 +601,7 @@ public:
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<
             PatternCollectionGeneratorHillclimbing>(
-            get_hillclimbing_arguments_from_options(opts),
+            tasks::g_root_task, get_hillclimbing_arguments_from_options(opts),
             get_generator_arguments_from_options(opts));
     }
 };
@@ -654,11 +654,13 @@ public:
         shared_ptr<PatternCollectionGeneratorHillclimbing> pgh =
             plugins::make_shared_from_arg_tuples<
                 PatternCollectionGeneratorHillclimbing>(
+                tasks::g_root_task,
                 get_hillclimbing_arguments_from_options(opts),
                 get_generator_arguments_from_options(opts));
 
         return plugins::make_shared_from_arg_tuples<CanonicalPDBsHeuristic>(
-            pgh, opts.get<double>("max_time_dominance_pruning"),
+            tasks::g_root_task, pgh,
+            opts.get<double>("max_time_dominance_pruning"),
             get_heuristic_arguments_from_options(opts));
     }
 };

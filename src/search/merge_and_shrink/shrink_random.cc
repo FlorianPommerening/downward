@@ -11,7 +11,9 @@
 using namespace std;
 
 namespace merge_and_shrink {
-ShrinkRandom::ShrinkRandom(int random_seed) : ShrinkBucketBased(random_seed) {
+ShrinkRandom::ShrinkRandom(
+    const shared_ptr<AbstractTask> &task, int random_seed)
+    : ShrinkBucketBased(task, random_seed) {
 }
 
 vector<ShrinkBucketBased::Bucket> ShrinkRandom::partition_into_buckets(
@@ -44,7 +46,7 @@ public:
     virtual shared_ptr<ShrinkRandom> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<ShrinkRandom>(
-            get_shrink_bucket_arguments_from_options(opts));
+            tasks::g_root_task, get_shrink_bucket_arguments_from_options(opts));
     }
 };
 

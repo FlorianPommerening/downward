@@ -90,8 +90,9 @@ struct Signature {
     }
 };
 
-ShrinkBisimulation::ShrinkBisimulation(bool greedy, AtLimit at_limit)
-    : greedy(greedy), at_limit(at_limit) {
+ShrinkBisimulation::ShrinkBisimulation(
+    const shared_ptr<AbstractTask> &task, bool greedy, AtLimit at_limit)
+    : ShrinkStrategy(task), greedy(greedy), at_limit(at_limit) {
 }
 
 int ShrinkBisimulation::initialize_groups(
@@ -417,7 +418,8 @@ public:
     virtual shared_ptr<ShrinkBisimulation> create_component(
         const plugins::Options &opts) const override {
         return make_shared<ShrinkBisimulation>(
-            opts.get<bool>("greedy"), opts.get<AtLimit>("at_limit"));
+            tasks::g_root_task, opts.get<bool>("greedy"),
+            opts.get<AtLimit>("at_limit"));
     }
 };
 

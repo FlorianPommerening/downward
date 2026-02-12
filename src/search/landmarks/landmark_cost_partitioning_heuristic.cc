@@ -16,13 +16,14 @@ using namespace std;
 
 namespace landmarks {
 LandmarkCostPartitioningHeuristic::LandmarkCostPartitioningHeuristic(
+    const shared_ptr<AbstractTask> &task,
     const shared_ptr<LandmarkFactory> &lm_factory, bool pref, bool prog_goal,
     bool prog_gn, bool prog_r, const shared_ptr<AbstractTask> &transform,
     bool cache_estimates, const string &description, utils::Verbosity verbosity,
     CostPartitioningMethod cost_partitioning, bool alm,
     lp::LPSolverType lpsolver)
     : LandmarkHeuristic(
-          pref, transform, cache_estimates, description, verbosity) {
+          task, pref, transform, cache_estimates, description, verbosity) {
     if (log.is_at_least_normal()) {
         log << "Initializing landmark cost partitioning heuristic..." << endl;
     }
@@ -168,6 +169,7 @@ public:
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<
             LandmarkCostPartitioningHeuristic>(
+            tasks::g_root_task,
             get_landmark_heuristic_arguments_from_options(opts),
             opts.get<CostPartitioningMethod>("cost_partitioning"),
             opts.get<bool>("alm"),

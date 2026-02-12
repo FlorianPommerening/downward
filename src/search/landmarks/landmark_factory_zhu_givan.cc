@@ -16,8 +16,9 @@ using namespace std;
 
 namespace landmarks {
 LandmarkFactoryZhuGivan::LandmarkFactoryZhuGivan(
-    bool use_orders, utils::Verbosity verbosity)
-    : LandmarkFactoryRelaxation(verbosity), use_orders(use_orders) {
+    const shared_ptr<AbstractTask> &task, bool use_orders,
+    utils::Verbosity verbosity)
+    : LandmarkFactoryRelaxation(task, verbosity), use_orders(use_orders) {
 }
 
 void LandmarkFactoryZhuGivan::generate_relaxed_landmarks(
@@ -331,7 +332,7 @@ public:
     virtual shared_ptr<LandmarkFactoryZhuGivan> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<LandmarkFactoryZhuGivan>(
-            get_use_orders_arguments_from_options(opts),
+            tasks::g_root_task, get_use_orders_arguments_from_options(opts),
             get_landmark_factory_arguments_from_options(opts));
     }
 };

@@ -11,6 +11,10 @@
 using namespace std;
 
 namespace merge_and_shrink {
+ShrinkStrategy::ShrinkStrategy(const shared_ptr<AbstractTask> &task)
+    : TaskSpecificComponent(task) {
+}
+
 void ShrinkStrategy::dump_options(utils::LogProxy &log) const {
     if (log.is_at_least_normal()) {
         log << "Shrink strategy options: " << endl;

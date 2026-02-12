@@ -1,7 +1,10 @@
 #ifndef OPERATOR_COUNTING_CONSTRAINT_GENERATOR_H
 #define OPERATOR_COUNTING_CONSTRAINT_GENERATOR_H
 
+#include "../component.h"
+
 #include "../algorithms/named_vector.h"
+#include "../tasks/root_task.h" // issue559 remove
 
 #include <memory>
 #include <vector>
@@ -29,9 +32,9 @@ namespace operator_counting {
       Example: constraints from landmarks generated for a given state, e.g.
       using the LM-Cut method.
 */
-class ConstraintGenerator {
+class ConstraintGenerator : TaskSpecificComponent {
 public:
-    virtual ~ConstraintGenerator() = default;
+    explicit ConstraintGenerator(const std::shared_ptr<AbstractTask> &task);
 
     /*
       Called upon initialization for the given task. Use this to add permanent

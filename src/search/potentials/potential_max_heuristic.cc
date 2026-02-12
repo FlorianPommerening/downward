@@ -8,10 +8,11 @@ using namespace std;
 
 namespace potentials {
 PotentialMaxHeuristic::PotentialMaxHeuristic(
+    const shared_ptr<AbstractTask> &task,
     vector<unique_ptr<PotentialFunction>> &&functions,
     const shared_ptr<AbstractTask> &transform, bool cache_estimates,
     const string &description, utils::Verbosity verbosity)
-    : Heuristic(transform, cache_estimates, description, verbosity),
+    : Heuristic(task, transform, cache_estimates, description, verbosity),
       functions(move(functions)) {
 }
 

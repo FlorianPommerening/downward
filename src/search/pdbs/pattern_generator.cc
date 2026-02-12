@@ -8,8 +8,9 @@ using namespace std;
 
 namespace pdbs {
 PatternCollectionGenerator::PatternCollectionGenerator(
-    utils::Verbosity verbosity)
-    : log(utils::get_log_for_verbosity(verbosity)) {
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+    : TaskSpecificComponent(task),
+      log(utils::get_log_for_verbosity(verbosity)) {
 }
 
 PatternCollectionInformation PatternCollectionGenerator::generate(
@@ -23,8 +24,10 @@ PatternCollectionInformation PatternCollectionGenerator::generate(
     return pci;
 }
 
-PatternGenerator::PatternGenerator(utils::Verbosity verbosity)
-    : log(utils::get_log_for_verbosity(verbosity)) {
+PatternGenerator::PatternGenerator(
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+    : TaskSpecificComponent(task),
+      log(utils::get_log_for_verbosity(verbosity)) {
 }
 
 PatternInformation PatternGenerator::generate(

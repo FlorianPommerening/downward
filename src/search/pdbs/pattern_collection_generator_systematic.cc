@@ -46,9 +46,9 @@ static void compute_union_pattern(
 }
 
 PatternCollectionGeneratorSystematic::PatternCollectionGeneratorSystematic(
-    int pattern_max_size, bool only_interesting_patterns,
-    utils::Verbosity verbosity)
-    : PatternCollectionGenerator(verbosity),
+    const shared_ptr<AbstractTask> &task, int pattern_max_size,
+    bool only_interesting_patterns, utils::Verbosity verbosity)
+    : PatternCollectionGenerator(task, verbosity),
       max_pattern_size(pattern_max_size),
       only_interesting_patterns(only_interesting_patterns) {
 }
@@ -321,7 +321,7 @@ public:
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<
             PatternCollectionGeneratorSystematic>(
-            opts.get<int>("pattern_max_size"),
+            tasks::g_root_task, opts.get<int>("pattern_max_size"),
             opts.get<bool>("only_interesting_patterns"),
             get_generator_arguments_from_options(opts));
     }

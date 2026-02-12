@@ -5,6 +5,9 @@
 #include "pattern_information.h"
 #include "types.h"
 
+#include "../component.h"
+
+#include "../tasks/root_task.h" // issue559 remove
 #include "../utils/logging.h"
 
 #include <memory>
@@ -22,29 +25,29 @@ class RandomNumberGenerator;
 }
 
 namespace pdbs {
-class PatternCollectionGenerator {
+class PatternCollectionGenerator : public TaskSpecificComponent {
     virtual std::string name() const = 0;
     virtual PatternCollectionInformation compute_patterns(
         const std::shared_ptr<AbstractTask> &task) = 0;
 protected:
     mutable utils::LogProxy log;
 public:
-    explicit PatternCollectionGenerator(utils::Verbosity verbosity);
-    virtual ~PatternCollectionGenerator() = default;
+    PatternCollectionGenerator(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
 
     PatternCollectionInformation generate(
         const std::shared_ptr<AbstractTask> &task);
 };
 
-class PatternGenerator {
+class PatternGenerator : public TaskSpecificComponent {
     virtual std::string name() const = 0;
     virtual PatternInformation compute_pattern(
         const std::shared_ptr<AbstractTask> &task) = 0;
 protected:
     mutable utils::LogProxy log;
 public:
-    explicit PatternGenerator(utils::Verbosity verbosity);
-    virtual ~PatternGenerator() = default;
+    PatternGenerator(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
 
     PatternInformation generate(const std::shared_ptr<AbstractTask> &task);
 };

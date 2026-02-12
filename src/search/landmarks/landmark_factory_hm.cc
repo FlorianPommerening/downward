@@ -576,9 +576,9 @@ void LandmarkFactoryHM::build_pm_operators(const TaskProxy &task_proxy) {
 }
 
 LandmarkFactoryHM::LandmarkFactoryHM(
-    int m, bool conjunctive_landmarks, bool use_orders,
-    utils::Verbosity verbosity)
-    : LandmarkFactory(verbosity),
+    const shared_ptr<AbstractTask> &task, int m, bool conjunctive_landmarks,
+    bool use_orders, utils::Verbosity verbosity)
+    : LandmarkFactory(task, verbosity),
       m(m),
       conjunctive_landmarks(conjunctive_landmarks),
       use_orders(use_orders) {
@@ -1073,7 +1073,8 @@ public:
     virtual shared_ptr<LandmarkFactoryHM> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<LandmarkFactoryHM>(
-            opts.get<int>("m"), opts.get<bool>("conjunctive_landmarks"),
+            tasks::g_root_task, opts.get<int>("m"),
+            opts.get<bool>("conjunctive_landmarks"),
             get_use_orders_arguments_from_options(opts),
             get_landmark_factory_arguments_from_options(opts));
     }

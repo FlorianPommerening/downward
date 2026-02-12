@@ -13,8 +13,9 @@ using namespace std;
 
 namespace pdbs {
 PatternGeneratorManual::PatternGeneratorManual(
-    const vector<int> &pattern, utils::Verbosity verbosity)
-    : PatternGenerator(verbosity), pattern(pattern) {
+    const shared_ptr<AbstractTask> &task, const vector<int> &pattern,
+    utils::Verbosity verbosity)
+    : PatternGenerator(task, verbosity), pattern(pattern) {
 }
 
 string PatternGeneratorManual::name() const {
@@ -45,7 +46,7 @@ public:
     virtual shared_ptr<PatternGeneratorManual> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<PatternGeneratorManual>(
-            opts.get_list<int>("pattern"),
+            tasks::g_root_task, opts.get_list<int>("pattern"),
             get_generator_arguments_from_options(opts));
     }
 };

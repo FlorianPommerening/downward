@@ -1,6 +1,7 @@
 #ifndef ABSTRACT_TASK_H
 #define ABSTRACT_TASK_H
 
+#include "component.h"
 #include "operator_id.h"
 
 #include "algorithms/subscriber.h"
@@ -47,10 +48,16 @@ inline void feed(HashState &hash_state, const FactPair &fact) {
 }
 }
 
-class AbstractTask : public subscriber::SubscriberService<AbstractTask> {
+/*
+  issue559 AbstractTask should not be a TaskSpecificComponent. Remove this
+  before merging. We do this, so the `transform` argument of heuristic can be
+  parsed but want to get rid of that argument alltogether.
+*/
+class AbstractTask : public TaskSpecificComponent,
+                     public subscriber::SubscriberService<AbstractTask> {
 public:
-    AbstractTask() = default;
-    virtual ~AbstractTask() override = default;
+    AbstractTask(const std::shared_ptr<AbstractTask> &task);
+    AbstractTask();
     virtual int get_num_variables() const = 0;
     virtual std::string get_variable_name(int var) const = 0;
     virtual int get_variable_domain_size(int var) const = 0;

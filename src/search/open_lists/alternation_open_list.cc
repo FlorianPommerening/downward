@@ -125,8 +125,9 @@ bool AlternationOpenList<Entry>::is_reliable_dead_end(
 }
 
 AlternationOpenListFactory::AlternationOpenListFactory(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<OpenListFactory>> &sublists, int boost)
-    : sublists(sublists), boost(boost) {
+    : OpenListFactory(task), sublists(sublists), boost(boost) {
     utils::verify_list_not_empty(sublists, "sublists");
 }
 
@@ -158,6 +159,7 @@ public:
     virtual shared_ptr<AlternationOpenListFactory> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<AlternationOpenListFactory>(
+            tasks::g_root_task,
             opts.get_list<shared_ptr<OpenListFactory>>("sublists"),
             opts.get<int>("boost"));
     }

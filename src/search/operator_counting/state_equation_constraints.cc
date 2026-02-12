@@ -11,8 +11,9 @@
 using namespace std;
 
 namespace operator_counting {
-StateEquationConstraints::StateEquationConstraints(utils::Verbosity verbosity)
-    : log(utils::get_log_for_verbosity(verbosity)) {
+StateEquationConstraints::StateEquationConstraints(
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+    : ConstraintGenerator(task), log(utils::get_log_for_verbosity(verbosity)) {
 }
 
 static void add_indices_to_constraint(
@@ -163,7 +164,7 @@ public:
     virtual shared_ptr<StateEquationConstraints> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<StateEquationConstraints>(
-            utils::get_log_arguments_from_options(opts));
+            tasks::g_root_task, utils::get_log_arguments_from_options(opts));
     }
 };
 

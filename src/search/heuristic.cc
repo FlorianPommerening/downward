@@ -14,17 +14,15 @@
 
 using namespace std;
 Heuristic::Heuristic(
+    const shared_ptr<AbstractTask> &task,
     const shared_ptr<AbstractTask> &transform, bool cache_estimates,
     const string &description, utils::Verbosity verbosity)
-    : Evaluator(true, true, true, description, verbosity),
+    : Evaluator(task, true, true, true, description, verbosity),
       heuristic_cache(
           HEntry(NO_VALUE, true)), // TODO: is true really a good idea here?
       cache_evaluator_values(cache_estimates),
       task(transform),
       task_proxy(*task) {
-}
-
-Heuristic::~Heuristic() {
 }
 
 void Heuristic::set_preferred(const OperatorProxy &op) {

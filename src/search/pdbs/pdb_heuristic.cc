@@ -19,10 +19,11 @@ static shared_ptr<PatternDatabase> get_pdb_from_generator(
 }
 
 PDBHeuristic::PDBHeuristic(
+    const shared_ptr<AbstractTask> &task,
     const shared_ptr<PatternGenerator> &pattern,
     const shared_ptr<AbstractTask> &transform, bool cache_estimates,
     const string &description, utils::Verbosity verbosity)
-    : Heuristic(transform, cache_estimates, description, verbosity),
+    : Heuristic(task, transform, cache_estimates, description, verbosity),
       pdb(get_pdb_from_generator(task, pattern)) {
 }
 
@@ -79,6 +80,7 @@ public:
     virtual shared_ptr<PDBHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<PDBHeuristic>(
+            tasks::g_root_task,
             opts.get<shared_ptr<PatternGenerator>>("pattern"),
             get_heuristic_arguments_from_options(opts));
     }

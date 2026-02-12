@@ -8,9 +8,10 @@ using namespace std;
 
 namespace max_evaluator {
 MaxEvaluator::MaxEvaluator(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<Evaluator>> &evals, const string &description,
     utils::Verbosity verbosity)
-    : CombiningEvaluator(evals, description, verbosity) {
+    : CombiningEvaluator(task, evals, description, verbosity) {
 }
 
 int MaxEvaluator::combine_values(const vector<int> &values) {
@@ -36,6 +37,7 @@ public:
     virtual shared_ptr<MaxEvaluator> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<MaxEvaluator>(
+            tasks::g_root_task,
             combining_evaluator::get_combining_evaluator_arguments_from_options(
                 opts));
     }

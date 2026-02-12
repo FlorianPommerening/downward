@@ -17,8 +17,9 @@ using namespace std;
 
 namespace pdbs {
 PatternGeneratorGreedy::PatternGeneratorGreedy(
-    int max_states, utils::Verbosity verbosity)
-    : PatternGenerator(verbosity), max_states(max_states) {
+    const shared_ptr<AbstractTask> &task, int max_states,
+    utils::Verbosity verbosity)
+    : PatternGenerator(task, verbosity), max_states(max_states) {
 }
 
 string PatternGeneratorGreedy::name() const {
@@ -66,7 +67,7 @@ public:
     virtual shared_ptr<PatternGeneratorGreedy> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<PatternGeneratorGreedy>(
-            opts.get<int>("max_states"),
+            tasks::g_root_task, opts.get<int>("max_states"),
             get_generator_arguments_from_options(opts));
     }
 };

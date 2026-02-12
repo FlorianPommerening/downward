@@ -10,9 +10,9 @@ using namespace std;
 
 namespace stubborn_sets_atom_centric {
 StubbornSetsAtomCentric::StubbornSetsAtomCentric(
-    bool use_sibling_shortcut, AtomSelectionStrategy atom_selection_strategy,
-    utils::Verbosity verbosity)
-    : StubbornSets(verbosity),
+    const shared_ptr<AbstractTask> &task, bool use_sibling_shortcut,
+    AtomSelectionStrategy atom_selection_strategy, utils::Verbosity verbosity)
+    : StubbornSets(task, verbosity),
       use_sibling_shortcut(use_sibling_shortcut),
       atom_selection_strategy(atom_selection_strategy) {
 }
@@ -289,7 +289,7 @@ public:
     virtual shared_ptr<StubbornSetsAtomCentric> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<StubbornSetsAtomCentric>(
-            opts.get<bool>("use_sibling_shortcut"),
+            tasks::g_root_task, opts.get<bool>("use_sibling_shortcut"),
             opts.get<AtomSelectionStrategy>("atom_selection_strategy"),
             get_pruning_arguments_from_options(opts));
     }

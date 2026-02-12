@@ -135,8 +135,9 @@ void TypeBasedOpenList<Entry>::get_path_dependent_evaluators(
 }
 
 TypeBasedOpenListFactory::TypeBasedOpenListFactory(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<Evaluator>> &evaluators, int random_seed)
-    : evaluators(evaluators), random_seed(random_seed) {
+    : OpenListFactory(task), evaluators(evaluators), random_seed(random_seed) {
     utils::verify_list_not_empty(evaluators, "evaluators");
 }
 
@@ -180,6 +181,7 @@ public:
     virtual shared_ptr<TypeBasedOpenListFactory> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<TypeBasedOpenListFactory>(
+            tasks::g_root_task,
             opts.get_list<shared_ptr<Evaluator>>("evaluators"),
             utils::get_rng_arguments_from_options(opts));
     }

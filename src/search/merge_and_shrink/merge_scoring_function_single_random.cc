@@ -13,8 +13,10 @@ using namespace std;
 
 namespace merge_and_shrink {
 MergeScoringFunctionSingleRandom::MergeScoringFunctionSingleRandom(
-    int random_seed)
-    : random_seed(random_seed), rng(utils::get_rng(random_seed)) {
+    const shared_ptr<AbstractTask> &task, int random_seed)
+    : MergeScoringFunction(task),
+      random_seed(random_seed),
+      rng(utils::get_rng(random_seed)) {
 }
 
 vector<double> MergeScoringFunctionSingleRandom::compute_scores(
@@ -62,7 +64,7 @@ public:
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<
             MergeScoringFunctionSingleRandom>(
-            utils::get_rng_arguments_from_options(opts));
+            tasks::g_root_task, utils::get_rng_arguments_from_options(opts));
     }
 };
 

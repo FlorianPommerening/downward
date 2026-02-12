@@ -3,6 +3,9 @@
 
 #include "landmark_graph.h"
 
+#include "../component.h"
+
+#include "../tasks/root_task.h" // issue559 remove
 #include "../utils/logging.h"
 
 #include <vector>
@@ -15,7 +18,7 @@ class Feature;
 }
 
 namespace landmarks {
-class LandmarkFactory {
+class LandmarkFactory : TaskSpecificComponent {
     AbstractTask *landmark_graph_task;
     std::vector<std::vector<std::vector<int>>> operators_providing_effect;
 
@@ -38,7 +41,8 @@ protected:
     std::shared_ptr<LandmarkGraph> landmark_graph;
     bool achievers_calculated = false;
 
-    explicit LandmarkFactory(utils::Verbosity verbosity);
+    LandmarkFactory(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
 
     void add_or_replace_ordering_if_stronger(
         LandmarkNode &from, LandmarkNode &to, OrderingType type) const;
@@ -51,7 +55,6 @@ protected:
     }
 
 public:
-    virtual ~LandmarkFactory() = default;
     LandmarkFactory(const LandmarkFactory &) = delete;
 
     std::shared_ptr<LandmarkGraph> compute_landmark_graph(

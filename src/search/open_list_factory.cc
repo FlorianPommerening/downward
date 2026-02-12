@@ -5,6 +5,10 @@
 
 using namespace std;
 
+OpenListFactory::OpenListFactory(const shared_ptr<AbstractTask> &task)
+    : TaskSpecificComponent(task) {
+}
+
 template<>
 unique_ptr<StateOpenList> OpenListFactory::create_open_list() {
     return create_state_open_list();

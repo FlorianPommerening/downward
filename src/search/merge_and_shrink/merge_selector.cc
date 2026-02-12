@@ -30,6 +30,10 @@ static vector<pair<int, int>> compute_merge_candidates(
     return merge_candidates;
 }
 
+MergeSelector::MergeSelector(const shared_ptr<AbstractTask> &task)
+    : TaskSpecificComponent(task) {
+}
+
 pair<int, int> MergeSelector::select_merge(
     const FactoredTransitionSystem &fts) const {
     return select_merge_from_candidates(fts, compute_merge_candidates(fts));

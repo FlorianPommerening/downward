@@ -39,9 +39,10 @@ static successor_generator::SuccessorGenerator &get_successor_generator(
 }
 
 SearchAlgorithm::SearchAlgorithm(
-    OperatorCost cost_type, int bound, double max_time,
-    const string &description, utils::Verbosity verbosity)
-    : description(description),
+    const shared_ptr<AbstractTask> &task, OperatorCost cost_type, int bound,
+    double max_time, const string &description, utils::Verbosity verbosity)
+    : TaskSpecificComponent(task),
+      description(description),
       status(IN_PROGRESS),
       solution_found(false),
       task(tasks::g_root_task),
@@ -63,10 +64,12 @@ SearchAlgorithm::SearchAlgorithm(
 }
 
 SearchAlgorithm::SearchAlgorithm(
+    const shared_ptr<AbstractTask> &task,
     const plugins::Options
         &opts) // TODO options object is needed for iterated search, the
                // prototype for issue559 resolves this
-    : description(opts.get_unparsed_config()),
+    : TaskSpecificComponent(task),
+      description(opts.get_unparsed_config()),
       status(IN_PROGRESS),
       solution_found(false),
       task(tasks::g_root_task),
@@ -86,9 +89,6 @@ SearchAlgorithm::SearchAlgorithm(
     }
     bound = opts.get<int>("bound");
     task_properties::print_variable_statistics(task_proxy);
-}
-
-SearchAlgorithm::~SearchAlgorithm() {
 }
 
 bool SearchAlgorithm::found_solution() const {

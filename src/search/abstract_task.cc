@@ -15,6 +15,12 @@ ostream &operator<<(ostream &os, const FactPair &fact_pair) {
     return os;
 }
 
+AbstractTask::AbstractTask(const shared_ptr<AbstractTask> &task)
+    : TaskSpecificComponent(task) {
+}
+AbstractTask::AbstractTask() : TaskSpecificComponent(nullptr) {
+}
+
 static class AbstractTaskCategoryPlugin
     : public plugins::TypedCategoryPlugin<AbstractTask> {
 public:

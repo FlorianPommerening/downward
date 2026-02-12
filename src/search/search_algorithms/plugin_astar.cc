@@ -52,6 +52,7 @@ public:
         vector<shared_ptr<Evaluator>> preferred_list;
         options_copy.set("preferred", preferred_list);
         return plugins::make_shared_from_arg_tuples<eager_search::EagerSearch>(
+            tasks::g_root_task,
             options_copy.get<shared_ptr<OpenListFactory>>("open"),
             options_copy.get<bool>("reopen_closed"),
             options_copy.get<shared_ptr<Evaluator>>("f_eval", nullptr),

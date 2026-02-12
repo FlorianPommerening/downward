@@ -20,6 +20,7 @@ protected:
 
 public:
     CanonicalPDBsHeuristic(
+        const std::shared_ptr<AbstractTask> &task,
         const std::shared_ptr<PatternCollectionGenerator> &patterns,
         double max_time_dominance_pruning,
         const std::shared_ptr<AbstractTask> &transform, bool cache_estimates,

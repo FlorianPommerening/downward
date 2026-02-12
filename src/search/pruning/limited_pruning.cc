@@ -7,9 +7,10 @@ using namespace std;
 
 namespace limited_pruning {
 LimitedPruning::LimitedPruning(
+    const shared_ptr<AbstractTask> &task,
     const shared_ptr<PruningMethod> &pruning, double min_required_pruning_ratio,
     int expansions_before_checking_pruning_ratio, utils::Verbosity verbosity)
-    : PruningMethod(verbosity),
+    : PruningMethod(task, verbosity),
       pruning_method(pruning),
       min_required_pruning_ratio(min_required_pruning_ratio),
       num_expansions_before_checking_pruning_ratio(
@@ -90,7 +91,7 @@ public:
     virtual shared_ptr<LimitedPruning> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<LimitedPruning>(
-            opts.get<shared_ptr<PruningMethod>>("pruning"),
+            tasks::g_root_task, opts.get<shared_ptr<PruningMethod>>("pruning"),
             opts.get<double>("min_required_pruning_ratio"),
             opts.get<int>("expansions_before_checking_pruning_ratio"),
             get_pruning_arguments_from_options(opts));

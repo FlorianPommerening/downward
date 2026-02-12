@@ -49,6 +49,7 @@ public:
     virtual shared_ptr<PotentialHeuristic> create_component(
         const plugins::Options &opts) const override {
         return make_shared<PotentialHeuristic>(
+            tasks::g_root_task,
             create_potential_function(
                 opts.get<shared_ptr<AbstractTask>>("transform"),
                 opts.get<lp::LPSolverType>("lpsolver"),
@@ -78,6 +79,7 @@ public:
     virtual shared_ptr<PotentialHeuristic> create_component(
         const plugins::Options &opts) const override {
         return make_shared<PotentialHeuristic>(
+            tasks::g_root_task,
             create_potential_function(
                 opts.get<shared_ptr<AbstractTask>>("transform"),
                 opts.get<lp::LPSolverType>("lpsolver"),

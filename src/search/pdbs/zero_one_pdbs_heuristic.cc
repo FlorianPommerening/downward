@@ -19,10 +19,11 @@ static ZeroOnePDBs get_zero_one_pdbs_from_generator(
 }
 
 ZeroOnePDBsHeuristic::ZeroOnePDBsHeuristic(
+    const shared_ptr<AbstractTask> &task,
     const shared_ptr<PatternCollectionGenerator> &patterns,
     const shared_ptr<AbstractTask> &transform, bool cache_estimates,
     const string &description, utils::Verbosity verbosity)
-    : Heuristic(transform, cache_estimates, description, verbosity),
+    : Heuristic(task, transform, cache_estimates, description, verbosity),
       zero_one_pdbs(get_zero_one_pdbs_from_generator(task, patterns)) {
 }
 
@@ -68,6 +69,7 @@ public:
     virtual shared_ptr<ZeroOnePDBsHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<ZeroOnePDBsHeuristic>(
+            tasks::g_root_task,
             opts.get<shared_ptr<PatternCollectionGenerator>>("patterns"),
             get_heuristic_arguments_from_options(opts));
     }

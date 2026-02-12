@@ -1,16 +1,19 @@
 #ifndef OPEN_LIST_FACTORY_H
 #define OPEN_LIST_FACTORY_H
 
+#include "component.h"
 #include "open_list.h"
 
 #include "plugins/plugin.h"
+#include "tasks/root_task.h" // issue559 remove
 
 #include <memory>
 
-class OpenListFactory {
+class OpenListFactory : TaskSpecificComponent {
+protected:
+    explicit OpenListFactory(const std::shared_ptr<AbstractTask> &task);
 public:
     OpenListFactory() = default;
-    virtual ~OpenListFactory() = default;
 
     OpenListFactory(const OpenListFactory &) = delete;
 

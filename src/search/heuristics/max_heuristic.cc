@@ -23,10 +23,11 @@ namespace max_heuristic {
 
 // construction and destruction
 HSPMaxHeuristic::HSPMaxHeuristic(
-    tasks::AxiomHandlingType axioms, const shared_ptr<AbstractTask> &transform,
-    bool cache_estimates, const string &description, utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, tasks::AxiomHandlingType axioms,
+    const shared_ptr<AbstractTask> &transform, bool cache_estimates,
+    const string &description, utils::Verbosity verbosity)
     : RelaxationHeuristic(
-          axioms, transform, cache_estimates, description, verbosity) {
+          task, axioms, transform, cache_estimates, description, verbosity) {
     if (log.is_at_least_normal()) {
         log << "Initializing HSP max heuristic..." << endl;
     }
@@ -123,6 +124,7 @@ public:
     virtual shared_ptr<HSPMaxHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<HSPMaxHeuristic>(
+            tasks::g_root_task,
             relaxation_heuristic::
                 get_relaxation_heuristic_arguments_from_options(opts));
     }

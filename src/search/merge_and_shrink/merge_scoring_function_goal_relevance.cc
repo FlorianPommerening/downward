@@ -9,6 +9,11 @@
 using namespace std;
 
 namespace merge_and_shrink {
+MergeScoringFunctionGoalRelevance::MergeScoringFunctionGoalRelevance(
+    const shared_ptr<AbstractTask> &task)
+    : MergeScoringFunction(task) {
+}
+
 vector<double> MergeScoringFunctionGoalRelevance::compute_scores(
     const FactoredTransitionSystem &fts,
     const vector<pair<int, int>> &merge_candidates) {
@@ -55,7 +60,8 @@ public:
 
     virtual shared_ptr<MergeScoringFunctionGoalRelevance> create_component(
         const plugins::Options &) const override {
-        return make_shared<MergeScoringFunctionGoalRelevance>();
+        return make_shared<MergeScoringFunctionGoalRelevance>(
+            tasks::g_root_task);
     }
 };
 

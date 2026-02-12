@@ -32,12 +32,13 @@ static vector<CartesianHeuristicFunction> generate_heuristic_functions(
 }
 
 AdditiveCartesianHeuristic::AdditiveCartesianHeuristic(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<SubtaskGenerator>> &subtasks, int max_states,
     int max_transitions, double max_time, PickSplit pick,
     bool use_general_costs, int random_seed,
     const shared_ptr<AbstractTask> &transform, bool cache_estimates,
     const string &description, utils::Verbosity verbosity)
-    : Heuristic(transform, cache_estimates, description, verbosity),
+    : Heuristic(task, transform, cache_estimates, description, verbosity),
       heuristic_functions(generate_heuristic_functions(
           subtasks, max_states, max_transitions, max_time, pick,
           use_general_costs, random_seed, transform, log)) {
@@ -126,6 +127,7 @@ public:
     virtual shared_ptr<AdditiveCartesianHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<AdditiveCartesianHeuristic>(
+            tasks::g_root_task,
             opts.get_list<shared_ptr<SubtaskGenerator>>("subtasks"),
             opts.get<int>("max_states"), opts.get<int>("max_transitions"),
             opts.get<double>("max_time"), opts.get<PickSplit>("pick"),

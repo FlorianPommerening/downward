@@ -221,9 +221,11 @@ bool ParetoOpenList<Entry>::is_reliable_dead_end(
 }
 
 ParetoOpenListFactory::ParetoOpenListFactory(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<Evaluator>> &evals, bool state_uniform_selection,
     int random_seed, bool pref_only)
-    : evals(evals),
+    : OpenListFactory(task),
+      evals(evals),
       state_uniform_selection(state_uniform_selection),
       random_seed(random_seed),
       pref_only(pref_only) {
@@ -263,7 +265,7 @@ public:
     virtual shared_ptr<ParetoOpenListFactory> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<ParetoOpenListFactory>(
-            opts.get_list<shared_ptr<Evaluator>>("evals"),
+            tasks::g_root_task, opts.get_list<shared_ptr<Evaluator>>("evals"),
             opts.get<bool>("state_uniform_selection"),
             utils::get_rng_arguments_from_options(opts),
             get_open_list_arguments_from_options(opts));

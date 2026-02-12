@@ -54,10 +54,12 @@ protected:
     virtual int compute_heuristic(const State &ancestor_state) override;
 public:
     ContextEnhancedAdditiveHeuristic(
+        const std::shared_ptr<AbstractTask> &task,
         tasks::AxiomHandlingType axioms,
         const std::shared_ptr<AbstractTask> &transform, bool cache_estimates,
         const std::string &description, utils::Verbosity verbosity);
-    ~ContextEnhancedAdditiveHeuristic();
+
+    virtual ~ContextEnhancedAdditiveHeuristic() override;
     virtual bool dead_ends_are_reliable() const override;
 };
 }

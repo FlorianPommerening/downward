@@ -25,10 +25,10 @@ using namespace std;
 
 namespace pdbs {
 PatternCollectionGeneratorGenetic::PatternCollectionGeneratorGenetic(
-    int pdb_max_size, int num_collections, int num_episodes,
-    double mutation_probability, bool disjoint, int random_seed,
-    utils::Verbosity verbosity)
-    : PatternCollectionGenerator(verbosity),
+    const shared_ptr<AbstractTask> &task, int pdb_max_size, int num_collections,
+    int num_episodes, double mutation_probability, bool disjoint,
+    int random_seed, utils::Verbosity verbosity)
+    : PatternCollectionGenerator(task, verbosity),
       pdb_max_size(pdb_max_size),
       num_collections(num_collections),
       num_episodes(num_episodes),
@@ -392,8 +392,8 @@ public:
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<
             PatternCollectionGeneratorGenetic>(
-            opts.get<int>("pdb_max_size"), opts.get<int>("num_collections"),
-            opts.get<int>("num_episodes"),
+            tasks::g_root_task, opts.get<int>("pdb_max_size"),
+            opts.get<int>("num_collections"), opts.get<int>("num_episodes"),
             opts.get<double>("mutation_probability"),
             opts.get<bool>("disjoint"),
             utils::get_rng_arguments_from_options(opts),

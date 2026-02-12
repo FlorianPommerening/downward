@@ -8,9 +8,10 @@ using namespace std;
 
 namespace sum_evaluator {
 SumEvaluator::SumEvaluator(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<Evaluator>> &evals, const string &description,
     utils::Verbosity verbosity)
-    : CombiningEvaluator(evals, description, verbosity) {
+    : CombiningEvaluator(task, evals, description, verbosity) {
 }
 
 int SumEvaluator::combine_values(const vector<int> &values) {
@@ -38,6 +39,7 @@ public:
     virtual shared_ptr<SumEvaluator> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<SumEvaluator>(
+            tasks::g_root_task,
             combining_evaluator::get_combining_evaluator_arguments_from_options(
                 opts));
     }

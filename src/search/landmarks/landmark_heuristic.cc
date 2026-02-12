@@ -14,9 +14,10 @@ using namespace std;
 
 namespace landmarks {
 LandmarkHeuristic::LandmarkHeuristic(
-    bool use_preferred_operators, const shared_ptr<AbstractTask> &transform,
-    bool cache_estimates, const string &description, utils::Verbosity verbosity)
-    : Heuristic(transform, cache_estimates, description, verbosity),
+    const shared_ptr<AbstractTask> &task, bool use_preferred_operators,
+    const shared_ptr<AbstractTask> &transform, bool cache_estimates,
+    const string &description, utils::Verbosity verbosity)
+    : Heuristic(task, transform, cache_estimates, description, verbosity),
       initial_landmark_graph_has_cycle_of_natural_orderings(false),
       use_preferred_operators(use_preferred_operators),
       successor_generator(nullptr) {

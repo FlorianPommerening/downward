@@ -10,9 +10,10 @@ using namespace std;
 
 namespace combining_evaluator {
 CombiningEvaluator::CombiningEvaluator(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<Evaluator>> &evals, const string &description,
     utils::Verbosity verbosity)
-    : Evaluator(false, false, false, description, verbosity),
+    : Evaluator(task, false, false, false, description, verbosity),
       subevaluators(evals) {
     utils::verify_list_not_empty(evals, "evals");
     all_dead_ends_are_reliable = true;

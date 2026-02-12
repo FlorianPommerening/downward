@@ -27,9 +27,11 @@ using utils::ExitCode;
 
 namespace merge_and_shrink {
 LabelReduction::LabelReduction(
-    bool before_shrinking, bool before_merging, LabelReductionMethod method,
+    const std::shared_ptr<AbstractTask> &task, bool before_shrinking,
+    bool before_merging, LabelReductionMethod method,
     LabelReductionSystemOrder system_order, int random_seed)
-    : lr_before_shrinking(before_shrinking),
+    : TaskSpecificComponent(task),
+      lr_before_shrinking(before_shrinking),
       lr_before_merging(before_merging),
       lr_method(method),
       lr_system_order(system_order),
@@ -341,7 +343,7 @@ public:
     virtual shared_ptr<LabelReduction> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<LabelReduction>(
-            opts.get<bool>("before_shrinking"),
+            tasks::g_root_task, opts.get<bool>("before_shrinking"),
             opts.get<bool>("before_merging"),
             opts.get<LabelReductionMethod>("method"),
             opts.get<LabelReductionSystemOrder>("system_order"),

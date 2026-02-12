@@ -92,6 +92,7 @@ create_fast_downward_library(
         abstract_task
         axioms
         command_line
+        component
         evaluation_context
         evaluation_result
         evaluator

@@ -172,6 +172,7 @@ public:
     virtual shared_ptr<PotentialMaxHeuristic> create_component(
         const plugins::Options &opts) const override {
         return make_shared<PotentialMaxHeuristic>(
+            tasks::g_root_task,
             DiversePotentialHeuristics(
                 opts.get<int>("num_samples"),
                 opts.get<int>("max_num_heuristics"),

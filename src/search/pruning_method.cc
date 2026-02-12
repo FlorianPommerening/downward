@@ -8,8 +8,10 @@
 
 using namespace std;
 
-PruningMethod::PruningMethod(utils::Verbosity verbosity)
-    : timer(false),
+PruningMethod::PruningMethod(
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+    : TaskSpecificComponent(task),
+      timer(false),
       log(utils::get_log_for_verbosity(verbosity)),
       task(nullptr) {
 }

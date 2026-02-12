@@ -28,22 +28,25 @@ static shared_ptr<OpenListFactory> create_alternation_open_list_factory_aux(
     const vector<shared_ptr<Evaluator>> &preferred_evaluators, int boost) {
     if (evals.size() == 1 && preferred_evaluators.empty()) {
         return make_shared<standard_scalar_open_list::BestFirstOpenListFactory>(
-            evals[0], false);
+            tasks::g_root_task, evals[0], false); // issue559
     } else {
         vector<shared_ptr<OpenListFactory>> subfactories;
         for (const shared_ptr<Evaluator> &evaluator : evals) {
             subfactories.push_back(
                 make_shared<
                     standard_scalar_open_list::BestFirstOpenListFactory>(
+                    tasks::g_root_task, // issue559
                     evaluator, false));
             if (!preferred_evaluators.empty()) {
                 subfactories.push_back(
                     make_shared<
                         standard_scalar_open_list::BestFirstOpenListFactory>(
+                        tasks::g_root_task, // issue559
                         evaluator, true));
             }
         }
         return make_shared<alternation_open_list::AlternationOpenListFactory>(
+            tasks::g_root_task, // issue559
             subfactories, boost);
     }
 }
@@ -77,9 +80,11 @@ static shared_ptr<Evaluator> create_wastar_eval(
         w_h_eval = h_eval;
     } else {
         w_h_eval = make_shared<WeightedEval>(
+            tasks::g_root_task, // issue559 TODO
             h_eval, weight, "wastar.w_h_eval", verbosity);
     }
     return make_shared<SumEval>(
+        tasks::g_root_task, // issue559 TODO
         vector<shared_ptr<Evaluator>>({g_eval, w_h_eval}), "wastar.eval",
         verbosity);
 }
@@ -89,7 +94,8 @@ shared_ptr<OpenListFactory> create_wastar_open_list_factory(
     const vector<shared_ptr<Evaluator>> &preferred, int boost, int weight,
     utils::Verbosity verbosity) {
     utils::verify_list_not_empty(evals, "evals");
-    shared_ptr<GEval> g_eval = make_shared<GEval>("wastar.g_eval", verbosity);
+    shared_ptr<GEval> g_eval = make_shared<GEval>(
+        tasks::g_root_task, "wastar.g_eval", verbosity); // issue559 TODO
     vector<shared_ptr<Evaluator>> f_evals;
     f_evals.reserve(evals.size());
     for (const shared_ptr<Evaluator> &eval : evals)
@@ -101,13 +107,16 @@ shared_ptr<OpenListFactory> create_wastar_open_list_factory(
 pair<shared_ptr<OpenListFactory>, const shared_ptr<Evaluator>>
 create_astar_open_list_factory_and_f_eval(
     const shared_ptr<Evaluator> &h_eval, utils::Verbosity verbosity) {
-    shared_ptr<GEval> g = make_shared<GEval>("astar.g_eval", verbosity);
+    shared_ptr<GEval> g = make_shared<GEval>(
+        tasks::g_root_task, "astar.g_eval", verbosity); // issue559 TODO
     shared_ptr<Evaluator> f = make_shared<SumEval>(
+        tasks::g_root_task, // issue559 TODO
         vector<shared_ptr<Evaluator>>({g, h_eval}), "astar.f_eval", verbosity);
     vector<shared_ptr<Evaluator>> evals = {f, h_eval};
 
     shared_ptr<OpenListFactory> open =
         make_shared<tiebreaking_open_list::TieBreakingOpenListFactory>(
+            tasks::g_root_task, // issue559
             evals, false, false);
     return make_pair(open, f);
 }

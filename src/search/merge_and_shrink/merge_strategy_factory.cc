@@ -7,8 +7,10 @@
 using namespace std;
 
 namespace merge_and_shrink {
-MergeStrategyFactory::MergeStrategyFactory(utils::Verbosity verbosity)
-    : log(utils::get_log_for_verbosity(verbosity)) {
+MergeStrategyFactory::MergeStrategyFactory(
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+    : TaskSpecificComponent(task),
+      log(utils::get_log_for_verbosity(verbosity)) {
 }
 
 void MergeStrategyFactory::dump_options() const {

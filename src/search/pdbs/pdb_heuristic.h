@@ -25,6 +25,7 @@ public:
        empty, default operator costs are used.
     */
     PDBHeuristic(
+        const std::shared_ptr<AbstractTask> &task,
         const std::shared_ptr<PatternGenerator> &pattern_generator,
         const std::shared_ptr<AbstractTask> &transform, bool cache_estimates,
         const std::string &description, utils::Verbosity verbosity);

@@ -17,10 +17,11 @@ using namespace domain_transition_graph;
 
 namespace cg_heuristic {
 CGHeuristic::CGHeuristic(
-    int max_cache_size, tasks::AxiomHandlingType axioms,
-    const shared_ptr<AbstractTask> &transform, bool cache_estimates,
-    const string &description, utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, int max_cache_size,
+    tasks::AxiomHandlingType axioms, const shared_ptr<AbstractTask> &transform,
+    bool cache_estimates, const string &description, utils::Verbosity verbosity)
     : Heuristic(
+          task,
           tasks::get_default_value_axioms_task_if_needed(transform, axioms),
           cache_estimates, description, verbosity),
       helpful_transition_extraction_counter(0),
@@ -311,7 +312,7 @@ public:
     virtual shared_ptr<CGHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<CGHeuristic>(
-            opts.get<int>("max_cache_size"),
+            tasks::g_root_task, opts.get<int>("max_cache_size"),
             tasks::get_axioms_arguments_from_options(opts),
             get_heuristic_arguments_from_options(opts));
     }

@@ -59,6 +59,11 @@ static vector<int> compute_label_ranks(
     return label_ranks;
 }
 
+MergeScoringFunctionDFP::MergeScoringFunctionDFP(
+    const shared_ptr<AbstractTask> &task)
+    : MergeScoringFunction(task) {
+}
+
 vector<double> MergeScoringFunctionDFP::compute_scores(
     const FactoredTransitionSystem &fts,
     const vector<pair<int, int>> &merge_candidates) {
@@ -140,7 +145,7 @@ public:
 
     virtual shared_ptr<MergeScoringFunctionDFP> create_component(
         const plugins::Options &) const override {
-        return make_shared<MergeScoringFunctionDFP>();
+        return make_shared<MergeScoringFunctionDFP>(tasks::g_root_task);
     }
 };
 

@@ -138,9 +138,10 @@ void EpsilonGreedyOpenList<Entry>::clear() {
 }
 
 EpsilonGreedyOpenListFactory::EpsilonGreedyOpenListFactory(
-    const shared_ptr<Evaluator> &eval, double epsilon, int random_seed,
-    bool pref_only)
-    : eval(eval),
+    const shared_ptr<AbstractTask> &task, const shared_ptr<Evaluator> &eval,
+    double epsilon, int random_seed, bool pref_only)
+    : OpenListFactory(task),
+      eval(eval),
       epsilon(epsilon),
       random_seed(random_seed),
       pref_only(pref_only) {
@@ -189,7 +190,7 @@ public:
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<
             EpsilonGreedyOpenListFactory>(
-            opts.get<shared_ptr<Evaluator>>("eval"),
+            tasks::g_root_task, opts.get<shared_ptr<Evaluator>>("eval"),
             opts.get<double>("epsilon"),
             utils::get_rng_arguments_from_options(opts),
             get_open_list_arguments_from_options(opts));

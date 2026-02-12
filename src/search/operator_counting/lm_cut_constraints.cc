@@ -11,6 +11,10 @@
 using namespace std;
 
 namespace operator_counting {
+LMCutConstraints::LMCutConstraints(const shared_ptr<AbstractTask> &task)
+    : ConstraintGenerator(task) {
+}
+
 void LMCutConstraints::initialize_constraints(
     const shared_ptr<AbstractTask> &task, lp::LinearProgram &) {
     TaskProxy task_proxy(*task);
@@ -72,7 +76,7 @@ public:
 
     virtual shared_ptr<LMCutConstraints> create_component(
         const plugins::Options &) const override {
-        return make_shared<LMCutConstraints>();
+        return make_shared<LMCutConstraints>(tasks::g_root_task);
     }
 };
 

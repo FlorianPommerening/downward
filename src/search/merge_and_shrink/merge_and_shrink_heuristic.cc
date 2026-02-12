@@ -21,6 +21,7 @@ using utils::ExitCode;
 
 namespace merge_and_shrink {
 MergeAndShrinkHeuristic::MergeAndShrinkHeuristic(
+    const shared_ptr<AbstractTask> &task,
     const shared_ptr<MergeStrategyFactory> &merge_strategy,
     const shared_ptr<ShrinkStrategy> &shrink_strategy,
     const shared_ptr<LabelReduction> &label_reduction,
@@ -28,7 +29,7 @@ MergeAndShrinkHeuristic::MergeAndShrinkHeuristic(
     int max_states_before_merge, int threshold_before_merge,
     double main_loop_max_time, const shared_ptr<AbstractTask> &transform,
     bool cache_estimates, const string &description, utils::Verbosity verbosity)
-    : Heuristic(transform, cache_estimates, description, verbosity) {
+    : Heuristic(task, transform, cache_estimates, description, verbosity) {
     log << "Initializing merge-and-shrink heuristic..." << endl;
     MergeAndShrinkAlgorithm algorithm(
         merge_strategy, shrink_strategy, label_reduction,
@@ -246,6 +247,7 @@ public:
     virtual shared_ptr<MergeAndShrinkHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<MergeAndShrinkHeuristic>(
+            tasks::g_root_task,
             get_merge_and_shrink_algorithm_arguments_from_options(opts),
             get_heuristic_arguments_from_options(opts));
     }

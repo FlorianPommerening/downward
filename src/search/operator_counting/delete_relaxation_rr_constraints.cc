@@ -187,9 +187,11 @@ int DeleteRelaxationRRConstraints::LPVariableIDs::id_of_t(FactPair f) const {
 }
 
 DeleteRelaxationRRConstraints::DeleteRelaxationRRConstraints(
-    const plugins::Options &opts)
-    : acyclicity_type(opts.get<AcyclicityType>("acyclicity_type")),
-      use_integer_vars(opts.get<bool>("use_integer_vars")) {
+    const shared_ptr<AbstractTask> &task, AcyclicityType acyclicity_type,
+    bool use_integer_vars)
+    : ConstraintGenerator(task),
+      acyclicity_type(acyclicity_type),
+      use_integer_vars(use_integer_vars) {
 }
 
 int DeleteRelaxationRRConstraints::get_constraint_id(FactPair f) const {
@@ -617,6 +619,13 @@ public:
             "recommend using this formulation as it can generally be solved "
             "more efficiently, in particular in case of the h^+^ "
             "configuration, and some relaxations offer tighter bounds.\n");
+    }
+
+    virtual shared_ptr<DeleteRelaxationRRConstraints> create_component(
+        const plugins::Options &opts) const override {
+        return make_shared<DeleteRelaxationRRConstraints>(
+            tasks::g_root_task, opts.get<AcyclicityType>("acyclicity_type"),
+            opts.get<bool>("use_integer_vars"));
     }
 };
 

@@ -13,10 +13,11 @@ namespace additive_heuristic {
 const int AdditiveHeuristic::MAX_COST_VALUE;
 
 AdditiveHeuristic::AdditiveHeuristic(
-    tasks::AxiomHandlingType axioms, const shared_ptr<AbstractTask> &transform,
-    bool cache_estimates, const string &description, utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, tasks::AxiomHandlingType axioms,
+    const shared_ptr<AbstractTask> &transform, bool cache_estimates,
+    const string &description, utils::Verbosity verbosity)
     : RelaxationHeuristic(
-          axioms, transform, cache_estimates, description, verbosity),
+          task, axioms, transform, cache_estimates, description, verbosity),
       did_write_overflow_warning(false) {
     if (log.is_at_least_normal()) {
         log << "Initializing additive heuristic..." << endl;
@@ -167,6 +168,7 @@ public:
     virtual shared_ptr<AdditiveHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<AdditiveHeuristic>(
+            tasks::g_root_task,
             relaxation_heuristic::
                 get_relaxation_heuristic_arguments_from_options(opts));
     }

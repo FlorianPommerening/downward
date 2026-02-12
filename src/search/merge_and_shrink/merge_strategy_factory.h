@@ -1,6 +1,9 @@
 #ifndef MERGE_AND_SHRINK_MERGE_STRATEGY_FACTORY_H
 #define MERGE_AND_SHRINK_MERGE_STRATEGY_FACTORY_H
 
+#include "../component.h"
+
+#include "../tasks/root_task.h" // issue559 remove
 #include "../utils/logging.h"
 
 #include <memory>
@@ -17,15 +20,15 @@ namespace merge_and_shrink {
 class FactoredTransitionSystem;
 class MergeStrategy;
 
-class MergeStrategyFactory {
+class MergeStrategyFactory : public TaskSpecificComponent {
 protected:
     mutable utils::LogProxy log;
 
     virtual std::string name() const = 0;
     virtual void dump_strategy_specific_options() const = 0;
 public:
-    MergeStrategyFactory(utils::Verbosity verbosity);
-    virtual ~MergeStrategyFactory() = default;
+    MergeStrategyFactory(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
     void dump_options() const;
     virtual std::unique_ptr<MergeStrategy> compute_merge_strategy(
         const TaskProxy &task_proxy, const FactoredTransitionSystem &fts) = 0;

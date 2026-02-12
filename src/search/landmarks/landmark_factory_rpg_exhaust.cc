@@ -21,8 +21,9 @@ namespace landmarks {
 */
 
 LandmarkFactoryRpgExhaust::LandmarkFactoryRpgExhaust(
-    bool use_unary_relaxation, utils::Verbosity verbosity)
-    : LandmarkFactoryRelaxation(verbosity),
+    const shared_ptr<AbstractTask> &task, bool use_unary_relaxation,
+    utils::Verbosity verbosity)
+    : LandmarkFactoryRelaxation(task, verbosity),
       use_unary_relaxation(use_unary_relaxation) {
 }
 
@@ -109,7 +110,7 @@ public:
     virtual shared_ptr<LandmarkFactoryRpgExhaust> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<LandmarkFactoryRpgExhaust>(
-            opts.get<bool>("use_unary_relaxation"),
+            tasks::g_root_task, opts.get<bool>("use_unary_relaxation"),
             get_landmark_factory_arguments_from_options(opts));
     }
 };

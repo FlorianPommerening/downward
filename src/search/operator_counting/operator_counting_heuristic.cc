@@ -13,11 +13,12 @@ using namespace std;
 
 namespace operator_counting {
 OperatorCountingHeuristic::OperatorCountingHeuristic(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<ConstraintGenerator>> &constraint_generators,
     bool use_integer_operator_counts, lp::LPSolverType lpsolver,
     const shared_ptr<AbstractTask> &transform, bool cache_estimates,
     const string &description, utils::Verbosity verbosity)
-    : Heuristic(transform, cache_estimates, description, verbosity),
+    : Heuristic(task, transform, cache_estimates, description, verbosity),
       constraint_generators(constraint_generators),
       lp_solver(lpsolver) {
     utils::verify_list_not_empty(
@@ -123,6 +124,7 @@ public:
     virtual shared_ptr<OperatorCountingHeuristic> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<OperatorCountingHeuristic>(
+            tasks::g_root_task,
             opts.get_list<shared_ptr<ConstraintGenerator>>(
                 "constraint_generators"),
             opts.get<bool>("use_integer_operator_counts"),

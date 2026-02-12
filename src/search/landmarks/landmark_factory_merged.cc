@@ -16,9 +16,10 @@ namespace landmarks {
 class LandmarkNode;
 
 LandmarkFactoryMerged::LandmarkFactoryMerged(
+    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<LandmarkFactory>> &lm_factories,
     utils::Verbosity verbosity)
-    : LandmarkFactory(verbosity), landmark_factories(lm_factories) {
+    : LandmarkFactory(task, verbosity), landmark_factories(lm_factories) {
     utils::verify_list_not_empty(lm_factories, "lm_factories");
 }
 
@@ -197,6 +198,7 @@ public:
     virtual shared_ptr<LandmarkFactoryMerged> create_component(
         const plugins::Options &opts) const override {
         return plugins::make_shared_from_arg_tuples<LandmarkFactoryMerged>(
+            tasks::g_root_task,
             opts.get_list<shared_ptr<LandmarkFactory>>("lm_factories"),
             get_landmark_factory_arguments_from_options(opts));
     }

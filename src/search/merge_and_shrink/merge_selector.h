@@ -1,6 +1,10 @@
 #ifndef MERGE_AND_SHRINK_MERGE_SELECTOR_H
 #define MERGE_AND_SHRINK_MERGE_SELECTOR_H
 
+#include "../component.h"
+
+#include "../tasks/root_task.h" // issue559 remove
+
 #include <string>
 #include <vector>
 
@@ -12,15 +16,14 @@ class LogProxy;
 
 namespace merge_and_shrink {
 class FactoredTransitionSystem;
-class MergeSelector {
+class MergeSelector : public TaskSpecificComponent {
 protected:
     virtual std::string name() const = 0;
     virtual void dump_selector_specific_options(utils::LogProxy &) const {
     }
 
 public:
-    MergeSelector() = default;
-    virtual ~MergeSelector() = default;
+    explicit MergeSelector(const std::shared_ptr<AbstractTask> &task);
     // Select a merge candidate from all possible candidates.
     std::pair<int, int> select_merge(const FactoredTransitionSystem &fts) const;
     /*
