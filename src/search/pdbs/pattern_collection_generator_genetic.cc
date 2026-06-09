@@ -25,10 +25,11 @@ using namespace std;
 
 namespace pdbs {
 PatternCollectionGeneratorGenetic::PatternCollectionGeneratorGenetic(
+    const shared_ptr<AbstractTask> &task,
     int pdb_max_size, int num_collections, int num_episodes,
     double mutation_probability, bool disjoint, int random_seed,
     utils::Verbosity verbosity)
-    : PatternCollectionGenerator(verbosity),
+    : PatternCollectionGenerator(task, verbosity),
       pdb_max_size(pdb_max_size),
       num_collections(num_collections),
       num_episodes(num_episodes),
@@ -304,10 +305,10 @@ PatternCollectionGeneratorGenetic::compute_patterns(
 }
 
 class PatternCollectionGeneratorGeneticFeature
-    : public plugins::TypedFeature<
-          PatternCollectionGenerator, PatternCollectionGeneratorGenetic> {
+    : public plugins::TaskIndependentFeature<
+          TaskIndependentPatternCollectionGenerator> {
 public:
-    PatternCollectionGeneratorGeneticFeature() : TypedFeature("genetic") {
+    PatternCollectionGeneratorGeneticFeature() : TaskIndependentFeature("genetic") {
         document_title("Genetic algorithm patterns");
         document_synopsis(
             "The following paper describes the automated creation of pattern "
@@ -388,10 +389,10 @@ public:
         document_language_support("axioms", "not supported");
     }
 
-    virtual shared_ptr<PatternCollectionGeneratorGenetic> create_component(
+    virtual shared_ptr<TaskIndependentPatternCollectionGenerator> create_component(
         const plugins::Options &opts) const override {
-        return plugins::make_shared_from_arg_tuples<
-            PatternCollectionGeneratorGenetic>(
+        return components::make_auto_task_independent_component<
+            PatternCollectionGeneratorGenetic, PatternCollectionGenerator>(
             opts.get<int>("pdb_max_size"), opts.get<int>("num_collections"),
             opts.get<int>("num_episodes"),
             opts.get<double>("mutation_probability"),

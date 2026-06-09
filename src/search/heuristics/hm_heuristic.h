@@ -63,7 +63,7 @@ protected:
 
 public:
     HMHeuristic(
-        int m, const std::shared_ptr<AbstractTask> &transform,
+        const std::shared_ptr<AbstractTask> &task, int m,
         bool cache_estimates, const std::string &description,
         utils::Verbosity verbosity);
 

@@ -115,10 +115,11 @@ static vector<vector<int>> compute_relevant_neighbours(
 }
 
 PatternCollectionGeneratorHillclimbing::PatternCollectionGeneratorHillclimbing(
+    const shared_ptr<AbstractTask> &task,
     int pdb_max_size, int collection_max_size, int num_samples,
     int min_improvement, double max_time, int random_seed,
     utils::Verbosity verbosity)
-    : PatternCollectionGenerator(verbosity),
+    : PatternCollectionGenerator(task, verbosity),
       pdb_max_size(pdb_max_size),
       collection_max_size(collection_max_size),
       num_samples(num_samples),
@@ -582,11 +583,11 @@ static basic_string<char> paper_references() {
 }
 
 class PatternCollectionGeneratorHillclimbingFeature
-    : public plugins::TypedFeature<
-          PatternCollectionGenerator, PatternCollectionGeneratorHillclimbing> {
+    : public plugins::TaskIndependentFeature<
+          TaskIndependentPatternCollectionGenerator> {
 public:
     PatternCollectionGeneratorHillclimbingFeature()
-        : TypedFeature("hillclimbing") {
+        : TaskIndependentFeature("hillclimbing") {
         document_title("Hill climbing");
         document_synopsis(
             "This algorithm uses hill climbing to generate patterns "
@@ -597,10 +598,10 @@ public:
         add_generator_options_to_feature(*this);
     }
 
-    virtual shared_ptr<PatternCollectionGeneratorHillclimbing> create_component(
+    virtual shared_ptr<TaskIndependentPatternCollectionGenerator> create_component(
         const plugins::Options &opts) const override {
-        return plugins::make_shared_from_arg_tuples<
-            PatternCollectionGeneratorHillclimbing>(
+        return components::make_auto_task_independent_component<
+            PatternCollectionGeneratorHillclimbing, PatternCollectionGenerator>(
             get_hillclimbing_arguments_from_options(opts),
             get_generator_arguments_from_options(opts));
     }
@@ -610,9 +611,9 @@ static plugins::FeaturePlugin<PatternCollectionGeneratorHillclimbingFeature>
     _plugin;
 
 class IPDBFeature
-    : public plugins::TypedFeature<Evaluator, CanonicalPDBsHeuristic> {
+    : public plugins::TaskIndependentFeature<TaskIndependentEvaluator> {
 public:
-    IPDBFeature() : TypedFeature("ipdb") {
+    IPDBFeature() : TaskIndependentFeature("ipdb") {
         document_subcategory("heuristics_pdb");
         document_title("iPDB");
         document_synopsis(
@@ -649,15 +650,15 @@ public:
         document_property("preferred operators", "no");
     }
 
-    virtual shared_ptr<CanonicalPDBsHeuristic> create_component(
+    virtual shared_ptr<TaskIndependentEvaluator> create_component(
         const plugins::Options &opts) const override {
-        shared_ptr<PatternCollectionGeneratorHillclimbing> pgh =
-            plugins::make_shared_from_arg_tuples<
-                PatternCollectionGeneratorHillclimbing>(
+        shared_ptr<TaskIndependentPatternCollectionGenerator> pgh =
+            components::make_auto_task_independent_component<
+                PatternCollectionGeneratorHillclimbing, PatternCollectionGenerator>(
                 get_hillclimbing_arguments_from_options(opts),
                 get_generator_arguments_from_options(opts));
 
-        return plugins::make_shared_from_arg_tuples<CanonicalPDBsHeuristic>(
+        return components::make_auto_task_independent_component<CanonicalPDBsHeuristic, Evaluator>(
             pgh, opts.get<double>("max_time_dominance_pruning"),
             get_heuristic_arguments_from_options(opts));
     }
