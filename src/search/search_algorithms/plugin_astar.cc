@@ -52,6 +52,7 @@ public:
         options_copy.set("reopen_closed", true);
         vector<shared_ptr<TaskIndependentEvaluator>> preferred_list;
         options_copy.set("preferred", preferred_list);
+
         return components::make_auto_task_independent_component<
             eager_search::EagerSearch, SearchAlgorithm>(
             options_copy.get<shared_ptr<TaskIndependentOpenListFactory>>(
