@@ -345,12 +345,14 @@ void add_eager_search_options_to_feature(
 }
 
 tuple<
-    shared_ptr<TaskIndependentPruningMethod>, shared_ptr<TaskIndependentEvaluator>, OperatorCost, int, double,
-    string, utils::Verbosity>
+    shared_ptr<TaskIndependentPruningMethod>,
+    shared_ptr<TaskIndependentEvaluator>, OperatorCost, int, double, string,
+    utils::Verbosity>
 get_eager_search_arguments_from_options(const plugins::Options &opts) {
     return tuple_cat(
         get_search_pruning_arguments_from_options(opts),
-        make_tuple(opts.get<shared_ptr<TaskIndependentEvaluator>>("lazy_evaluator", nullptr)),
+        make_tuple(opts.get<shared_ptr<TaskIndependentEvaluator>>(
+            "lazy_evaluator", nullptr)),
         get_search_algorithm_arguments_from_options(opts));
 }
 }

@@ -73,8 +73,10 @@ extern std::tuple<int, int, int> handle_shrink_limit_defaults(
 extern void add_merge_and_shrink_algorithm_options_to_feature(
     plugins::Feature &feature);
 std::tuple<
-    std::shared_ptr<TaskIndependentMergeStrategyFactory>, std::shared_ptr<TaskIndependentShrinkStrategy>,
-    std::shared_ptr<TaskIndependentLabelReduction>, bool, bool, int, int, int, double>
+    std::shared_ptr<TaskIndependentMergeStrategyFactory>,
+    std::shared_ptr<TaskIndependentShrinkStrategy>,
+    std::shared_ptr<TaskIndependentLabelReduction>, bool, bool, int, int, int,
+    double>
 get_merge_and_shrink_algorithm_arguments_from_options(
     const plugins::Options &opts);
 extern void add_transition_system_size_limit_options_to_feature(

@@ -40,7 +40,8 @@ protected:
     std::shared_ptr<LandmarkGraph> landmark_graph;
     bool achievers_calculated = false;
 
-    LandmarkFactory(const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
+    LandmarkFactory(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
 
     void add_or_replace_ordering_if_stronger(
         LandmarkNode &from, LandmarkNode &to, OrderingType type) const;

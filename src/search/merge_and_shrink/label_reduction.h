@@ -77,8 +77,8 @@ class LabelReduction : public components::TaskSpecificComponent {
         int ts_index, const FactoredTransitionSystem &fts) const;
 public:
     LabelReduction(
-        const std::shared_ptr<AbstractTask> &task,
-        bool before_shrinking, bool before_merging, LabelReductionMethod method,
+        const std::shared_ptr<AbstractTask> &task, bool before_shrinking,
+        bool before_merging, LabelReductionMethod method,
         LabelReductionSystemOrder system_order, int random_seed);
     void initialize(const TaskProxy &task_proxy);
     bool reduce(

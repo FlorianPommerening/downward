@@ -141,8 +141,7 @@ unique_ptr<EdgeOpenList> AlternationOpenListFactory::create_edge_open_list() {
 }
 
 class AlternationOpenListFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentOpenListFactory> {
+    : public plugins::TaskIndependentFeature<TaskIndependentOpenListFactory> {
 public:
     AlternationOpenListFeature() : TaskIndependentFeature("alt") {
         document_title("Alternation open list");
@@ -158,8 +157,10 @@ public:
 
     virtual shared_ptr<TaskIndependentOpenListFactory> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<AlternationOpenListFactory, OpenListFactory>(
-            opts.get_list<shared_ptr<TaskIndependentOpenListFactory>>("sublists"),
+        return components::make_auto_task_independent_component<
+            AlternationOpenListFactory, OpenListFactory>(
+            opts.get_list<shared_ptr<TaskIndependentOpenListFactory>>(
+                "sublists"),
             opts.get<int>("boost"));
     }
 };

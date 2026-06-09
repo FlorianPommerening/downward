@@ -15,8 +15,8 @@ using namespace std;
 namespace pdbs {
 PatternCollectionGeneratorMultipleRandom::
     PatternCollectionGeneratorMultipleRandom(
-        const shared_ptr<AbstractTask> &task,
-        bool bidirectional, int max_pdb_size, int max_collection_size,
+        const shared_ptr<AbstractTask> &task, bool bidirectional,
+        int max_pdb_size, int max_collection_size,
         double pattern_generation_max_time, double total_max_time,
         double stagnation_limit, double blacklist_trigger_percentage,
         bool enable_blacklist_on_stagnation, int random_seed,
@@ -80,7 +80,8 @@ public:
     virtual shared_ptr<TaskIndependentPatternCollectionGenerator>
     create_component(const plugins::Options &opts) const override {
         return components::make_auto_task_independent_component<
-            PatternCollectionGeneratorMultipleRandom, PatternCollectionGenerator>(
+            PatternCollectionGeneratorMultipleRandom,
+            PatternCollectionGenerator>(
             get_random_pattern_bidirectional_arguments_from_options(opts),
             get_multiple_arguments_from_options(opts));
     }

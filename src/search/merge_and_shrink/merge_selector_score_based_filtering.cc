@@ -102,8 +102,7 @@ bool MergeSelectorScoreBasedFiltering::requires_goal_distances() const {
 }
 
 class MergeSelectorScoreBasedFilteringFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentMergeSelector> {
+    : public plugins::TaskIndependentFeature<TaskIndependentMergeSelector> {
 public:
     MergeSelectorScoreBasedFilteringFeature()
         : TaskIndependentFeature("score_based_filtering") {
@@ -120,7 +119,8 @@ public:
 
     virtual shared_ptr<TaskIndependentMergeSelector> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<MergeSelectorScoreBasedFiltering, MergeSelector>(
+        return components::make_auto_task_independent_component<
+            MergeSelectorScoreBasedFiltering, MergeSelector>(
             opts.get_list<shared_ptr<TaskIndependentMergeScoringFunction>>(
                 "scoring_functions"));
     }

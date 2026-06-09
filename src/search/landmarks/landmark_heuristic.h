@@ -47,10 +47,9 @@ protected:
     virtual int compute_heuristic(const State &ancestor_state) override;
 public:
     LandmarkHeuristic(
-        const std::shared_ptr<AbstractTask> &task,
-        bool use_preferred_operators,
-        bool cache_estimates,
-        const std::string &description, utils::Verbosity verbosity);
+        const std::shared_ptr<AbstractTask> &task, bool use_preferred_operators,
+        bool cache_estimates, const std::string &description,
+        utils::Verbosity verbosity);
 
     virtual void get_path_dependent_evaluators(
         std::set<Evaluator *> &evals) override {

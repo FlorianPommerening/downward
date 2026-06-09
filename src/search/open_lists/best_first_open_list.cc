@@ -97,7 +97,8 @@ bool BestFirstOpenList<Entry>::is_reliable_dead_end(
 }
 
 BestFirstOpenListFactory::BestFirstOpenListFactory(
-    const shared_ptr<AbstractTask> &task, const shared_ptr<Evaluator> &eval, bool pref_only)
+    const shared_ptr<AbstractTask> &task, const shared_ptr<Evaluator> &eval,
+    bool pref_only)
     : OpenListFactory(task), eval(eval), pref_only(pref_only) {
 }
 
@@ -131,7 +132,8 @@ public:
 
     virtual shared_ptr<TaskIndependentOpenListFactory> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<BestFirstOpenListFactory, OpenListFactory>(
+        return components::make_auto_task_independent_component<
+            BestFirstOpenListFactory, OpenListFactory>(
             opts.get<shared_ptr<TaskIndependentEvaluator>>("eval"),
             get_open_list_arguments_from_options(opts));
     }

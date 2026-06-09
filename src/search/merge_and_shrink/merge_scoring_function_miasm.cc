@@ -20,7 +20,8 @@ MergeScoringFunctionMIASM::MergeScoringFunctionMIASM(
     const shared_ptr<AbstractTask> &task,
     shared_ptr<ShrinkStrategy> shrink_strategy, int max_states,
     int max_states_before_merge, int threshold_before_merge, bool use_caching)
-    : MergeScoringFunction(task), use_caching(use_caching),
+    : MergeScoringFunction(task),
+      use_caching(use_caching),
       shrink_strategy(move(shrink_strategy)),
       max_states(max_states),
       max_states_before_merge(max_states_before_merge),
@@ -180,8 +181,10 @@ public:
 
     virtual shared_ptr<TaskIndependentMergeScoringFunction> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<MergeScoringFunctionMIASM, MergeScoringFunction>(
-            opts.get<shared_ptr<TaskIndependentShrinkStrategy>>("shrink_strategy"),
+        return components::make_auto_task_independent_component<
+            MergeScoringFunctionMIASM, MergeScoringFunction>(
+            opts.get<shared_ptr<TaskIndependentShrinkStrategy>>(
+                "shrink_strategy"),
             get_transition_system_size_limit_arguments_from_options(opts),
             opts.get<bool>("use_caching"));
     }

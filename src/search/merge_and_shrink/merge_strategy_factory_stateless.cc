@@ -42,7 +42,8 @@ class MergeStrategyFactoryStatelessFeature
     : public plugins::TaskIndependentFeature<
           TaskIndependentMergeStrategyFactory> {
 public:
-    MergeStrategyFactoryStatelessFeature() : TaskIndependentFeature("merge_stateless") {
+    MergeStrategyFactoryStatelessFeature()
+        : TaskIndependentFeature("merge_stateless") {
         document_title("Stateless merge strategy");
         document_synopsis(
             "This merge strategy has a merge selector, which computes the next "
@@ -75,7 +76,8 @@ public:
         const plugins::Options &opts) const override {
         return components::make_auto_task_independent_component<
             MergeStrategyFactoryStateless, MergeStrategyFactory>(
-            opts.get<shared_ptr<TaskIndependentMergeSelector>>("merge_selector"),
+            opts.get<shared_ptr<TaskIndependentMergeSelector>>(
+                "merge_selector"),
             get_merge_strategy_arguments_from_options(opts));
     }
 };

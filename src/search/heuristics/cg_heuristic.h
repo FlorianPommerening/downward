@@ -42,8 +42,8 @@ protected:
     virtual int compute_heuristic(const State &ancestor_state) override;
 public:
     CGHeuristic(
-        const std::shared_ptr<AbstractTask> &task, int max_cache_size, tasks::AxiomHandlingType axiom_hanlding,
-        bool cache_estimates,
+        const std::shared_ptr<AbstractTask> &task, int max_cache_size,
+        tasks::AxiomHandlingType axiom_hanlding, bool cache_estimates,
         const std::string &description, utils::Verbosity verbosity);
     virtual bool dead_ends_are_reliable() const override;
 };

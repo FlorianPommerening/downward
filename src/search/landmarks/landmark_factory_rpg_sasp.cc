@@ -21,8 +21,8 @@ using utils::ExitCode;
 
 namespace landmarks {
 LandmarkFactoryRpgSasp::LandmarkFactoryRpgSasp(
-    const shared_ptr<AbstractTask> &task,
-    bool disjunctive_landmarks, bool use_orders, utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, bool disjunctive_landmarks,
+    bool use_orders, utils::Verbosity verbosity)
     : LandmarkFactoryRelaxation(task, verbosity),
       disjunctive_landmarks(disjunctive_landmarks),
       use_orders(use_orders) {
@@ -768,7 +768,8 @@ public:
 
     virtual shared_ptr<TaskIndependentLandmarkFactory> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<LandmarkFactoryRpgSasp, LandmarkFactory>(
+        return components::make_auto_task_independent_component<
+            LandmarkFactoryRpgSasp, LandmarkFactory>(
             opts.get<bool>("disjunctive_landmarks"),
             get_use_orders_arguments_from_options(opts),
             get_landmark_factory_arguments_from_options(opts));

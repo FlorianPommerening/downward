@@ -115,10 +115,9 @@ static vector<vector<int>> compute_relevant_neighbours(
 }
 
 PatternCollectionGeneratorHillclimbing::PatternCollectionGeneratorHillclimbing(
-    const shared_ptr<AbstractTask> &task,
-    int pdb_max_size, int collection_max_size, int num_samples,
-    int min_improvement, double max_time, int random_seed,
-    utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, int pdb_max_size,
+    int collection_max_size, int num_samples, int min_improvement,
+    double max_time, int random_seed, utils::Verbosity verbosity)
     : PatternCollectionGenerator(task, verbosity),
       pdb_max_size(pdb_max_size),
       collection_max_size(collection_max_size),
@@ -598,8 +597,8 @@ public:
         add_generator_options_to_feature(*this);
     }
 
-    virtual shared_ptr<TaskIndependentPatternCollectionGenerator> create_component(
-        const plugins::Options &opts) const override {
+    virtual shared_ptr<TaskIndependentPatternCollectionGenerator>
+    create_component(const plugins::Options &opts) const override {
         return components::make_auto_task_independent_component<
             PatternCollectionGeneratorHillclimbing, PatternCollectionGenerator>(
             get_hillclimbing_arguments_from_options(opts),
@@ -654,11 +653,13 @@ public:
         const plugins::Options &opts) const override {
         shared_ptr<TaskIndependentPatternCollectionGenerator> pgh =
             components::make_auto_task_independent_component<
-                PatternCollectionGeneratorHillclimbing, PatternCollectionGenerator>(
+                PatternCollectionGeneratorHillclimbing,
+                PatternCollectionGenerator>(
                 get_hillclimbing_arguments_from_options(opts),
                 get_generator_arguments_from_options(opts));
 
-        return components::make_auto_task_independent_component<CanonicalPDBsHeuristic, Evaluator>(
+        return components::make_auto_task_independent_component<
+            CanonicalPDBsHeuristic, Evaluator>(
             pgh, opts.get<double>("max_time_dominance_pruning"),
             get_heuristic_arguments_from_options(opts));
     }

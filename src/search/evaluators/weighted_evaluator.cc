@@ -12,9 +12,8 @@ using namespace std;
 
 namespace weighted_evaluator {
 WeightedEvaluator::WeightedEvaluator(
-    const shared_ptr<AbstractTask> &task,
-    const shared_ptr<Evaluator> &eval, int weight, const string &description,
-    utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, const shared_ptr<Evaluator> &eval,
+    int weight, const string &description, utils::Verbosity verbosity)
     : Evaluator(task, false, false, false, description, verbosity),
       evaluator(eval),
       weight(weight) {
@@ -57,8 +56,10 @@ public:
 
     virtual shared_ptr<TaskIndependentEvaluator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<WeightedEvaluator, Evaluator>(
-            opts.get<shared_ptr<TaskIndependentEvaluator>>("eval"), opts.get<int>("weight"),
+        return components::make_auto_task_independent_component<
+            WeightedEvaluator, Evaluator>(
+            opts.get<shared_ptr<TaskIndependentEvaluator>>("eval"),
+            opts.get<int>("weight"),
             get_evaluator_arguments_from_options(opts));
     }
 };

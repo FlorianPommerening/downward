@@ -451,8 +451,7 @@ bool ContextEnhancedAdditiveHeuristic::dead_ends_are_reliable() const {
 }
 
 class ContextEnhancedAdditiveHeuristicFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentEvaluator> {
+    : public plugins::TaskIndependentFeature<TaskIndependentEvaluator> {
 public:
     ContextEnhancedAdditiveHeuristicFeature() : TaskIndependentFeature("cea") {
         document_title("Context-enhanced additive heuristic");

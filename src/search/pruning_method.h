@@ -33,7 +33,8 @@ protected:
     long num_successors_before_pruning;
     long num_successors_after_pruning;
 public:
-    PruningMethod(const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
+    PruningMethod(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
     virtual void initialize(const std::shared_ptr<AbstractTask> &task);
     void prune_operators(const State &state, std::vector<OperatorID> &op_ids);
     virtual void print_statistics() const;

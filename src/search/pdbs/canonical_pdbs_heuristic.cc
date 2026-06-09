@@ -59,8 +59,7 @@ static CanonicalPDBs get_canonical_pdbs(
 CanonicalPDBsHeuristic::CanonicalPDBsHeuristic(
     const shared_ptr<AbstractTask> &task,
     const shared_ptr<PatternCollectionGenerator> &patterns,
-    double max_time_dominance_pruning,
-    bool cache_estimates,
+    double max_time_dominance_pruning, bool cache_estimates,
     const string &description, utils::Verbosity verbosity)
     : Heuristic(task, cache_estimates, description, verbosity),
       canonical_pdbs(
@@ -123,8 +122,10 @@ public:
 
     virtual shared_ptr<TaskIndependentEvaluator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<CanonicalPDBsHeuristic, Evaluator>(
-            opts.get<shared_ptr<TaskIndependentPatternCollectionGenerator>>("patterns"),
+        return components::make_auto_task_independent_component<
+            CanonicalPDBsHeuristic, Evaluator>(
+            opts.get<shared_ptr<TaskIndependentPatternCollectionGenerator>>(
+                "patterns"),
             get_canonical_pdbs_arguments_from_options(opts),
             get_heuristic_arguments_from_options(opts));
     }

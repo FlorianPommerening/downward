@@ -138,10 +138,10 @@ void EpsilonGreedyOpenList<Entry>::clear() {
 }
 
 EpsilonGreedyOpenListFactory::EpsilonGreedyOpenListFactory(
-    const shared_ptr<AbstractTask> &task,
-    const shared_ptr<Evaluator> &eval, double epsilon, int random_seed,
-    bool pref_only)
-    : OpenListFactory(task), eval(eval),
+    const shared_ptr<AbstractTask> &task, const shared_ptr<Evaluator> &eval,
+    double epsilon, int random_seed, bool pref_only)
+    : OpenListFactory(task),
+      eval(eval),
       epsilon(epsilon),
       random_seed(random_seed),
       pref_only(pref_only) {
@@ -159,8 +159,7 @@ unique_ptr<EdgeOpenList> EpsilonGreedyOpenListFactory::create_edge_open_list() {
 }
 
 class EpsilonGreedyOpenListFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentOpenListFactory> {
+    : public plugins::TaskIndependentFeature<TaskIndependentOpenListFactory> {
 public:
     EpsilonGreedyOpenListFeature() : TaskIndependentFeature("epsilon_greedy") {
         document_title("Epsilon-greedy open list");

@@ -39,9 +39,7 @@ void add_relaxation_heuristic_options_to_feature(
     add_heuristic_options_to_feature(feature, description);
 }
 
-tuple<
-    tasks::AxiomHandlingType, bool, string,
-    utils::Verbosity>
+tuple<tasks::AxiomHandlingType, bool, string, utils::Verbosity>
 get_relaxation_heuristic_arguments_from_options(const plugins::Options &opts) {
     return tuple_cat(
         tasks::get_axioms_arguments_from_options(opts),

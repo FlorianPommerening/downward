@@ -42,15 +42,16 @@ static shared_ptr<OpenListFactory> create_ehc_open_list_factory(
           open list code.
         */
         vector<shared_ptr<Evaluator>> evals = {
-            g_evaluator, make_shared<PrefEval>(task, "ehc.pref_eval", verbosity)};
+            g_evaluator,
+            make_shared<PrefEval>(task, "ehc.pref_eval", verbosity)};
         return make_shared<tiebreaking_open_list::TieBreakingOpenListFactory>(
             task, evals, false, true);
     }
 }
 
 EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
-    const shared_ptr<AbstractTask> &task,
-    const shared_ptr<Evaluator> &h, PreferredUsage preferred_usage,
+    const shared_ptr<AbstractTask> &task, const shared_ptr<Evaluator> &h,
+    PreferredUsage preferred_usage,
     const vector<shared_ptr<Evaluator>> &preferred, OperatorCost cost_type,
     int bound, double max_time, const string &description,
     utils::Verbosity verbosity)
@@ -76,9 +77,9 @@ EnforcedHillClimbingSearch::EnforcedHillClimbingSearch(
                         preferred_operator_evaluators.end(),
                         evaluator) != preferred_operator_evaluators.end();
 
-    open_list =
-        create_ehc_open_list_factory(verbosity, use_preferred, preferred_usage, task)
-            ->create_edge_open_list();
+    open_list = create_ehc_open_list_factory(
+                    verbosity, use_preferred, preferred_usage, task)
+                    ->create_edge_open_list();
 }
 
 void EnforcedHillClimbingSearch::reach_state(
@@ -261,8 +262,7 @@ void EnforcedHillClimbingSearch::print_statistics() const {
 }
 
 class EnforcedHillClimbingSearchFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentSearchAlgorithm> {
+    : public plugins::TaskIndependentFeature<TaskIndependentSearchAlgorithm> {
 public:
     EnforcedHillClimbingSearchFeature() : TaskIndependentFeature("ehc") {
         document_title("Lazy enforced hill-climbing");
@@ -279,7 +279,8 @@ public:
 
     virtual shared_ptr<TaskIndependentSearchAlgorithm> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<EnforcedHillClimbingSearch, SearchAlgorithm>(
+        return components::make_auto_task_independent_component<
+            EnforcedHillClimbingSearch, SearchAlgorithm>(
             opts.get<shared_ptr<TaskIndependentEvaluator>>("h"),
             opts.get<PreferredUsage>("preferred_usage"),
             opts.get_list<shared_ptr<TaskIndependentEvaluator>>("preferred"),

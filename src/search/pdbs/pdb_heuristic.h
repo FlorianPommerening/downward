@@ -27,8 +27,8 @@ public:
     PDBHeuristic(
         const std::shared_ptr<AbstractTask> &task,
         const std::shared_ptr<PatternGenerator> &pattern_generator,
-        bool cache_estimates,
-        const std::string &description, utils::Verbosity verbosity);
+        bool cache_estimates, const std::string &description,
+        utils::Verbosity verbosity);
 };
 }
 

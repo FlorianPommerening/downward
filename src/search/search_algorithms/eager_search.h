@@ -64,8 +64,9 @@ public:
 extern void add_eager_search_options_to_feature(
     plugins::Feature &feature, const std::string &description);
 extern std::tuple<
-    std::shared_ptr<TaskIndependentPruningMethod>, std::shared_ptr<TaskIndependentEvaluator>, OperatorCost,
-    int, double, std::string, utils::Verbosity>
+    std::shared_ptr<TaskIndependentPruningMethod>,
+    std::shared_ptr<TaskIndependentEvaluator>, OperatorCost, int, double,
+    std::string, utils::Verbosity>
 get_eager_search_arguments_from_options(const plugins::Options &opts);
 }
 

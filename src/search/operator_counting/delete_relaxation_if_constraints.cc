@@ -21,8 +21,11 @@ static void add_lp_variables(
 }
 
 DeleteRelaxationIFConstraints::DeleteRelaxationIFConstraints(
-    const shared_ptr<AbstractTask> &task, bool use_time_vars, bool use_integer_vars)
-    : ConstraintGenerator(task), use_time_vars(use_time_vars), use_integer_vars(use_integer_vars) {
+    const shared_ptr<AbstractTask> &task, bool use_time_vars,
+    bool use_integer_vars)
+    : ConstraintGenerator(task),
+      use_time_vars(use_time_vars),
+      use_integer_vars(use_integer_vars) {
 }
 
 int DeleteRelaxationIFConstraints::get_var_op_used(const OperatorProxy &op) {
@@ -294,7 +297,8 @@ public:
 
     virtual shared_ptr<TaskIndependentConstraintGenerator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<DeleteRelaxationIFConstraints, ConstraintGenerator>(
+        return components::make_auto_task_independent_component<
+            DeleteRelaxationIFConstraints, ConstraintGenerator>(
             opts.get<bool>("use_time_vars"),
             opts.get<bool>("use_integer_vars"));
     }

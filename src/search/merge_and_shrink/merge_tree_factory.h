@@ -32,7 +32,9 @@ protected:
     virtual void dump_tree_specific_options(utils::LogProxy &) const {
     }
 public:
-    MergeTreeFactory(const std::shared_ptr<AbstractTask> &task, int random_seed, UpdateOption update_option);
+    MergeTreeFactory(
+        const std::shared_ptr<AbstractTask> &task, int random_seed,
+        UpdateOption update_option);
     void dump_options(utils::LogProxy &log) const;
     // Compute a merge tree for the given entire task.
     virtual std::unique_ptr<MergeTree> compute_merge_tree(

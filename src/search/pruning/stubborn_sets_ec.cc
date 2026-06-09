@@ -101,7 +101,8 @@ static void get_conflicting_vars(
     }
 }
 
-StubbornSetsEC::StubbornSetsEC(const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+StubbornSetsEC::StubbornSetsEC(
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
     : StubbornSetsActionCentric(task, verbosity) {
 }
 
@@ -355,7 +356,8 @@ public:
 
     virtual shared_ptr<TaskIndependentPruningMethod> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<StubbornSetsEC, PruningMethod>(
+        return components::make_auto_task_independent_component<
+            StubbornSetsEC, PruningMethod>(
             get_pruning_arguments_from_options(opts));
     }
 };

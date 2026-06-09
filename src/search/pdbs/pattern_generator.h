@@ -31,7 +31,8 @@ class PatternCollectionGenerator : public components::TaskSpecificComponent {
 protected:
     mutable utils::LogProxy log;
 public:
-    PatternCollectionGenerator(const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
+    PatternCollectionGenerator(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
 
     PatternCollectionInformation generate(
         const std::shared_ptr<AbstractTask> &task);
@@ -47,7 +48,8 @@ class PatternGenerator : public components::TaskSpecificComponent {
 protected:
     mutable utils::LogProxy log;
 public:
-    PatternGenerator(const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
+    PatternGenerator(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
 
     PatternInformation generate(const std::shared_ptr<AbstractTask> &task);
 };

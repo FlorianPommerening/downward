@@ -13,8 +13,7 @@ namespace ff_heuristic {
 FFHeuristic::FFHeuristic(
     const shared_ptr<AbstractTask> &task, tasks::AxiomHandlingType axioms,
     bool cache_estimates, const string &description, utils::Verbosity verbosity)
-    : AdditiveHeuristic(
-         task, axioms, cache_estimates, description, verbosity),
+    : AdditiveHeuristic(task, axioms, cache_estimates, description, verbosity),
       relaxed_plan(task_proxy.get_operators().size(), false) {
     if (log.is_at_least_normal()) {
         log << "Initializing FF heuristic..." << endl;
@@ -91,7 +90,8 @@ public:
 
     virtual shared_ptr<TaskIndependentEvaluator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<FFHeuristic, Evaluator>(
+        return components::make_auto_task_independent_component<
+            FFHeuristic, Evaluator>(
             relaxation_heuristic::
                 get_relaxation_heuristic_arguments_from_options(opts));
     }

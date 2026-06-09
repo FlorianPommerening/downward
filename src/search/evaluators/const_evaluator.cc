@@ -6,9 +6,10 @@ using namespace std;
 
 namespace const_evaluator {
 ConstEvaluator::ConstEvaluator(
-    const shared_ptr<AbstractTask> &task,
-    int value, const string &description, utils::Verbosity verbosity)
-    : Evaluator(task, false, false, false, description, verbosity), value(value) {
+    const shared_ptr<AbstractTask> &task, int value, const string &description,
+    utils::Verbosity verbosity)
+    : Evaluator(task, false, false, false, description, verbosity),
+      value(value) {
 }
 
 EvaluationResult ConstEvaluator::compute_result(EvaluationContext &) {
@@ -33,7 +34,8 @@ public:
 
     virtual shared_ptr<TaskIndependentEvaluator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<ConstEvaluator, Evaluator>(
+        return components::make_auto_task_independent_component<
+            ConstEvaluator, Evaluator>(
             opts.get<int>("value"), get_evaluator_arguments_from_options(opts));
     }
 };

@@ -144,7 +144,10 @@ TieBreakingOpenListFactory::TieBreakingOpenListFactory(
     const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<Evaluator>> &evals, bool unsafe_pruning,
     bool pref_only)
-    : OpenListFactory(task), evals(evals), unsafe_pruning(unsafe_pruning), pref_only(pref_only) {
+    : OpenListFactory(task),
+      evals(evals),
+      unsafe_pruning(unsafe_pruning),
+      pref_only(pref_only) {
     utils::verify_list_not_empty(evals, "evals");
 }
 
@@ -165,7 +168,8 @@ public:
         document_title("Tie-breaking open list");
         document_synopsis("");
 
-        add_list_option<shared_ptr<TaskIndependentEvaluator>>("evals", "evaluators");
+        add_list_option<shared_ptr<TaskIndependentEvaluator>>(
+            "evals", "evaluators");
         add_option<bool>(
             "unsafe_pruning",
             "allow unsafe pruning when the main evaluator regards a state a dead end",
@@ -175,7 +179,8 @@ public:
 
     virtual shared_ptr<TaskIndependentOpenListFactory> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<TieBreakingOpenListFactory, OpenListFactory>(
+        return components::make_auto_task_independent_component<
+            TieBreakingOpenListFactory, OpenListFactory>(
             opts.get_list<shared_ptr<TaskIndependentEvaluator>>("evals"),
             opts.get<bool>("unsafe_pruning"),
             get_open_list_arguments_from_options(opts));

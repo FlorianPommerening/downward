@@ -379,8 +379,7 @@ bool LandmarkFactoryReasonableOrdersHPS::supports_conditional_effects() const {
 }
 
 class LandmarkFactoryReasonableOrdersHPSFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentLandmarkFactory> {
+    : public plugins::TaskIndependentFeature<TaskIndependentLandmarkFactory> {
 public:
     LandmarkFactoryReasonableOrdersHPSFeature()
         : TaskIndependentFeature("lm_reasonable_orders_hps") {

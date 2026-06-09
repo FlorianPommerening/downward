@@ -69,7 +69,9 @@ class GoalDecomposition : public SubtaskGenerator {
     std::shared_ptr<utils::RandomNumberGenerator> rng;
 
 public:
-    GoalDecomposition(const std::shared_ptr<AbstractTask> &task, FactOrder order, int random_seed);
+    GoalDecomposition(
+        const std::shared_ptr<AbstractTask> &task, FactOrder order,
+        int random_seed);
 
     virtual SharedTasks get_subtasks(
         const std::shared_ptr<AbstractTask> &task,
@@ -93,8 +95,8 @@ class LandmarkDecomposition : public SubtaskGenerator {
 
 public:
     LandmarkDecomposition(
-        const std::shared_ptr<AbstractTask> &task,
-        FactOrder order, int random_seed, bool combine_facts);
+        const std::shared_ptr<AbstractTask> &task, FactOrder order,
+        int random_seed, bool combine_facts);
 
     virtual SharedTasks get_subtasks(
         const std::shared_ptr<AbstractTask> &task,

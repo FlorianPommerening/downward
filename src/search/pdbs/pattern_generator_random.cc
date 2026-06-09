@@ -17,9 +17,8 @@ using namespace std;
 
 namespace pdbs {
 PatternGeneratorRandom::PatternGeneratorRandom(
-    const shared_ptr<AbstractTask> &task,
-    int max_pdb_size, double max_time, bool bidirectional, int random_seed,
-    utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, int max_pdb_size, double max_time,
+    bool bidirectional, int random_seed, utils::Verbosity verbosity)
     : PatternGenerator(task, verbosity),
       max_pdb_size(max_pdb_size),
       max_time(max_time),
@@ -74,7 +73,8 @@ public:
 
     virtual shared_ptr<TaskIndependentPatternGenerator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<PatternGeneratorRandom, PatternGenerator>(
+        return components::make_auto_task_independent_component<
+            PatternGeneratorRandom, PatternGenerator>(
             opts.get<int>("max_pdb_size"), opts.get<double>("max_time"),
             get_random_pattern_bidirectional_arguments_from_options(opts),
             utils::get_rng_arguments_from_options(opts),

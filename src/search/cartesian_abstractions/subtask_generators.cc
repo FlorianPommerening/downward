@@ -35,8 +35,7 @@ public:
     explicit SortFactsByIncreasingHaddValues(
         const shared_ptr<AbstractTask> &task)
         : hadd(make_unique<additive_heuristic::AdditiveHeuristic>(
-              task,
-              tasks::AxiomHandlingType::APPROXIMATE_NEGATIVE, false,
+              task, tasks::AxiomHandlingType::APPROXIMATE_NEGATIVE, false,
               "h^add within CEGAR abstractions", utils::Verbosity::SILENT)) {
         TaskProxy task_proxy(*task);
         hadd->compute_heuristic_for_cegar(task_proxy.get_initial_state());
@@ -98,7 +97,8 @@ SubtaskGenerator::SubtaskGenerator(const shared_ptr<AbstractTask> &task)
     : components::TaskSpecificComponent(task) {
 }
 
-TaskDuplicator::TaskDuplicator(const shared_ptr<AbstractTask> &task, int copies) : SubtaskGenerator(task), num_copies(copies) {
+TaskDuplicator::TaskDuplicator(const shared_ptr<AbstractTask> &task, int copies)
+    : SubtaskGenerator(task), num_copies(copies) {
 }
 
 SharedTasks TaskDuplicator::get_subtasks(
@@ -111,8 +111,11 @@ SharedTasks TaskDuplicator::get_subtasks(
     return subtasks;
 }
 
-GoalDecomposition::GoalDecomposition(const shared_ptr<AbstractTask> &task, FactOrder order, int random_seed)
-    : SubtaskGenerator(task), fact_order(order), rng(utils::get_rng(random_seed)) {
+GoalDecomposition::GoalDecomposition(
+    const shared_ptr<AbstractTask> &task, FactOrder order, int random_seed)
+    : SubtaskGenerator(task),
+      fact_order(order),
+      rng(utils::get_rng(random_seed)) {
 }
 
 SharedTasks GoalDecomposition::get_subtasks(
@@ -130,8 +133,10 @@ SharedTasks GoalDecomposition::get_subtasks(
 }
 
 LandmarkDecomposition::LandmarkDecomposition(
-    const shared_ptr<AbstractTask> &task, FactOrder order, int random_seed, bool combine_facts)
-    : SubtaskGenerator(task), fact_order(order),
+    const shared_ptr<AbstractTask> &task, FactOrder order, int random_seed,
+    bool combine_facts)
+    : SubtaskGenerator(task),
+      fact_order(order),
       combine_facts(combine_facts),
       rng(utils::get_rng(random_seed)) {
 }
@@ -198,8 +203,8 @@ public:
 
     virtual shared_ptr<TaskIndependentSubtaskGenerator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<TaskDuplicator, SubtaskGenerator>(
-            opts.get<int>("copies"));
+        return components::make_auto_task_independent_component<
+            TaskDuplicator, SubtaskGenerator>(opts.get<int>("copies"));
     }
 };
 
@@ -217,7 +222,8 @@ public:
 
     virtual shared_ptr<TaskIndependentSubtaskGenerator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<GoalDecomposition, SubtaskGenerator>(
+        return components::make_auto_task_independent_component<
+            GoalDecomposition, SubtaskGenerator>(
             get_fact_order_arguments_from_options(opts));
     }
 };
@@ -239,7 +245,8 @@ public:
 
     virtual shared_ptr<TaskIndependentSubtaskGenerator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<LandmarkDecomposition, SubtaskGenerator>(
+        return components::make_auto_task_independent_component<
+            LandmarkDecomposition, SubtaskGenerator>(
             get_fact_order_arguments_from_options(opts),
             opts.get<bool>("combine_facts"));
     }

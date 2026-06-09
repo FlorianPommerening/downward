@@ -26,7 +26,8 @@ protected:
     virtual std::string name() const = 0;
     virtual void dump_strategy_specific_options() const = 0;
 public:
-    MergeStrategyFactory(const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
+    MergeStrategyFactory(
+        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
     void dump_options() const;
     virtual std::unique_ptr<MergeStrategy> compute_merge_strategy(
         const TaskProxy &task_proxy, const FactoredTransitionSystem &fts) = 0;

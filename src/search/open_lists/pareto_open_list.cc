@@ -224,7 +224,8 @@ ParetoOpenListFactory::ParetoOpenListFactory(
     const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<Evaluator>> &evals, bool state_uniform_selection,
     int random_seed, bool pref_only)
-    : OpenListFactory(task), evals(evals),
+    : OpenListFactory(task),
+      evals(evals),
       state_uniform_selection(state_uniform_selection),
       random_seed(random_seed),
       pref_only(pref_only) {
@@ -249,7 +250,8 @@ public:
             "Selects one of the Pareto-optimal (regarding the sub-evaluators) "
             "entries for removal.");
 
-        add_list_option<shared_ptr<TaskIndependentEvaluator>>("evals", "evaluators");
+        add_list_option<shared_ptr<TaskIndependentEvaluator>>(
+            "evals", "evaluators");
         add_option<bool>(
             "state_uniform_selection",
             "When removing an entry, we select a non-dominated bucket "
@@ -263,7 +265,8 @@ public:
 
     virtual shared_ptr<TaskIndependentOpenListFactory> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<ParetoOpenListFactory, OpenListFactory>(
+        return components::make_auto_task_independent_component<
+            ParetoOpenListFactory, OpenListFactory>(
             opts.get_list<shared_ptr<TaskIndependentEvaluator>>("evals"),
             opts.get<bool>("state_uniform_selection"),
             utils::get_rng_arguments_from_options(opts),

@@ -11,7 +11,8 @@
 using namespace std;
 
 namespace merge_and_shrink {
-ShrinkRandom::ShrinkRandom(const shared_ptr<AbstractTask> &task, int random_seed)
+ShrinkRandom::ShrinkRandom(
+    const shared_ptr<AbstractTask> &task, int random_seed)
     : ShrinkBucketBased(task, random_seed) {
 }
 
@@ -44,7 +45,8 @@ public:
 
     virtual shared_ptr<TaskIndependentShrinkStrategy> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<ShrinkRandom, ShrinkStrategy>(
+        return components::make_auto_task_independent_component<
+            ShrinkRandom, ShrinkStrategy>(
             get_shrink_bucket_arguments_from_options(opts));
     }
 };

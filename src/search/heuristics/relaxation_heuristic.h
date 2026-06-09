@@ -121,9 +121,7 @@ public:
 
 extern void add_relaxation_heuristic_options_to_feature(
     plugins::Feature &feature, const std::string &description);
-extern std::tuple<
-    tasks::AxiomHandlingType, bool, std::string,
-    utils::Verbosity>
+extern std::tuple<tasks::AxiomHandlingType, bool, std::string, utils::Verbosity>
 get_relaxation_heuristic_arguments_from_options(const plugins::Options &opts);
 }
 #endif

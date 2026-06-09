@@ -40,10 +40,10 @@ static successor_generator::SuccessorGenerator &get_successor_generator(
 }
 
 SearchAlgorithm::SearchAlgorithm(
-    const shared_ptr<AbstractTask> &task,
-    OperatorCost cost_type, int bound, double max_time,
-    const string &description, utils::Verbosity verbosity)
-    : components::TaskSpecificComponent(task), description(description),
+    const shared_ptr<AbstractTask> &task, OperatorCost cost_type, int bound,
+    double max_time, const string &description, utils::Verbosity verbosity)
+    : components::TaskSpecificComponent(task),
+      description(description),
       status(IN_PROGRESS),
       solution_found(false),
       log(utils::get_log_for_verbosity(verbosity)),
@@ -141,9 +141,9 @@ void add_search_pruning_options_to_feature(plugins::Feature &feature) {
 }
 
 tuple<shared_ptr<TaskIndependentPruningMethod>>
-get_search_pruning_arguments_from_options(
-    const plugins::Options &opts) {
-    return make_tuple(opts.get<shared_ptr<TaskIndependentPruningMethod>>("pruning"));
+get_search_pruning_arguments_from_options(const plugins::Options &opts) {
+    return make_tuple(
+        opts.get<shared_ptr<TaskIndependentPruningMethod>>("pruning"));
 }
 
 void add_search_algorithm_options_to_feature(

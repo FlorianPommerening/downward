@@ -9,7 +9,8 @@ using namespace std;
 namespace pdbs {
 PatternCollectionGenerator::PatternCollectionGenerator(
     const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
-    : components::TaskSpecificComponent(task), log(utils::get_log_for_verbosity(verbosity)) {
+    : components::TaskSpecificComponent(task),
+      log(utils::get_log_for_verbosity(verbosity)) {
 }
 
 PatternCollectionInformation PatternCollectionGenerator::generate(
@@ -23,8 +24,10 @@ PatternCollectionInformation PatternCollectionGenerator::generate(
     return pci;
 }
 
-PatternGenerator::PatternGenerator(const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
-    : components::TaskSpecificComponent(task), log(utils::get_log_for_verbosity(verbosity)) {
+PatternGenerator::PatternGenerator(
+    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
+    : components::TaskSpecificComponent(task),
+      log(utils::get_log_for_verbosity(verbosity)) {
 }
 
 PatternInformation PatternGenerator::generate(
@@ -48,7 +51,8 @@ tuple<utils::Verbosity> get_generator_arguments_from_options(
 }
 
 static class PatternCollectionGeneratorCategoryPlugin
-    : public plugins::TypedCategoryPlugin<TaskIndependentPatternCollectionGenerator> {
+    : public plugins::TypedCategoryPlugin<
+          TaskIndependentPatternCollectionGenerator> {
 public:
     PatternCollectionGeneratorCategoryPlugin()
         : TypedCategoryPlugin("PatternCollectionGenerator") {

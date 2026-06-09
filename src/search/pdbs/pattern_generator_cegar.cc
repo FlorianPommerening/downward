@@ -17,9 +17,8 @@ using namespace std;
 
 namespace pdbs {
 PatternGeneratorCEGAR::PatternGeneratorCEGAR(
-    const shared_ptr<AbstractTask> &task,
-    int max_pdb_size, double max_time, bool use_wildcard_plans, int random_seed,
-    utils::Verbosity verbosity)
+    const shared_ptr<AbstractTask> &task, int max_pdb_size, double max_time,
+    bool use_wildcard_plans, int random_seed, utils::Verbosity verbosity)
     : PatternGenerator(task, verbosity),
       max_pdb_size(max_pdb_size),
       max_time(max_time),
@@ -69,7 +68,8 @@ public:
 
     virtual shared_ptr<TaskIndependentPatternGenerator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<PatternGeneratorCEGAR, PatternGenerator>(
+        return components::make_auto_task_independent_component<
+            PatternGeneratorCEGAR, PatternGenerator>(
             opts.get<int>("max_pdb_size"), opts.get<double>("max_time"),
             get_cegar_wildcard_arguments_from_options(opts),
             utils::get_rng_arguments_from_options(opts),
