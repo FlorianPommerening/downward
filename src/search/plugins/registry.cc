@@ -15,7 +15,7 @@ static void validate_category_names(
     unordered_map<string, vector<string>> class_name_to_category_names;
     for (const CategoryPlugin *category_plugin :
          raw_registry.get_category_plugins()) {
-        string class_name = category_plugin->get_class_name();
+        string class_name = category_plugin->get_pointer_class_name();
         string category_name = category_plugin->get_category_name();
         category_name_to_class_names[category_name].push_back(class_name);
         class_name_to_category_names[class_name].push_back(category_name);

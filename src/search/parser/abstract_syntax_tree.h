@@ -25,6 +25,8 @@ public:
 
     DecoratedASTNodePtr decorate() const;
     virtual DecoratedASTNodePtr decorate(DecorateContext &context) const = 0;
+    DecoratedASTNodePtr decorate_and_convert(const plugins::Type &to_type) const;
+    DecoratedASTNodePtr decorate_and_convert(const plugins::Type &to_type, DecorateContext &context) const;
     virtual void dump(std::string indent = "+") const = 0;
     virtual const plugins::Type &get_type(DecorateContext &context) const = 0;
 };
@@ -92,5 +94,7 @@ public:
     void dump(std::string indent) const override;
     const plugins::Type &get_type(DecorateContext &context) const override;
 };
+
+extern plugins::Any parse_as(const std::string &value, const plugins::Type &type);
 }
 #endif

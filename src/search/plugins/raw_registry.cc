@@ -1,7 +1,6 @@
 #include "raw_registry.h"
 
 #include "plugin.h"
-#include "registry.h"
 
 #include "../utils/collections.h"
 #include "../utils/strings.h"
