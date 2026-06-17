@@ -349,6 +349,16 @@ create_fast_downward_library(
 )
 
 create_fast_downward_library(
+    NAME modify_costs_evaluator
+    HELP "Evaluator modifying the costs"
+    SOURCES
+        evaluators/modify_costs_evaluator
+    DEPENDS
+        core_tasks
+        task_properties
+)
+
+create_fast_downward_library(
     NAME max_evaluator
     HELP "The max evaluator"
     SOURCES
