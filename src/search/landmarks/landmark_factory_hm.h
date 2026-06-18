@@ -233,6 +233,7 @@ class LandmarkFactoryHM : public LandmarkFactory {
 
 public:
     LandmarkFactoryHM(
+        const std::shared_ptr<AbstractTask> &task,
         int m, bool conjunctive_landmarks, bool use_orders,
         utils::Verbosity verbosity);
 
